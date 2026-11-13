@@ -148,7 +148,23 @@ app.get('/api/health', (_request, response) => {
 
 const dataDir = path.join(__dirname, 'data');
 const leadsFilePath = path.join(dataDir, 'leads.json');
+const leadsJsonlPath = path.join(dataDir, 'leads.jsonl');
 const leadsCsvPath = path.join(dataDir, 'google-sheet-crm.csv');
+
+// Lightweight in-memory sliding window rate limiter (max 10 requests per 15 min per IP)
+const submissionRateMap = new Map();
+function isRateLimited(ip) {
+  const now = Date.now();
+  const windowMs = 15 * 60 * 1000;
+  const maxRequests = 10;
+  const timestamps = (submissionRateMap.get(ip) || []).filter((t) => now - t < windowMs);
+  if (timestamps.length >= maxRequests) return true;
+  timestamps.push(now);
+  submissionRateMap.set(ip, timestamps);
+  return false;
+}
+
+const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 function generateSovereignReference() {
   const year = new Date().getFullYear();
@@ -179,19 +195,21 @@ function persistLeadToDisk(leadRecord) {
     if (!fs.existsSync(dataDir)) {
       fs.mkdirSync(dataDir, { recursive: true });
     }
-    let leads = [];
-    if (fs.existsSync(leadsFilePath)) {
-      try {
+    // Atomic append to JSONL (immune to concurrent read-modify-write overwrite)
+    fs.appendFileSync(leadsJsonlPath, JSON.stringify(leadRecord) + '\n', 'utf8');
+
+    try {
+      let leads = [];
+      if (fs.existsSync(leadsFilePath)) {
         const raw = fs.readFileSync(leadsFilePath, 'utf8');
         leads = JSON.parse(raw);
         if (!Array.isArray(leads)) leads = [];
-      } catch (parseErr) {
-        console.warn(`[LEADS DB] Warning reading ${leadsFilePath}, initializing empty array:`, parseErr.message);
-        leads = [];
       }
+      leads.push(leadRecord);
+      fs.writeFileSync(leadsFilePath, JSON.stringify(leads, null, 2), 'utf8');
+    } catch (parseErr) {
+      console.warn(`[LEADS DB] Warning updating ${leadsFilePath}:`, parseErr.message);
     }
-    leads.push(leadRecord);
-    fs.writeFileSync(leadsFilePath, JSON.stringify(leads, null, 2), 'utf8');
 
     // Also maintain a local Google Sheets compatible CSV mirror for testing
     const { waUrl } = formatWhatsAppDetails(leadRecord.phone, leadRecord.name, leadRecord.jurisdiction);
@@ -324,6 +342,14 @@ function sendPushNotification(leadRecord) {
 }
 
 app.post('/api/leads', (request, response) => {
+  const clientIp = request.headers['x-forwarded-for']?.toString().split(',')[0].trim() || request.socket.remoteAddress || 'unknown';
+  if (isRateLimited(clientIp)) {
+    return response.status(429).json({
+      success: false,
+      error: 'Too many requests. Please wait a few minutes before submitting again.',
+    });
+  }
+
   const {
     name,
     email,
@@ -334,7 +360,6 @@ app.post('/api/leads', (request, response) => {
     visaCount,
     notes,
     source,
-    ...rest
   } = request.body || {};
 
   const trimmedName = typeof name === 'string' ? name.trim() : '';
@@ -348,9 +373,17 @@ app.post('/api/leads', (request, response) => {
     });
   }
 
+  if (!EMAIL_REGEX.test(trimmedEmail)) {
+    return response.status(400).json({
+      success: false,
+      error: 'Please provide a valid email address.',
+    });
+  }
+
   const leadId = generateSovereignReference();
   const timestamp = new Date().toISOString();
 
+  // Whitelist fields only — no arbitrary property spreading
   const leadRecord = {
     id: leadId,
     referenceNumber: leadId,
@@ -362,9 +395,8 @@ app.post('/api/leads', (request, response) => {
     activity: activity || 'General',
     timeline: timeline || null,
     visaCount: visaCount !== undefined ? visaCount : null,
-    notes: notes || null,
+    notes: notes ? String(notes).trim().slice(0, 1000) : null,
     source: source || 'calculator',
-    ...rest,
   };
 
   console.log(`[LEAD RECEIVED - ${process.env.VITE_ENVIRONMENT || 'local'}] ID: ${leadId}`, {

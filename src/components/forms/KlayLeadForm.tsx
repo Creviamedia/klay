@@ -215,7 +215,7 @@ export function KlayLeadForm({
       } else {
         const errorData = await response.json().catch(() => ({}));
         setErrorMessage(
-          errorData.message || 'Unable to register your request with the Legal Desk. Please try again or call us directly.'
+          errorData.error || errorData.message || 'Unable to register your request with the Legal Desk. Please try again or call us directly.'
         );
         setStatus('error');
       }

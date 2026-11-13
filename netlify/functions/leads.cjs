@@ -165,6 +165,7 @@ exports.handler = async (event, context) => {
   const trimmedEmail = typeof email === 'string' ? email.trim() : '';
   const trimmedPhone = typeof phone === 'string' ? phone.trim() : '';
 
+  const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   if (!trimmedName || !trimmedEmail || !trimmedPhone) {
     return {
       statusCode: 400,
@@ -176,9 +177,21 @@ exports.handler = async (event, context) => {
     };
   }
 
+  if (!EMAIL_REGEX.test(trimmedEmail)) {
+    return {
+      statusCode: 400,
+      headers,
+      body: JSON.stringify({
+        success: false,
+        error: 'Please provide a valid email address.',
+      }),
+    };
+  }
+
   const leadId = generateSovereignReference();
   const timestamp = new Date().toISOString();
 
+  // Whitelist fields only — no arbitrary property spreading
   const leadRecord = {
     id: leadId,
     referenceNumber: leadId,
@@ -190,10 +203,9 @@ exports.handler = async (event, context) => {
     activity: activity || 'General',
     timeline: timeline || null,
     visaCount: visaCount !== undefined ? visaCount : null,
-    notes: notes || null,
+    notes: notes ? String(notes).trim().slice(0, 1000) : null,
     source: source || 'calculator',
     platform: 'netlify-serverless',
-    ...rest,
   };
 
   // Run external integrations asynchronously in parallel before returning
