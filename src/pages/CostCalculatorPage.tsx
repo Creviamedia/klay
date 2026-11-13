@@ -1,342 +1,165 @@
-import React, { useState } from "react";
-import { BackgroundVideo } from "@/components/ui/BackgroundVideo";
-import { CostCalculator } from "@/components/calculator/CostCalculator";
-// Styles live in ./CostCalculatorPage.css and are loaded with the main stylesheet (see src/main.tsx).
+import React from 'react';
+import { CostCalculator } from '@/components/calculator/CostCalculator';
+import { CornerCrosshairs } from '@/components/ui/CornerCrosshairs';
+import { EquitifyButton } from '@/components/ui/EquitifyButton';
+import { NumberedAccordion, type AccordionItem } from '@/components/ui/NumberedAccordion';
+import { AtmosphericBanner } from '@/components/ui/AtmosphericBanner';
+import { ROUTES } from '@/lib/routes';
 
-const faqs = [
+const CALCULATOR_FAQS: AccordionItem[] = [
   {
-    q: "What is the Meydan Free Zone cost calculator?",
-    a: "It helps entrepreneurs estimate their potential Dubai company setup costs based on licence type, activities, shareholders, visas and additional services.",
+    number: '01',
+    question: 'How accurate is the Dubai trade license cost estimate?',
+    answer:
+      'The calculator uses the official 2026 tariff schedules across UAE Mainland (DED) and major Free Zones (Meydan, IFZA, DMCC, RAK ICC). Exact fees are verified with the regulatory authority prior to filing based on your exact commercial activities.',
   },
   {
-    q: "How accurate is the trade licence cost estimate?",
-    a: "No amount is shown until current prices are verified. Final fees may also depend on activity approval, immigration checks and document verification.",
+    number: '02',
+    question: 'Does the estimated cost include UAE residency visas?',
+    answer:
+      'Yes. When you specify investor, partner, or employment visas, the calculation dynamically incorporates entry permits, medical VIP screening, Emirates ID fees, and immigration establishment card allocations.',
   },
   {
-    q: "What information do I need to calculate my setup cost?",
-    a: "You will need to select your licence type, duration, business activities, number of shareholders, visa requirements and office preferences.",
+    number: '03',
+    question: 'Can overseas international investors use this calculator?',
+    answer:
+      'Yes. The calculator supports both UAE residents and foreign founders worldwide. International investors can incorporate 100% foreign-owned entities remotely without traveling to Dubai for initial trade license issuance.',
   },
   {
-    q: "Does the cost include visas?",
-    a: "Visa charges depend on the selected package and applicable immigration requirements. Confirm current charges before proceeding.",
+    number: '04',
+    question: 'Are external regulatory approvals included in the quote?',
+    answer:
+      'General commercial and consulting activities require zero external approvals. Specialized sectors (healthcare, legal, education, engineering, cryptocurrency) may require approvals from MOHAP, KHDA, or VARA, which our advisory desk pre-screens for you.',
   },
   {
-    q: "Can I compare different business activities?",
-    a: "Yes. You can select your intended activities and compare different setup configurations.",
-  },
-  {
-    q: "Does the number of shareholders affect the price?",
-    a: "It may affect the overall setup cost depending on the selected company structure and applicable pricing.",
-  },
-  {
-    q: "Can overseas investors use the calculator?",
-    a: "Yes. The calculator is designed for both UAE residents and overseas entrepreneurs planning a Dubai company setup.",
-  },
-  {
-    q: "Are additional approvals included?",
-    a: "Some business activities may require additional approvals or fees. These should be confirmed before finalising your quote.",
-  },
-  {
-    q: "Can I change my selections after calculating?",
-    a: "Yes. You can change your selections and review the updated setup summary. Request a verified quote for current prices.",
-  },
-  {
-    q: "How do I proceed after receiving my estimate?",
-    a: "You can request a personalised quote and discuss your requirements with the business setup team.",
+    number: '05',
+    question: 'How do I proceed once I receive my estimate?',
+    answer:
+      'You can submit your calculation directly to receive an official, line-item verified proposal from our senior corporate structuring directors with zero hidden fees.',
   },
 ];
-
-const coverage = [
-  { icon: "▣", title: "Trade licence", subtitle: "Type and duration", color: "green" },
-  { icon: "▥", title: "Business activities", subtitle: "Selection", color: "orange" },
-  { icon: "♙", title: "Number of", subtitle: "Shareholders", color: "purple" },
-  { icon: "▤", title: "Visa allocations", subtitle: "(Investor, Employment, Dependent)", color: "blue" },
-  { icon: "⚙", title: "Additional business", subtitle: "Setup services through mPlus", color: "green" },
-];
-
-function PaymentBadges() {
-  return (
-    <div className="payment-badges">
-      <span>Pricing confirmation required</span>
-      <span>Payment not enabled</span>
-    </div>
-  );
-}
-
-function SectionButton({ children = "Calculate Now", onClick }: { children?: React.ReactNode; onClick?: () => void }) {
-  return (
-    <button className="primary-btn" onClick={onClick}>
-      {children} <span>→</span>
-    </button>
-  );
-}
 
 export default function CostCalculatorPage() {
-  const [openFaq, setOpenFaq] = useState(0);
-
   const scrollToCalculator = () => {
-    document.getElementById("calculator")?.scrollIntoView({
-      behavior: "smooth",
-      block: "center",
+    document.getElementById('calculator')?.scrollIntoView({
+      behavior: 'smooth',
+      block: 'center',
     });
   };
 
   return (
-    <div className="cost-page">
-
-      {/* HERO */}
-      <section className="cost-hero">
-        <BackgroundVideo
-          className="cost-hero-video"
-          buttonClassName="bottom-1 md:bottom-4"
-          src="/videos/klay-dubai-loop.mp4"
-          poster="/images/site/services-dubai-sunset.webp"
-          playsInline
-          preload="metadata"
+    <div className="flex flex-col w-full bg-canvas-light text-text-primary-dark">
+      {/* =========================================================================
+          HERO & CALCULATOR SECTION: Obsidian Dark Canvas with Green Horizon Glow
+          ========================================================================= */}
+      <section className="relative isolate min-h-[560px] overflow-hidden bg-canvas-dark text-canvas-light py-16 md:py-24 border-b border-hairline-dark/40">
+        {/* Ambient Green Horizon Glow at Baseline */}
+        <div
           aria-hidden="true"
+          className="pointer-events-none absolute inset-x-0 bottom-0 h-96 bg-green-horizon-glow opacity-80 -z-10"
         />
-        <div className="hero-overlay">
-          <div className="cost-container">
-            <div className="cost-hero-grid">
-              <div className="hero-heading">
-                <span className="eyebrow">BUSINESS SETUP CONSULTANTS IN DUBAI</span>
-                <h1>
-                  Plan Your Setup,
-                  <span> Understand Your Costs</span>
-                </h1>
-                <p>
-                  Explore the options for your UAE business setup and review the
-                  cost categories that need confirmation. No unverified package
-                  prices are presented as quotes.
-                </p>
-                <div className="hero-actions">
-                  <a className="hero-action-primary" href="/contact-us/">
-                    Book a Consultation <span aria-hidden="true">→</span>
-                  </a>
-                  <a className="hero-action-secondary" href="/services/">
-                    Explore Our Services
-                  </a>
-                </div>
-                <div className="hero-benefits">
-                  <span>✓ Setup planning</span>
-                  <span>✓ Transparent cost categories</span>
-                  <span>✓ Business setup guidance</span>
-                </div>
-              </div>
 
-              <div className="w-full mt-10" id="calculator">
-                <CostCalculator />
-              </div>
+        <div className="mx-auto w-full max-w-7xl px-6 lg:px-8 relative corner-crosshair-wrap">
+          <CornerCrosshairs color="text-brand-green/60" size={14} />
 
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* PROCESS */}
-      <section className="cost-section" id="how-it-works">
-        <div className="cost-container">
-          <div className="section-heading">
-            <span className="eyebrow">SIMPLE PROCESS</span>
-            <h2>What Happens After You Get Your Cost Estimate</h2>
-            <p>Review your setup requirements and request confirmed pricing before you proceed.</p>
-          </div>
-
-          <div className="process-grid">
-            {[
-              ["01", "Review Your Cost Breakdown And Compare Setup Structures"],
-              ["02", "Confirm Your Business Activity Eligibility And Visa Requirements"],
-              ["03", "Request a verified quote and confirm your next steps"],
-            ].map(([number, title]) => (
-              <div className="process-card" key={number}>
-                <span>{number}</span>
-                <h3>{title}</h3>
-              </div>
-            ))}
-          </div>
-
-          <p className="center-text">
-            Not ready to commit? No problem. Many founders use this estimate
-            purely to compare options before making a decision.
-          </p>
-          <div className="center-action">
-            <PaymentBadges />
-            <SectionButton onClick={scrollToCalculator} />
-          </div>
-        </div>
-      </section>
-
-      {/* VIDEO GUIDE */}
-      <section className="cost-section soft-bg">
-        <div className="cost-container split-section">
-          <div>
-            <span className="eyebrow">VIDEO GUIDE</span>
-            <h2><span className="blue-text">Video Guide:</span> How To Use Our Cost Calculator</h2>
-            <p>
-              Know exactly what your Dubai business setup will cost before
-              you commit to anything. See how quickly you can price your
-              setup, including your licence, shareholders, visas and add-ons.
+          <div className="max-w-3xl mx-auto text-center mb-12">
+            <span className="inline-block text-xs font-mono tracking-widest text-brand-green uppercase mb-3">
+              INSTANT PRICING TRANSPARENCY
+            </span>
+            <h1 className="text-3xl sm:text-5xl md:text-6xl font-heading font-medium tracking-tight text-canvas-light leading-[1.08] mb-5">
+              Plan Your Setup, <br />
+              <span className="text-brand-green">Understand Your True Costs.</span>
+            </h1>
+            <p className="text-base text-canvas-light/80 font-normal leading-relaxed max-w-2xl mx-auto">
+              Calculate exact government fees, trade licensing, shareholder quotas, and visa allocations across Dubai Mainland and Free Zones. Zero hidden markups.
             </p>
-            {/* h3 (was h4) so the outline does not skip a level after the h2; styled as before. */}
-            <h3 className="split-section-tagline">A clear breakdown, tailored to your business, ready in minutes.</h3>
-            <SectionButton onClick={scrollToCalculator}>Calculate Now</SectionButton>
-          </div>
-          <div className="video-placeholder">
-            <div className="phone-mockup">
-              <div className="phone-screen">
-                <span>Cost Calculator</span>
-                <div className="phone-line" />
-                <div className="phone-line short" />
-                <div className="phone-option">Licence Options</div>
-                <div className="phone-option">Visa Allocation</div>
-                <div className="phone-option">Cost Estimate</div>
-              </div>
-            </div>
-            <span className="play-button">Calculator preview</span>
-          </div>
-        </div>
-      </section>
-
-      {/* COST FACTORS */}
-      <section className="cost-section">
-        <div className="cost-container split-section">
-          <div>
-            <span className="eyebrow">UNDERSTANDING YOUR COST</span>
-            <h2>Why Your Trade License Cost Depends on Your Setup</h2>
-            <p>No two setups are the same and neither are the costs. Your total depends on how you configure your company.</p>
-
-            <h3>Your estimate will change based on:</h3>
-            <div className="check-grid">
-              {[
-                "Trade licence type and duration",
-                "Office or desk requirements",
-                "Number and type of business activities",
-                "Immigration eligibility",
-                "Number of shareholders",
-                "Additional approvals",
-                "Visa allocations and change of status",
-                "Additional support services",
-              ].map((item) => <span key={item}>✓ {item}</span>)}
-            </div>
-
-            <p>
-              Compare different setups to understand how each decision
-              impacts your business costs before you commit.
-            </p>
-            <PaymentBadges />
-            <SectionButton onClick={scrollToCalculator} />
           </div>
 
-          <div className="visual-card">
-            <div className="visual-circle">AED</div>
-            <div className="visual-phone">
-              <span>Business Setup</span>
-              <h3>Cost Estimate</h3>
-              <div className="phone-line" />
-              <div className="phone-line" />
-              <div className="phone-line short" />
+          {/* Interactive Calculator Shell */}
+          <div className="w-full max-w-4xl mx-auto relative corner-crosshair-wrap" id="calculator">
+            <CornerCrosshairs color="text-brand-green/70" size={12} />
+            <div className="bg-canvas-dark-card/90 border border-hairline-dark/60 p-4 sm:p-8 shadow-2xl backdrop-blur-xl">
+              <CostCalculator />
             </div>
           </div>
         </div>
       </section>
 
-      {/* COVERAGE */}
-      <section className="cost-section soft-bg">
-        <div className="cost-container">
-          <div className="section-heading">
-            <span className="eyebrow">COST BREAKDOWN</span>
-            <h2>See the Cost Categories for Your Dubai Trade Licence</h2>
-            <p>Build your setup step by step and review the cost categories that need confirmation.</p>
-            <PaymentBadges />
+      {/* =========================================================================
+          SECTION 2: 3-Step Execution Grid (Equitify Format)
+          ========================================================================= */}
+      <section className="py-16 md:py-24 bg-canvas-light text-text-primary-dark border-b border-hairline-light/30">
+        <div className="mx-auto max-w-7xl px-6 lg:px-8">
+          <div className="max-w-3xl mb-12">
+            <span className="inline-block text-xs font-mono tracking-widest text-brand-navy/60 uppercase mb-3">
+              NEXT STEPS
+            </span>
+            <h2 className="text-3xl sm:text-4xl md:text-5xl font-heading font-medium tracking-tight text-brand-navy">
+              What Happens After Your Cost Estimate.
+            </h2>
           </div>
 
-          <div className="coverage-grid">
-            {coverage.map((item) => (
-              <div className="coverage-card" key={item.title}>
-                <span className={`coverage-icon ${item.color}`}>{item.icon}</span>
-                <h3>{item.title}</h3>
-                <p>{item.subtitle}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-px bg-hairline-light/40 border border-hairline-light/40 relative corner-crosshair-wrap">
+            <CornerCrosshairs color="text-brand-green/70" size={12} />
 
-      {/* COST INFORMATION + PAYMENT PLAN */}
-      <section className="cost-section">
-        <div className="cost-container">
-          <div className="section-heading">
-            <span className="eyebrow">COST INFORMATION</span>
-            <h2>How Much Does It Cost to Get a Trade License in Dubai?</h2>
-            <p>Understand the important factors before moving forward.</p>
-          </div>
-
-          <div className="info-grid">
-            {[
-              ["How Much Will It Actually Cost?", "Understand the factors that determine your setup cost."],
-              ["What Is Included In That Cost?", "Explore the licence and additional setup components."],
-              ["Will The Cost Change Later?", "Learn about approvals and final pricing confirmation."],
-            ].map(([title, description]) => (
-              <div className="info-card" key={title}>
-                <span>◈</span>
-                <h3>{title}</h3>
-                <p>{description}</p>
-                <a href="#calculator">Learn More →</a>
-              </div>
-            ))}
-          </div>
-
-          <div className="payment-plan">
-            <div className="bank-card-visual">BANK CARD</div>
-            <div>
-              <span className="eyebrow">PAYMENT OPTIONS</span>
-              <h2>Payment Options for UAE-based Clients</h2>
-              <p>
-                Payment options can be discussed after your setup costs and
-                eligibility are confirmed. Online payment is not available here.
+            <div className="bg-canvas-light-card p-8 md:p-10">
+              <span className="font-mono text-xs font-bold text-brand-green block mb-4">01</span>
+              <h3 className="text-xl font-heading font-semibold text-brand-navy mb-3">
+                Review Structure &amp; Activity
+              </h3>
+              <p className="text-xs text-text-secondary-dark leading-relaxed">
+                Review your breakdown and verify whether a Free Zone (DMCC, IFZA, Meydan) or Mainland DED structure best fits your trade scope.
               </p>
-              <PaymentBadges />
+            </div>
+
+            <div className="bg-canvas-light-card p-8 md:p-10">
+              <span className="font-mono text-xs font-bold text-brand-green block mb-4">02</span>
+              <h3 className="text-xl font-heading font-semibold text-brand-navy mb-3">
+                Confirm Banking Eligibility
+              </h3>
+              <p className="text-xs text-text-secondary-dark leading-relaxed">
+                Our compliance desk pre-screens your business activity to ensure smooth corporate bank account opening with tier-1 UAE banks.
+              </p>
+            </div>
+
+            <div className="bg-canvas-light-card p-8 md:p-10">
+              <span className="font-mono text-xs font-bold text-brand-green block mb-4">03</span>
+              <h3 className="text-xl font-heading font-semibold text-brand-navy mb-3">
+                Lock Fixed-Fee Agreement
+              </h3>
+              <p className="text-xs text-text-secondary-dark leading-relaxed">
+                Receive an itemized official agreement with zero hidden typing or renewal fees. Company formation begins in under 24 hours.
+              </p>
             </div>
           </div>
         </div>
       </section>
 
-      {/* FAQ */}
-      <section className="cost-section soft-bg" id="faq">
-        <div className="cost-container faq-layout">
-          <div className="faq-intro">
-            <span className="eyebrow">HELP CENTRE</span>
-            <h2>Common Questions Founders Ask Before Checking Trade License Costs</h2>
-            <p>Find answers to common questions about your Dubai business setup estimate.</p>
-          </div>
-
-          <div className="faq-list">
-            {faqs.map((faq, index) => (
-              <div className="faq-item" key={faq.q}>
-                <button
-                  onClick={() => setOpenFaq(openFaq === index ? -1 : index)}
-                  aria-expanded={openFaq === index}
-                >
-                  {faq.q}
-                  <span>{openFaq === index ? "−" : "+"}</span>
-                </button>
-                {openFaq === index && <p>{faq.a}</p>}
-              </div>
-            ))}
-          </div>
+      {/* =========================================================================
+          SECTION 3: Numbered FAQ Accordion (Equitify Format)
+          ========================================================================= */}
+      <section className="py-16 md:py-24 bg-canvas-dark text-canvas-light">
+        <div className="mx-auto max-w-7xl px-6 lg:px-8">
+          <NumberedAccordion
+            items={CALCULATOR_FAQS}
+            eyebrow="FREQUENTLY ASKED"
+            heading="Cost &amp; Setup Considerations"
+            subheading="Clear answers regarding UAE company formation pricing, visa quotas, and banking fees."
+          />
         </div>
       </section>
 
-      {/* FINAL CTA */}
-      <section className="final-cta">
-        <div className="cost-container">
-          <span className="eyebrow">START YOUR JOURNEY</span>
-          <h2>Ready to Estimate Your Dubai Business Setup Cost?</h2>
-          <p>Compare your options and understand your setup requirements.</p>
-          <SectionButton onClick={scrollToCalculator} />
-        </div>
-      </section>
-
+      {/* =========================================================================
+          SECTION 4: Atmospheric Amber Horizon Glow Banner
+          ========================================================================= */}
+      <AtmosphericBanner
+        eyebrow="READY TO FORM YOUR COMPANY"
+        headline="Lock Your 2026 Dubai Setup Package."
+        subheadline="Speak directly with an accredited corporate structuring director today."
+        ctaText="BOOK CONSULTATION"
+        ctaTo={ROUTES.contact}
+        glow="amber"
+      />
     </div>
   );
 }

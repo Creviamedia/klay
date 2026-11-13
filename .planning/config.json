@@ -1,0 +1,12 @@
+{
+  "mode": "standard",
+  "workflow": {
+    "auto_advance": false,
+    "verify_after_phase": true,
+    "require_plan_review": true
+  },
+  "branching": {
+    "feature_branches": true,
+    "main_branch": "uat"
+  }
+}

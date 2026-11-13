@@ -289,6 +289,40 @@
 
 @layer base {
   :root {
+    /* Equitify + Klay Sovereign Green & Blue + Signature Amber Glow Tokens */
+    --canvas-light: #FBFBFB;
+    --canvas-light-card: #FFFFFF;
+    --canvas-dark: #05131F;
+    --canvas-dark-card: #0A1E30;
+    --canvas-dark-elevated: #0E273E;
+    --brand-navy: #0C2D48;
+    --brand-navy-deep: #05131F;
+    --brand-navy-surface: #103859;
+    --brand-blue: #0C2D48;
+    --brand-blue-accent: #2563EB;
+    --brand-green: #22C55E;
+    --brand-green-hover: #16A34A;
+    --brand-green-dark: #15803D;
+    --brand-green-tint: rgba(34, 197, 94, 0.12);
+    --brand-gold: #D4AF37;
+    --brand-gold-hover: #C59B27;
+    --accent-amber: #E8A72E;
+    --accent-amber-hover: #D1921E;
+    --accent-champagne: #E8C37A;
+    --accent-champagne-tint: rgba(232, 195, 122, 0.12);
+    --border-hairline-dark: rgba(34, 197, 94, 0.22);
+    --border-hairline-dark-active: rgba(34, 197, 94, 0.55);
+    --border-hairline-light: rgba(12, 45, 72, 0.12);
+    --border-hairline-light-active: rgba(34, 197, 94, 0.45);
+    --green-horizon-glow: radial-gradient(ellipse 80% 50% at 50% 100%, rgba(34, 197, 94, 0.35) 0%, rgba(12, 45, 72, 0.2) 50%, transparent 80%);
+    --amber-horizon-glow: radial-gradient(ellipse 80% 50% at 50% 100%, rgba(232, 167, 46, 0.35) 0%, rgba(34, 197, 94, 0.15) 50%, transparent 80%);
+    --green-button-glow: 0 0 24px -2px rgba(34, 197, 94, 0.45);
+    --amber-button-glow: 0 0 24px -2px rgba(232, 167, 46, 0.4);
+    --amber-card-glow: 0 0 32px -4px rgba(232, 167, 46, 0.2);
+    --green-card-glow: 0 0 32px -4px rgba(34, 197, 94, 0.2);
+    --radius-card: 0px;
+    --radius-pill: 50px;
+
     --font-outfit: 'Outfit';
     --font-plus-jakarta-sans: 'Plus Jakarta Sans';
     --font-body: 'Plus Jakarta Sans', 'Plus Jakarta Sans Fallback', Arial, sans-serif;
@@ -400,6 +434,9 @@
 @layer base {
   * {
     @apply border-border;
+  }
+  html, body {
+    overflow-x: clip;
   }
   body {
     @apply text-foreground font-body antialiased;
@@ -981,6 +1018,35 @@
   .animate-delay-200 { animation-delay: 200ms; }
   .animate-delay-300 { animation-delay: 300ms; }
   .animate-delay-500 { animation-delay: 500ms; }
+
+  /* Equitify + Klay Green & Blue + Amber Glow Utilities */
+  .bg-amber-horizon-glow {
+    background-image: var(--amber-horizon-glow);
+  }
+  .bg-green-horizon-glow {
+    background-image: var(--green-horizon-glow);
+  }
+  .shadow-amber-glow {
+    box-shadow: var(--amber-button-glow);
+  }
+  .shadow-green-glow {
+    box-shadow: var(--green-button-glow);
+  }
+  .shadow-amber-card {
+    box-shadow: var(--amber-card-glow);
+  }
+  .shadow-green-card {
+    box-shadow: var(--green-card-glow);
+  }
+  .border-hairline-dark {
+    border-color: var(--border-hairline-dark);
+  }
+  .border-hairline-light {
+    border-color: var(--border-hairline-light);
+  }
+  .corner-crosshair-wrap {
+    position: relative;
+  }
 }
 
 .about-reveal {

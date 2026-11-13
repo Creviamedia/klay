@@ -1,10 +1,10 @@
-import { ArrowRight, Calendar, Instagram } from 'lucide-react';
+import { ArrowLeft, Calendar, Instagram } from 'lucide-react';
 import { lazy, Suspense, type ComponentType } from 'react';
 import { Navigate, useLocation, useParams } from 'react-router-dom';
 import { LongFormArticleContent } from '@/components/blog/LongFormArticleContent';
 import { MarkdownArticleContent } from '@/components/blog/MarkdownArticleContent';
 import { PageCTA } from '@/components/sections/MarketingPages';
-import { GlassCard } from '@/components/ui/glass-card';
+import { CornerCrosshairs } from '@/components/ui/CornerCrosshairs';
 import { Image } from '@/components/ui/image';
 import { Link } from '@/components/ui/link';
 import { BLOG_REDIRECTS, getBlogPost, loadBlogArticle, type BlogArticle, type BlogPostSummary } from '@/content/blog';
@@ -62,16 +62,46 @@ function ArticleLayout({ post, article }: { post: BlogPostSummary; article?: Blo
   const body = article?.body;
 
   return (
-    <div className="relative z-[1]">
-      <article className="section-padding pb-12 pt-20 sm:pt-24">
-        <div className="mx-auto max-w-4xl">
-          <Link href="/blog" className="mb-4 inline-flex items-center gap-2 text-sm font-semibold text-black hover:text-gold-ink">
-            <ArrowRight className="h-4 w-4 rotate-180" />
-            All articles
+    <div className="relative z-[1] bg-[#FBFBFB] text-[#0C2D48]">
+      <article className="pb-16 pt-28 sm:pt-36">
+        <div className="mx-auto max-w-4xl px-6">
+          <Link
+            href="/blog"
+            className="mb-8 inline-flex items-center gap-2 font-mono text-xs font-semibold uppercase tracking-widest text-[#0C2D48]/60 transition-colors hover:text-[#16A34A]"
+          >
+            <ArrowLeft className="h-3.5 w-3.5" />
+            Back to Publications
           </Link>
+
+          <div className="mb-4">
+            <span className="border border-[#22C55E]/30 bg-[#22C55E]/10 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.2em] text-[#16A34A]">
+              {post.category}
+            </span>
+          </div>
+
+          <h1 className="font-heading text-3xl font-light tracking-tight text-[#0C2D48] sm:text-4xl lg:text-5xl">
+            {post.title}
+          </h1>
+
+          <div className="mt-4 flex items-center gap-2 font-mono text-xs text-[#0C2D48]/50">
+            <Calendar className="h-3.5 w-3.5" />
+            <span>{post.date}</span>
+          </div>
+
+          {details?.tags && (
+            <div className="mt-4 flex flex-wrap gap-2" aria-label="Article tags">
+              {details.tags.map((tag) => (
+                <span key={tag} className="border border-[#0C2D48]/10 bg-white px-2.5 py-0.5 font-mono text-[10px] uppercase tracking-wider text-[#0C2D48]/70">
+                  #{tag}
+                </span>
+              ))}
+            </div>
+          )}
+
           {post.image && (
-            <figure className="mt-3">
-              <div className="overflow-hidden rounded-3xl bg-white/70">
+            <figure className="relative mt-8 border border-[#0C2D48]/10 bg-white p-3 shadow-sm">
+              <CornerCrosshairs color="text-[#22C55E]/40" size={12} />
+              <div className="overflow-hidden bg-[#05131F]/5">
                 <Image
                   src={post.image}
                   alt={post.imageAlt ?? post.title}
@@ -85,58 +115,45 @@ function ArticleLayout({ post, article }: { post: BlogPostSummary; article?: Blo
                 />
               </div>
               {details?.imageCaption && (
-                <figcaption className="mt-2 text-center text-sm text-black/70">{details.imageCaption}</figcaption>
+                <figcaption className="mt-2 text-center font-mono text-xs text-[#0C2D48]/60">{details.imageCaption}</figcaption>
               )}
               {details?.imageDescription && (
                 <span id="article-image-description" className="sr-only">{details.imageDescription}</span>
               )}
             </figure>
           )}
-          <div className="mb-3">
-            <span className="rounded-full bg-gold-500/15 px-3 py-1 text-xs font-semibold text-gold-ink">{post.category}</span>
-          </div>
-          <h1 className="text-balance text-3xl font-bold leading-tight text-black sm:text-4xl">{post.title}</h1>
-          <div className="mt-3 flex items-center gap-2 text-sm text-black">
-            <Calendar className="h-4 w-4" />
-            {post.date}
-          </div>
-          {details?.tags && (
-            <div className="mt-3 flex flex-wrap gap-2" aria-label="Article tags">
-              {details.tags.map((tag) => (
-                <span key={tag} className="rounded-full border border-black/10 px-3 py-1 text-xs text-black">
-                  {tag}
-                </span>
-              ))}
-            </div>
-          )}
-          <GlassCard className="mt-4 p-6 sm:p-10">
+
+          <div className="relative mt-8 border border-[#0C2D48]/10 bg-white p-8 sm:p-12 lg:p-14 shadow-sm">
+            <CornerCrosshairs color="text-[#22C55E]/40" size={14} />
             {!body ? (
               <div className="space-y-4" aria-busy="true">
-                <p className="text-lg leading-relaxed text-black">{post.excerpt}</p>
-                <div className="h-4 w-3/4 animate-pulse rounded bg-black/10" />
-                <div className="h-4 w-2/3 animate-pulse rounded bg-black/10" />
+                <p className="text-lg leading-relaxed text-[#0C2D48]">{post.excerpt}</p>
+                <div className="h-4 w-3/4 animate-pulse bg-[#0C2D48]/10" />
+                <div className="h-4 w-2/3 animate-pulse bg-[#0C2D48]/10" />
               </div>
             ) : body.kind === 'markdown' ? (
               <MarkdownArticleContent markdown={body.markdown} />
             ) : (
               <LongFormArticleContent article={body} />
             )}
-          </GlassCard>
-          <div className="mt-5 flex justify-center">
+          </div>
+
+          <div className="mt-8 flex justify-center">
             <a
               href={CONTACT_CHANNELS.instagramUrl}
               target="_blank"
               rel="noreferrer"
-              className="inline-flex items-center gap-2 rounded-full border border-black/10 px-4 py-2 text-sm font-semibold text-black transition-colors hover:border-palette-gold hover:text-gold-ink focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#a68724]"
+              className="inline-flex items-center gap-2 border border-[#0C2D48]/15 bg-white px-5 py-2.5 font-mono text-xs font-semibold uppercase tracking-wider text-[#0C2D48] transition-colors hover:border-[#22C55E] hover:text-[#16A34A]"
             >
               <Instagram className="h-4 w-4" aria-hidden="true" />
-              Follow us on Instagram
+              Follow on Instagram
               <span className="sr-only"> (opens in a new tab)</span>
             </a>
           </div>
         </div>
       </article>
-      {body?.kind === 'markdown' && <PageCTA title="Need help with your UAE plans?" />}
+
+      {body?.kind === 'markdown' && <PageCTA title="Need guidance with your UAE setup?" />}
     </div>
   );
 }

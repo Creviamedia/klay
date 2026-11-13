@@ -6,6 +6,7 @@ import { Image } from '@/components/ui/image';
 import { Link } from '@/components/ui/link';
 import { LiquidNavbar, type LiquidNavItem } from '@/components/layout/LiquidNavbar';
 import { MobileMenu, type MobileMenuItem } from '@/components/layout/MobileMenu';
+import { EquitifyButton } from '@/components/ui/EquitifyButton';
 import { ROUTES } from '@/lib/routes';
 
 const DESKTOP_NAV_LINKS = NAV_LINKS
@@ -216,11 +217,20 @@ export function Header() {
             )}
           </div>
 
+          <EquitifyButton
+            to={ROUTES.costCalculator}
+            variant="green"
+            size="sm"
+            className="hidden sm:inline-flex"
+          >
+            CALCULATE COST
+          </EquitifyButton>
+
           <Link
             href={ROUTES.goldenVisa}
             aria-label="Golden Visa"
             aria-current={pathname.startsWith('/golden-visa') ? 'page' : undefined}
-            className="header-visa-card hidden md:block"
+            className="header-visa-card hidden lg:block"
           >
             <span className="header-visa-card__inner" aria-hidden="true">
               <span className="header-visa-card__face header-visa-card__front">

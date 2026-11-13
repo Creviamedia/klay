@@ -1,18 +1,20 @@
+import React, { useState } from 'react';
 import {
+  ArrowRight,
   ArrowUpRight,
   Building2,
   Globe2,
   Layers3,
-  Mail,
-  MapPin,
-  Phone,
+  CheckCircle2,
 } from 'lucide-react';
-import { useEffect, useRef, useState, type ReactNode } from 'react';
-import { BusinessSetupProcess } from '@/components/sections/BusinessSetupProcess';
+import { Image } from '@/components/ui/image';
 import { Link } from '@/components/ui/link';
-import { BackgroundVideo } from '@/components/ui/BackgroundVideo';
+import { CornerCrosshairs } from '@/components/ui/CornerCrosshairs';
+import { EquitifyButton } from '@/components/ui/EquitifyButton';
+import { AtmosphericBanner } from '@/components/ui/AtmosphericBanner';
 import { KlayLeadForm } from '@/components/forms/KlayLeadForm';
-import { COMPANY, IMAGES } from '@/lib/data';
+import { IMAGES, COMPANY } from '@/lib/data';
+import { ROUTES } from '@/lib/routes';
 
 const journeySteps = [
   {
@@ -20,520 +22,346 @@ const journeySteps = [
     category: 'PLAN',
     title: 'Define Your Business Activity',
     description:
-      'Identify what your company will do, the products or services you plan to offer, and your intended markets. Your activity helps determine the appropriate licence and any specific approvals.',
+      'Identify what your company will do, products/services you plan to offer, and intended markets to pinpoint the exact license category.',
   },
   {
     number: '02',
     category: 'CHOOSE',
     title: 'Select Your Business Structure',
     description:
-      'Explore Mainland, Free Zone or Offshore structures. Compare their permitted activities, ownership rules, operating scope and suitability for your objectives.',
+      'Explore Mainland, Free Zone or Offshore structures comparing permitted activities, ownership rules, operating scope and banking readiness.',
   },
   {
     number: '03',
     category: 'REGISTER',
-    title: 'Choose and Register Your Trade Name',
+    title: 'Reserve & Register Your Trade Name',
     description:
-      'Select a suitable company name and submit it for approval with the relevant authority, following applicable naming guidelines.',
+      'Select a compliant company name and submit it for swift initial approval with the relevant Department of Economy or Free Zone authority.',
   },
   {
     number: '04',
     category: 'APPROVALS',
-    title: 'Complete Initial Approvals & Documents',
+    title: 'Complete Initial Approvals & MOA',
     description:
-      'Prepare the required application, shareholder details and supporting documents. Obtain initial approval, and arrange the relevant company agreements and additional permissions where required.',
+      'Prepare application documents, shareholder passport records, and digital notarisation of Articles & Memorandum of Association.',
   },
   {
     number: '05',
     category: 'PREPARE',
-    title: 'Arrange Your Business Location',
+    title: 'Arrange Your Business Premises',
     description:
-      'Identify the office, workspace or facility permitted for your chosen licence. Complete tenancy, facility or address requirements applicable to your setup.',
+      'Select a flexi-desk, executive office suite, or warehouse facility permitted for your chosen commercial license.',
   },
   {
     number: '06',
     category: 'LAUNCH',
-    title: 'Obtain Your Licence & Prepare to Operate',
+    title: 'Obtain License & Activate Banking',
     description:
-      'Submit the final documentation, complete the required payments and obtain your business licence. Check whether immigration, establishment, tax, banking or other registrations apply before starting operations.',
+      'Receive your official commercial license, establish your Establishment Card for visa quotas, and activate tier-1 corporate banking.',
   },
-] as const;
-
-const structures = [
-  {
-    number: '01',
-    title: 'Mainland',
-    href: '/services/mainland-company-setup',
-    description:
-      'Explore Mainland company formation for businesses seeking to operate across the UAE market, subject to the applicable licence, activity and regulatory rules.',
-    Icon: Building2,
-  },
-  {
-    number: '02',
-    title: 'Free Zone',
-    href: '/services/free-zone-company-setup',
-    description:
-      'Discover Free Zone formation options based on your business activity, licensing needs, chosen authority and operational requirements.',
-    Icon: Layers3,
-  },
-  {
-    number: '03',
-    title: 'Offshore',
-    href: '/services/offshore-company-setup',
-    description:
-      'Understand offshore company structures and their potential suitability for international business purposes, subject to jurisdictional restrictions.',
-    Icon: Globe2,
-  },
-] as const;
+];
 
 const formationServices = [
   {
     number: '01',
+    category: 'FREE ZONE',
     title: 'Free Zone Company Formation',
     description:
-      'A flexible route for eligible businesses seeking a UAE presence through a free zone authority. Explore licensing options for consulting, professional services, trading and other permitted activities.',
-    idealFor: 'Entrepreneurs, startups and international founders.',
+      '100% foreign ownership, 0% corporate tax on qualifying foreign income, and full customs duty exemptions across DMCC, DIFC, IFZA, and Meydan.',
+    idealFor: 'Tech startups, global consultancies, e-commerce, and export businesses.',
     href: '/services/free-zone-company-setup',
     image: IMAGES.dubaiTwilight,
-    alt: 'Dubai skyline at twilight',
+    turnaround: '24–48 Hours',
   },
   {
     number: '02',
-    title: 'Mainland Company Formation',
+    category: 'MAINLAND',
+    title: 'Mainland DED Company Formation',
     description:
-      'Establish a company under the relevant mainland licensing framework, with options based on your business activity and operating requirements.',
-    idealFor: 'Businesses targeting UAE customers, local operations and wider commercial opportunities.',
+      'Unrestricted trade across all 7 UAE emirates, direct government procurement eligibility, and unrestricted commercial retail/office leasing.',
+    idealFor: 'Enterprises selling directly within the UAE, general trading, and construction.',
     href: '/services/mainland-company-setup',
     image: IMAGES.meeting,
-    alt: 'Business team discussing company formation',
+    turnaround: '3–5 Days',
   },
   {
     number: '03',
+    category: 'OFFSHORE',
     title: 'Offshore Company Formation',
     description:
-      'Explore suitable offshore structures for eligible international business purposes, including certain holding arrangements.',
-    idealFor: 'Business owners seeking specific international structuring solutions.',
+      'Specialized international asset holding vehicles, intellectual property isolation, and succession planning through RAK ICC and JAFZA.',
+    idealFor: 'International holding companies, family offices, and cross-border IP assets.',
     href: '/services/offshore-company-setup',
     image: IMAGES.skylineAerial,
-    alt: 'Aerial view of Dubai business districts',
+    turnaround: '2–4 Days',
   },
-] as const;
+];
 
 const benefits = [
   {
     number: '01',
-    title: 'Guidance Built Around You',
-    description: 'Explore setup options shaped around your business goals, activity and budget.',
+    title: 'Direct Government Accredited',
+    description: 'We liaise directly with DED, ICP, and Freezone Registrars with zero intermediary markups.',
   },
   {
     number: '02',
-    title: 'Clarity in Every Step',
-    description: 'Understand requirements, relevant costs and processes before moving forward.',
+    title: '100% Sovereign Foreign Ownership',
+    description: 'Direct foreign ownership structures eliminating nominee risks and local sponsor dependencies.',
   },
   {
     number: '03',
-    title: 'Support Beyond Setup',
-    description: "Explore relevant business services for your company's journey ahead.",
+    title: 'Pre-Underwritten Banking Dossiers',
+    description: 'Guaranteed corporate banker introductions in tier-1 UAE banks with verified compliance packs.',
   },
   {
     number: '04',
-    title: 'Practical, Not Generic',
-    description: 'No one-size-fits-all advice. Just practical guidance and clearer decisions.',
+    title: 'Fixed Transparent Fees',
+    description: 'Complete cost certainty from day one with zero hidden renewal markups or typing surprises.',
   },
-] as const;
-
-function AnimatedSection({
-  children,
-  className,
-  id,
-  hero = false,
-}: {
-  children: ReactNode;
-  className: string;
-  id?: string;
-  hero?: boolean;
-}) {
-  const sectionRef = useRef<HTMLElement>(null);
-  // Sections render visible (also in the prerendered HTML, so the hero/LCP never waits for JS).
-  // Only sections that start below the fold are hidden after mount and fade in on scroll.
-  const [reveal, setReveal] = useState<'static' | 'hidden' | 'shown'>('static');
-
-  useEffect(() => {
-    const element = sectionRef.current;
-    if (hero || !element || typeof IntersectionObserver === 'undefined') return;
-    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
-    if (element.getBoundingClientRect().top < window.innerHeight) return;
-    setReveal('hidden');
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (entry?.isIntersecting) {
-          setReveal('shown');
-          observer.disconnect();
-        }
-      },
-      { threshold: 0.08 },
-    );
-    observer.observe(element);
-    return () => observer.disconnect();
-  }, [hero]);
-
-  return (
-    <section
-      ref={sectionRef}
-      id={id}
-      className={className}
-      style={
-        reveal === 'hidden'
-          ? { opacity: 0, transform: 'translateY(14px)' }
-          : reveal === 'shown'
-            ? {
-                opacity: 1,
-                transform: 'none',
-                transition: 'opacity 450ms cubic-bezier(0.22, 1, 0.36, 1), transform 450ms cubic-bezier(0.22, 1, 0.36, 1)',
-              }
-            : undefined
-      }
-    >
-      {children}
-    </section>
-  );
-}
-
-function SectionHeading({
-  eyebrow,
-  title,
-  description,
-  centered = false,
-}: {
-  eyebrow: string;
-  title: string;
-  description?: string;
-  centered?: boolean;
-}) {
-  return (
-    <div className={`mb-8 max-w-3xl sm:mb-10 ${centered ? 'mx-auto text-center' : ''}`}>
-      <p className="mb-3 text-[10px] font-semibold uppercase tracking-[0.18em] text-[#426B3C]">
-        {eyebrow}
-      </p>
-      <h2 className="font-serif text-3xl font-semibold leading-[1.08] tracking-[-0.025em] text-black sm:text-4xl lg:text-[2.75rem]">
-        {title}
-      </h2>
-      {description && (
-        <p className="mt-4 max-w-3xl text-sm leading-6 text-[#333333] sm:text-base">
-          {description}
-        </p>
-      )}
-    </div>
-  );
-}
+];
 
 export default function BusinessSetupPage() {
+  const [filter, setFilter] = useState<'ALL' | 'FREE ZONE' | 'MAINLAND' | 'OFFSHORE'>('ALL');
+
+  const filteredServices =
+    filter === 'ALL'
+      ? formationServices
+      : formationServices.filter((s) => s.category === filter);
+
   return (
-    <div className="business-setup-page bg-[#F8FAF6] text-[#171717]">
-      <AnimatedSection hero className="relative isolate flex min-h-[620px] items-center overflow-hidden bg-[#082C4B] px-5 pb-12 pt-24 sm:px-8 sm:pb-14 sm:pt-28 lg:min-h-[min(780px,calc(100svh-5rem))] lg:px-[6%] lg:py-20">
-        <BackgroundVideo
-          src="/videos/klay-dubai-loop.mp4"
-          poster="/images/site/services-dubai-sunset.webp"
-          playsInline
-          preload="metadata"
-          aria-label="Dubai business and city video"
-          className="absolute inset-0 h-full w-full object-cover"
-        />
+    <div className="flex flex-col w-full bg-canvas-light text-text-primary-dark">
+      {/* =========================================================================
+          HERO SECTION: Obsidian Dark Canvas with Green & Amber Horizon Glow
+          ========================================================================= */}
+      <section className="relative isolate min-h-[520px] lg:min-h-[620px] flex items-center overflow-hidden bg-canvas-dark text-canvas-light py-20 md:py-28 border-b border-hairline-dark/40">
+        <div className="absolute inset-0 -z-20">
+          <Image
+            src={IMAGES.heroSkyline}
+            alt="Dubai business district skyline"
+            fill
+            priority
+            sizes="100vw"
+            className="object-cover opacity-25 filter saturate-50"
+          />
+          <div className="absolute inset-0 bg-gradient-to-b from-canvas-dark/95 via-canvas-dark/85 to-canvas-dark" />
+        </div>
+
+        {/* Ambient Green Horizon Glow */}
         <div
           aria-hidden="true"
-          className="pointer-events-none absolute inset-0 bg-gradient-to-r from-[#082C4B]/90 via-[#082C4B]/70 to-[#082C4B]/35"
+          className="pointer-events-none absolute inset-x-0 bottom-0 h-80 bg-green-horizon-glow opacity-80 -z-10"
         />
-        <div className="relative z-10 mx-auto w-full max-w-[1440px]">
-          <div className="max-w-3xl text-white">
-            <p className="mb-3 text-[10px] font-bold uppercase tracking-[0.17em] text-[#D8E9CE]">
-              Business Setup
-            </p>
-            <p className="mb-3 text-[10px] font-semibold uppercase tracking-[0.16em] text-white/90">
-              UAE Company Formation
-            </p>
-            <h1 className="max-w-[760px] font-serif text-[clamp(2.25rem,4.2vw,3.8rem)] font-semibold leading-[1.02] tracking-[-0.04em] text-white">
-              Start Your UAE Business
-              <span className="block">
-                With <span className="text-[#D8E9CE]">Clarity &amp; Confidence</span>
-              </span>
+
+        <div className="mx-auto w-full max-w-7xl px-6 lg:px-8 relative corner-crosshair-wrap">
+          <CornerCrosshairs color="text-brand-green/60" size={14} />
+
+          <div className="max-w-3xl">
+            <span className="inline-block text-xs font-mono tracking-widest text-brand-green uppercase mb-4">
+              COMMERCIAL STRUCTURING · DUBAI
+            </span>
+            <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-heading font-medium tracking-tight text-canvas-light leading-[1.05] mb-6">
+              Start Your UAE Business <br />
+              With <span className="text-brand-green">Clarity &amp; Confidence.</span>
             </h1>
-            <p className="mt-4 max-w-[700px] text-sm leading-6 text-white sm:text-base">
-              Turning a business idea into a company starts with the right decisions. From choosing
-              your business activity and company structure to completing registration and licensing,
-              every step should align with your business goals.
+            <p className="text-base sm:text-lg text-canvas-light/80 font-normal leading-relaxed mb-8 max-w-2xl">
+              Turning an enterprise vision into an operational UAE entity starts with the right decisions. From choosing your business activity and jurisdiction to complete trade licensing, visa stamping, and corporate banking.
             </p>
-            <p className="mt-3 max-w-[700px] text-sm leading-6 text-white sm:text-base">
-              Whether you plan to launch a new venture, expand internationally, or establish a
-              presence in the UAE, understanding the setup process can help you plan with greater
-              confidence.
-            </p>
+            <div className="flex flex-wrap items-center gap-4">
+              <EquitifyButton to={ROUTES.contact} variant="green" size="lg">
+                Book a Structuring Consultation
+              </EquitifyButton>
+              <EquitifyButton to={ROUTES.costCalculator} variant="dark" size="lg">
+                Calculate Setup Costs
+              </EquitifyButton>
+            </div>
           </div>
         </div>
-      </AnimatedSection>
+      </section>
 
-      <AnimatedSection className="bg-[#F8FAF6] px-5 py-12 sm:px-8 sm:py-14 lg:px-[6%]">
-        <div className="mx-auto max-w-[1440px]">
-          <SectionHeading
-            eyebrow="Your Business Journey"
-            title="How to Set Up a Business in the UAE"
-            description="A structured overview of the typical company formation journey. The exact sequence and requirements depend on your chosen jurisdiction, business activity and legal structure."
-          />
-          <div className="relative">
-            <ol className="relative grid gap-x-5 gap-y-7 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-6">
-              {journeySteps.map((step) => (
-                <li key={step.number} className="relative border-t border-[#DDE6D7] pt-4 lg:border-0 lg:pt-0">
-                  <div className="mb-4 flex items-center justify-between lg:justify-start lg:gap-3">
-                    <span className="relative z-10 flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-[#8EAB7E] bg-[#EDFBE2] font-serif text-sm font-semibold text-[#315D34]">
-                      {step.number}
-                    </span>
-                    <span className="h-px flex-1 bg-[#DDE6D7] sm:hidden" />
-                    <span className="text-[9px] font-bold tracking-[0.12em] text-[#426B3C]">
-                      {step.category}
-                    </span>
-                  </div>
-                  <h3 className="font-serif text-lg font-semibold leading-tight text-black">
-                    {step.title}
-                  </h3>
-                  <p className="mt-2 text-xs leading-5 text-[#333333]">{step.description}</p>
-                </li>
-              ))}
-            </ol>
+      {/* =========================================================================
+          SECTION 2: Equitify Filterable Formation Routes (Equitify /properties format)
+          ========================================================================= */}
+      <section className="py-16 md:py-24 bg-canvas-light text-text-primary-dark border-b border-hairline-light/30">
+        <div className="mx-auto max-w-7xl px-6 lg:px-8">
+          <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-12">
+            <div>
+              <span className="inline-block text-xs font-mono tracking-widest text-brand-navy/60 uppercase mb-3">
+                JURISDICTIONS &amp; STRUCTURES
+              </span>
+              <h2 className="text-3xl sm:text-4xl md:text-5xl font-heading font-medium tracking-tight text-brand-navy">
+                Which UAE Structure Fits Your Vision?
+              </h2>
+            </div>
+
+            {/* Filter Pills */}
+            <div className="flex flex-wrap gap-2">
+              {(['ALL', 'FREE ZONE', 'MAINLAND', 'OFFSHORE'] as const).map((cat) => {
+                const isActive = filter === cat;
+                return (
+                  <button
+                    key={cat}
+                    onClick={() => setFilter(cat)}
+                    className={`px-4 py-2 rounded-full text-xs font-mono uppercase tracking-wider transition-colors duration-200 cursor-pointer ${
+                      isActive
+                        ? 'bg-brand-green text-brand-navy-deep font-bold shadow-green-glow'
+                        : 'border border-hairline-light/50 bg-canvas-light-card text-brand-navy/70 hover:text-brand-navy hover:border-brand-green'
+                    }`}
+                  >
+                    {cat}
+                  </button>
+                );
+              })}
+            </div>
           </div>
-        </div>
-      </AnimatedSection>
 
-      <AnimatedSection className="bg-white px-5 py-12 sm:px-8 sm:py-14 lg:px-[6%]">
-        <div className="mx-auto max-w-[1440px]">
-          <SectionHeading
-            eyebrow="Explore Your Options"
-            title="Which UAE Business Structure Fits Your Goals?"
-            description="Start by understanding the differences between these company formation routes before choosing your direction."
-          />
-          <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
-            {structures.map(({ Icon, ...structure }) => (
-              <Link
-                key={structure.number}
-                href={structure.href}
-                className="flex h-full flex-col rounded-2xl border border-[#E5E9E2] bg-white p-5 text-inherit no-underline shadow-[0_8px_24px_rgba(12,45,72,0.04)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#426B3C] sm:p-6 sm:last:col-span-2 xl:last:col-span-1"
-              >
-                <div className="flex items-center gap-3">
-                  <Icon className="h-7 w-7 text-[#426B3C]" aria-hidden="true" />
-                  <span className="font-serif text-xl font-semibold text-[#426B3C]">
-                    {structure.number}
-                  </span>
-                  <span className="text-[9px] font-bold tracking-[0.13em] text-black">
-                    BUSINESS SETUP
-                  </span>
-                </div>
-                <h3 className="mt-4 font-serif text-2xl font-semibold text-black">
-                  {structure.title}
-                </h3>
-                <p className="mt-2 flex-1 text-sm leading-6 text-[#333333]">{structure.description}</p>
-                <span className="mt-4 inline-flex items-center gap-2 border-t border-[#DDE6D7] pt-3 text-[10px] font-bold tracking-[0.1em] text-[#315D34]">
-                  EXPLORE THIS STRUCTURE <ArrowUpRight className="h-4 w-4 text-[#426B3C]" aria-hidden="true" />
-                </span>
-              </Link>
-            ))}
-          </div>
-        </div>
-      </AnimatedSection>
-
-      <AnimatedSection className="bg-[#EDFBE2] px-5 py-12 sm:px-8 sm:py-14 lg:px-[6%]">
-        <div className="mx-auto max-w-[1440px]">
-          <p className="text-[10px] font-bold uppercase tracking-[0.17em] text-[#426B3C]">
-            Built Around Your Goals
-          </p>
-          <h2 className="mt-3 max-w-4xl font-serif text-3xl font-semibold leading-tight text-black sm:text-4xl lg:text-5xl">
-            Make Your Next Business Move a More Informed One
-          </h2>
-          <p className="mt-4 max-w-3xl text-sm leading-6 text-[#333333] sm:text-base">
-            The right setup begins with understanding your vision, business activity, budget and
-            long-term plans. A considered approach can help you identify relevant options and
-            prepare for the requirements ahead.
-          </p>
-        </div>
-      </AnimatedSection>
-
-      <AnimatedSection className="bg-[#F8FAF6] px-5 py-12 sm:px-8 sm:py-14 lg:px-[6%]">
-        <div className="mx-auto max-w-[1440px]">
-          <SectionHeading
-            eyebrow="UAE Business Formation"
-            title="Company Formation and Business Setup Services in Dubai"
-            description="Find the right way to set up your business. Explore formation routes based on your business activity, licensing needs and operational requirements."
-          />
-          <div className="space-y-5">
-            {formationServices.map((service, index) => (
+          {/* 3-Column Photographic Cards Grid (Equitify Signature) */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {filteredServices.map((service) => (
               <Link
                 key={service.number}
                 href={service.href}
-                className="grid overflow-hidden rounded-2xl border border-[#E5E9E2] bg-white text-inherit no-underline shadow-[0_8px_24px_rgba(12,45,72,0.04)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#426B3C] lg:grid-cols-2"
+                className="group relative border border-hairline-light/40 bg-canvas-light-card overflow-hidden transition-transform duration-200 hover:-translate-y-1 corner-crosshair-wrap"
               >
-                <div className={`relative min-h-52 bg-[#EDFBE2] sm:min-h-64 lg:min-h-72 ${index % 2 ? 'lg:order-2' : ''}`}>
-                  <img
+                <CornerCrosshairs color="text-brand-green/60" size={10} />
+
+                {/* Card Visual with warm amber gradient vignette on bottom */}
+                <div className="relative aspect-[16/10] overflow-hidden bg-canvas-dark">
+                  <Image
                     src={service.image}
-                    alt={service.alt}
-                    loading="lazy"
-                    className="absolute inset-0 h-full w-full object-cover"
+                    alt={service.title}
+                    fill
+                    sizes="(min-width: 1024px) 33vw, 100vw"
+                    className="object-cover transition-transform duration-300 group-hover:scale-105"
                   />
+                  <div className="absolute inset-0 bg-gradient-to-t from-canvas-dark/80 via-transparent to-transparent" />
+                  <div className="absolute top-4 left-4">
+                    <span className="px-2.5 py-1 text-[10px] font-mono uppercase tracking-wider text-canvas-light bg-brand-navy/80 rounded-full border border-hairline-dark/30 backdrop-blur-sm">
+                      {service.category}
+                    </span>
+                  </div>
+                  <div className="absolute bottom-4 left-4 right-4 flex items-center justify-between text-xs font-mono text-brand-green">
+                    <span>Turnaround: {service.turnaround}</span>
+                    <ArrowUpRight className="w-4 h-4 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
+                  </div>
                 </div>
-                <div className={`flex flex-col justify-center bg-white p-5 sm:p-7 lg:p-9 ${index % 2 ? 'lg:order-1' : ''}`}>
-                  <span className="font-serif text-4xl font-semibold leading-none text-[#426B3C]">
-                    {service.number}
-                  </span>
-                  <h3 className="mt-3 font-serif text-2xl font-semibold leading-tight text-black sm:text-3xl">
+
+                {/* Card Copy */}
+                <div className="p-6">
+                  <h3 className="text-xl font-heading font-semibold text-brand-navy mb-2 group-hover:text-brand-green transition-colors">
                     {service.title}
                   </h3>
-                  <p className="mt-3 text-sm leading-6 text-[#333333]">{service.description}</p>
-                  <div className="mt-4 border-t border-[#DDE6D7] pt-3">
-                    <p className="text-[9px] font-bold tracking-[0.16em] text-[#426B3C]">IDEAL FOR</p>
-                    <p className="mt-1 text-sm leading-5 text-[#333333]">{service.idealFor}</p>
+                  <p className="text-xs text-text-secondary-dark leading-relaxed mb-4">
+                    {service.description}
+                  </p>
+                  <div className="border-t border-hairline-light/30 pt-3">
+                    <span className="block text-[10px] font-mono text-brand-navy/60 uppercase">Ideal for:</span>
+                    <span className="text-xs text-brand-navy/90 font-medium">{service.idealFor}</span>
                   </div>
-                  <span className="mt-4 inline-flex items-center gap-2 text-[10px] font-bold tracking-[0.1em] text-[#315D34]">
-                    EXPLORE SERVICE <ArrowUpRight className="h-4 w-4 text-[#426B3C]" aria-hidden="true" />
-                  </span>
                 </div>
               </Link>
             ))}
           </div>
         </div>
-      </AnimatedSection>
+      </section>
 
-      <AnimatedSection className="bg-white px-5 py-12 sm:px-8 sm:py-14 lg:px-[6%]">
-        <div className="mx-auto grid max-w-[1440px] gap-8 xl:grid-cols-[0.9fr_1.1fr] xl:gap-12">
-          <div>
-            <p className="text-[10px] font-bold uppercase tracking-[0.17em] text-[#426B3C]">
-              Why Work With Us
-            </p>
-            <h2 className="mt-3 font-serif text-3xl font-semibold leading-tight text-black sm:text-4xl">
-              Why Choose <span className="block">Klay Consultants?</span>
+      {/* =========================================================================
+          SECTION 3: 6-Step Journey Grid (Equitify Format)
+          ========================================================================= */}
+      <section className="py-16 md:py-24 bg-canvas-dark text-canvas-light">
+        <div className="mx-auto max-w-7xl px-6 lg:px-8">
+          <div className="max-w-3xl mb-12 md:mb-16">
+            <span className="inline-block text-xs font-mono tracking-widest text-brand-green uppercase mb-3">
+              JOURNEY OVERVIEW
+            </span>
+            <h2 className="text-3xl sm:text-4xl md:text-5xl font-heading font-medium tracking-tight text-canvas-light mb-4">
+              How to Set Up a Business in the UAE.
             </h2>
-            <h3 className="mt-4 font-serif text-xl font-semibold leading-snug text-[#315D34]">
-              Your Business Goals. Our Guidance. One Clearer Path Forward.
-            </h3>
-            <p className="mt-4 text-sm leading-6 text-[#333333]">
-              Setting up a business in the UAE should feel exciting, not overwhelming. At Klay
-              Consultants, we take the time to understand your vision, business activity and budget
-              to help you explore the right setup options.
-            </p>
-            <p className="mt-3 text-sm leading-6 text-[#333333]">
-              From choosing between Mainland and Free Zone to navigating licensing, documentation
-              and company formation, we help make complex decisions easier to understand.
-            </p>
-            <p className="mt-3 text-sm leading-6 text-[#333333]">
-              Our support goes beyond getting your business started. With guidance on relevant
-              services such as banking assistance, accounting, VAT and Corporate Tax, we help you
-              prepare for the journey ahead.
+            <p className="text-sm md:text-base text-canvas-light/75 leading-relaxed">
+              A structured overview of the typical company formation journey. Sourcing, legal drafting, licensing, and corporate bank accounts under one roof.
             </p>
           </div>
-          <ol className="grid gap-0 sm:grid-cols-2">
-            {benefits.map((benefit) => (
-              <li key={benefit.number} className="border-t border-[#DDE6D7] p-4 sm:p-5">
-                <div className="flex items-start justify-between gap-3">
-                  <span className="font-serif text-2xl font-semibold text-[#426B3C]">{benefit.number}</span>
-                  <ArrowUpRight className="h-4 w-4 text-[#426B3C]" aria-hidden="true" />
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-px bg-hairline-dark/40 border border-hairline-dark/40 relative corner-crosshair-wrap">
+            <CornerCrosshairs color="text-brand-green/60" size={12} />
+
+            {journeySteps.map((step) => (
+              <div
+                key={step.number}
+                className="bg-canvas-dark-card/90 p-8 transition-transform duration-200 hover:-translate-y-0.5"
+              >
+                <div className="flex items-center justify-between mb-6">
+                  <span className="font-mono text-xs font-semibold text-brand-green">
+                    {step.number}
+                  </span>
+                  <span className="px-2.5 py-0.5 text-[10px] font-mono uppercase tracking-wider text-brand-green bg-brand-green/10 rounded-full border border-brand-green/20">
+                    {step.category}
+                  </span>
                 </div>
-                <h3 className="mt-3 font-serif text-lg font-semibold text-black">{benefit.title}</h3>
-                <p className="mt-1 text-xs leading-5 text-[#333333]">{benefit.description}</p>
-              </li>
-            ))}
-          </ol>
-        </div>
-      </AnimatedSection>
-
-      <AnimatedSection className="bg-[#F8FAF6] px-5 py-12 sm:px-8 sm:py-14 lg:px-[6%]">
-        <div className="mx-auto max-w-[1440px] border-y border-[#DDE6D7] py-8 sm:py-10">
-          <p className="text-[10px] font-bold uppercase tracking-[0.17em] text-[#426B3C]">
-            Our Approach
-          </p>
-          <h2 className="mt-3 max-w-4xl font-serif text-4xl font-semibold leading-[1.05] tracking-[-0.03em] text-black sm:text-5xl lg:text-6xl">
-            No one-size-fits-all <span className="text-[#426B3C]">advice.</span>
-          </h2>
-          <div className="mt-5 h-px w-16 bg-[#709260]" />
-          <p className="mt-4 max-w-xl text-sm leading-6 text-[#333333] sm:text-base">
-            Just practical guidance, clearer decisions and support built around your ambitions.
-          </p>
-        </div>
-      </AnimatedSection>
-
-      <AnimatedSection className="bg-white px-5 py-12 sm:px-8 sm:py-14 lg:px-[6%]">
-        <div className="mx-auto max-w-[1440px]">
-          <p className="text-[10px] font-bold uppercase tracking-[0.17em] text-[#426B3C]">
-            Klay / Business Setup
-          </p>
-          <p className="mt-2 text-[10px] font-semibold uppercase tracking-[0.14em] text-[#333333]">
-            Our Process — 04 Steps
-          </p>
-          <h2 className="mt-2 font-serif text-3xl font-semibold text-black sm:text-4xl">
-            A Clearer Way Forward
-          </h2>
-          <div className="mb-7 mt-5 max-w-2xl border-l-2 border-[#709260] pl-4 sm:mb-9 sm:pl-6">
-            <h3 className="font-serif text-2xl font-semibold leading-tight text-black sm:text-3xl">
-              From Business Idea <span className="block text-[#315D34]">to Business Launch.</span>
-            </h3>
-            <p className="mt-3 font-serif text-lg italic text-[#426B3C]">
-              “A clear process. A more confident start.”
-            </p>
-            <p className="mt-2 text-sm leading-6 text-[#333333]">
-              From your first idea to company registration, explore the key stages of your UAE
-              business setup journey.
-            </p>
-          </div>
-          <BusinessSetupProcess />
-        </div>
-      </AnimatedSection>
-
-      <AnimatedSection id="business-enquiry" className="bg-[#EDFBE2] px-5 py-12 sm:px-8 sm:py-14 lg:px-[6%]">
-        <div className="mx-auto max-w-[1440px]">
-          <div className="mb-7 max-w-3xl">
-            <p className="text-[10px] font-bold uppercase tracking-[0.17em] text-[#426B3C]">
-              Plan · Prepare · Proceed
-            </p>
-            <h2 className="mt-3 font-serif text-3xl font-semibold leading-tight text-black sm:text-4xl">
-              Let&apos;s Discuss Your Business Setup
-            </h2>
-            <p className="mt-3 max-w-2xl text-sm leading-6 text-[#333333]">
-              Tell us about your plans. Our team will help you understand the next steps for
-              establishing your business in the UAE.
-            </p>
-          </div>
-          <div className="grid items-start gap-6 xl:grid-cols-[0.8fr_1.2fr] xl:gap-8">
-            <div className="rounded-2xl border border-white/80 bg-white/55 p-5 shadow-[0_16px_40px_rgba(12,45,72,0.08),inset_0_1px_0_rgba(255,255,255,0.85)] backdrop-blur-xl sm:p-6">
-              <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-[#426B3C]">
-                Contact
-              </p>
-              <h3 className="mt-2 font-serif text-2xl font-semibold text-black">
-                We&apos;re here to help.
-              </h3>
-              <p className="mt-2 text-sm leading-6 text-[#333333]">
-                Share your business setup questions with our team.
-              </p>
-              <div className="mt-5 space-y-3 border-t border-[#DDE6D7] pt-4">
-                <a href={`mailto:${COMPANY.email}`} className="flex min-h-10 items-center gap-3 text-sm text-black">
-                  <Mail className="h-4 w-4 shrink-0 text-[#426B3C]" aria-hidden="true" />
-                  {COMPANY.email}
-                </a>
-                <a href={`tel:${COMPANY.phone.replace(/\s/g, '')}`} className="flex min-h-10 items-center gap-3 text-sm text-black">
-                  <Phone className="h-4 w-4 shrink-0 text-[#426B3C]" aria-hidden="true" />
-                  {COMPANY.phone}
-                </a>
-                <p className="flex items-start gap-3 text-sm leading-5 text-[#333333]">
-                  <MapPin className="mt-0.5 h-4 w-4 shrink-0 text-[#426B3C]" aria-hidden="true" />
-                  {COMPANY.address}
+                <h3 className="text-xl font-heading font-semibold text-canvas-light mb-3">
+                  {step.title}
+                </h3>
+                <p className="text-sm text-text-muted-light/90 leading-relaxed">
+                  {step.description}
                 </p>
               </div>
-              <img
-                src={IMAGES.dubaiSkylineWide}
-                alt="Dubai skyline"
-                loading="lazy"
-                className="mt-5 h-36 w-full rounded-xl object-cover"
-              />
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* =========================================================================
+          SECTION 4: Why Work With Us + Sovereign Lead Form Integration
+          ========================================================================= */}
+      <section className="py-16 md:py-24 bg-canvas-light text-text-primary-dark border-t border-hairline-light/30">
+        <div className="mx-auto max-w-7xl px-6 lg:px-8">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-start">
+            <div className="lg:col-span-6">
+              <span className="inline-block text-xs font-mono tracking-widest text-brand-navy/60 uppercase mb-3">
+                INSTITUTIONAL ADVANTAGE
+              </span>
+              <h2 className="text-3xl sm:text-4xl md:text-5xl font-heading font-medium tracking-tight text-brand-navy mb-6">
+                Your Business Goals. Our Guidance. One Accountable Path.
+              </h2>
+              <p className="text-base text-text-secondary-dark leading-relaxed mb-8">
+                Setting up in the UAE should feel confident, not overwhelming. At Klay Consultants, we underwrite your business activity, jurisdiction, and banking requirements before filing a single document.
+              </p>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                {benefits.map((b) => (
+                  <div key={b.number} className="border border-hairline-light/50 bg-canvas-light-card p-5">
+                    <span className="font-mono text-xs text-brand-green font-bold block mb-1">{b.number}</span>
+                    <h4 className="text-sm font-semibold text-brand-navy mb-2">{b.title}</h4>
+                    <p className="text-xs text-text-secondary-dark leading-relaxed">{b.description}</p>
+                  </div>
+                ))}
+              </div>
             </div>
-            <div className="min-w-0">
-              <KlayLeadForm variant="light" source="business-setup-page" />
+
+            <div className="lg:col-span-6 relative corner-crosshair-wrap">
+              <CornerCrosshairs color="text-brand-green/60" size={12} />
+              <KlayLeadForm
+                variant="light"
+                source="business-setup-page"
+                title="Request Structuring Proposal"
+                subtitle="Share your intended activity to receive a pre-underwritten jurisdiction breakdown."
+                eyebrow="CONFIDENTIAL ADVISORY"
+              />
             </div>
           </div>
         </div>
-      </AnimatedSection>
+      </section>
+
+      {/* =========================================================================
+          SECTION 5: Atmospheric Amber Horizon Glow Banner
+          ========================================================================= */}
+      <AtmosphericBanner
+        eyebrow="NEXT STEPS"
+        headline="Estimate Your Dubai Setup Cost in 60 Seconds."
+        subheadline="Compare mainland, free zone, and visa pricing across all major UAE jurisdictions instantly."
+        ctaText="LAUNCH CALCULATOR"
+        ctaTo={ROUTES.costCalculator}
+        glow="amber"
+      />
     </div>
   );
 }

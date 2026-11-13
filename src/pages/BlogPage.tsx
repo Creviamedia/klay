@@ -29,33 +29,48 @@ export default function BlogPage() {
   const pageArticles = publishedArticles.slice(firstIndex, firstIndex + BLOG_POSTS_PER_PAGE);
 
   return (
-    <section className="section-padding py-12 sm:py-16 lg:py-20">
-      <div className="mx-auto max-w-7xl">
-        <ScrollReveal className="mx-auto mb-10 max-w-3xl text-center sm:mb-14">
-          <p className="mb-3 text-xs font-semibold uppercase tracking-[0.16em] text-gold-ink">
-            Insights &amp; Resources
-          </p>
-          <h1 className="text-balance text-4xl font-bold leading-tight text-black sm:text-5xl lg:text-6xl">
-            Business Setup Insights
+    <div className="bg-[#FBFBFB] text-[#0C2D48]">
+      {/* Editorial Header */}
+      <section className="relative isolate overflow-hidden bg-[#05131F] pb-16 pt-32 text-white border-b border-white/10">
+        <div
+          aria-hidden="true"
+          className="pointer-events-none absolute inset-x-0 bottom-0 h-64 bg-green-horizon-glow opacity-50"
+        />
+        <div className="relative z-10 mx-auto max-w-4xl px-6 text-center">
+          <div className="mb-6 inline-flex items-center gap-2 border border-white/10 bg-white/[0.03] px-3.5 py-1.5 text-xs font-semibold uppercase tracking-[0.2em] text-[#22C55E]">
+            <span className="h-1.5 w-1.5 rounded-full bg-[#22C55E] shadow-[0_0_8px_#22C55E]" />
+            Regulatory Publications &amp; Briefings
+          </div>
+          <h1 className="font-heading text-4xl font-light tracking-tight text-white sm:text-5xl lg:text-6xl">
+            UAE Commercial &amp; <span className="font-semibold text-white">Residency Insights</span>
           </h1>
-          <p className="mx-auto mt-5 max-w-2xl text-base leading-relaxed text-black sm:text-lg">
-            Practical guides and updates to help you navigate business setup and residency options in the UAE.
+          <p className="mx-auto mt-6 max-w-2xl text-lg leading-relaxed text-white/70">
+            Practical legal guides, statutory updates, and strategic intelligence to help you navigate business setup and residency in the UAE.
           </p>
           {currentPage > 1 && (
-            <p className="mt-4 text-sm font-semibold text-gold-ink">
-              Page {currentPage} of {pageCount}
+            <p className="mt-4 font-mono text-xs uppercase tracking-widest text-[#22C55E]">
+              PAGE {currentPage} OF {pageCount}
             </p>
           )}
-        </ScrollReveal>
-        <div className="grid items-stretch gap-6 sm:grid-cols-2 lg:grid-cols-3">
-          {pageArticles.map((post, index) => (
-            <ScrollReveal key={post.slug} delay={(index % 3) * 70} className="h-full">
-              <BlogCard {...post} priority={index === 0} />
-            </ScrollReveal>
-          ))}
         </div>
-        <BlogPagination currentPage={currentPage} pageCount={pageCount} />
-      </div>
-    </section>
+      </section>
+
+      {/* Publications Grid */}
+      <section className="py-16 sm:py-20 lg:py-24">
+        <div className="mx-auto max-w-[1440px] px-6 lg:px-12">
+          <div className="grid items-stretch gap-6 sm:grid-cols-2 lg:grid-cols-3">
+            {pageArticles.map((post, index) => (
+              <ScrollReveal key={post.slug} delay={(index % 3) * 70} className="h-full">
+                <BlogCard {...post} priority={index === 0} />
+              </ScrollReveal>
+            ))}
+          </div>
+
+          <div className="mt-14 border-t border-[#0C2D48]/10 pt-10">
+            <BlogPagination currentPage={currentPage} pageCount={pageCount} />
+          </div>
+        </div>
+      </section>
+    </div>
   );
 }
