@@ -96,10 +96,13 @@
 }
 
 .cost-page .cost-hero .cost-container {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(420px, .92fr);
+  display: flex;
+  flex-direction: column;
   align-items: center;
-  gap: clamp(36px, 6vw, 88px);
+  gap: 32px;
+  max-width: 1240px;
+  margin: 0 auto;
+  padding: 0 20px;
 }
 
 .cost-page .cost-hero-grid {

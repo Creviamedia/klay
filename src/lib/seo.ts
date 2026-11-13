@@ -10,7 +10,11 @@ import {
   ROUTES,
 } from './routes';
 
-export const SITE_ORIGIN = 'https://klayconsultants.com';
+const defaultOrigin = 'https://klayconsultants.com';
+export const SITE_ORIGIN = (
+  (typeof process !== 'undefined' && (process.env?.VITE_SITE_URL || process.env?.SITE_URL)) ||
+  defaultOrigin
+).replace(/\/+$/, '');
 
 export interface PageSeo {
   title: string;

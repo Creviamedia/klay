@@ -28,6 +28,9 @@ const TermsPage = lazy(() => import('@/pages/TermsPage'));
 const FloatingContactWidget = lazy(() =>
   import('@/components/layout/FloatingContactWidget').then((module) => ({ default: module.FloatingContactWidget })),
 );
+const FloatingDock = lazy(() =>
+  import('@/components/layout/FloatingDock').then((module) => ({ default: module.FloatingDock })),
+);
 
 const CHUNK_RELOAD_FLAG = 'chunk-reload';
 
@@ -191,6 +194,7 @@ export function SiteRoutes() {
         <ChunkErrorBoundary fallback={null}>
           <Suspense fallback={null}>
             <FloatingContactWidget />
+            <FloatingDock />
           </Suspense>
         </ChunkErrorBoundary>
       )}

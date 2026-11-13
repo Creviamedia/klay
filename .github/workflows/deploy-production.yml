@@ -1,0 +1,47 @@
+name: Production Zero-Downtime Deploy to Hostinger
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  deploy-production:
+    name: Build & Deploy Production Static Bundle
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+
+      - name: Install Dependencies
+        run: npm ci
+
+      - name: Full Production Build & SSG
+        run: npm run build
+
+      - name: Prepare Delivery Archive
+        run: |
+          cd dist
+          zip -r ../klay-dist.zip .
+          cd ..
+
+      # Deploys directly to Hostinger LiteSpeed public_html via secure SFTP/SSH
+      - name: Deploy to Hostinger via SFTP
+        if: env.HOSTINGER_SFTP_HOST != ''
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.5
+        with:
+          server: ${{ secrets.HOSTINGER_SFTP_HOST }}
+          username: ${{ secrets.HOSTINGER_SFTP_USER }}
+          password: ${{ secrets.HOSTINGER_SFTP_PASSWORD }}
+          server-dir: 'public_html/'
+          local-dir: './dist/'
+          dangerous-clean-slate: false
+        env:
+          HOSTINGER_SFTP_HOST: ${{ secrets.HOSTINGER_SFTP_HOST }}

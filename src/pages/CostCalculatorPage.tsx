@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { BackgroundVideo } from "@/components/ui/BackgroundVideo";
-import { LazyFilloutEmbed } from "@/components/ui/LazyFilloutEmbed";
+import { CostCalculator } from "@/components/calculator/CostCalculator";
 // Styles live in ./CostCalculatorPage.css and are loaded with the main stylesheet (see src/main.tsx).
 
 const faqs = [
@@ -124,18 +124,8 @@ export default function CostCalculatorPage() {
                 </div>
               </div>
 
-              <div className="calculator-layout" id="calculator">
-                <div className="calculator-card">
-                  <span className="eyebrow">GET YOUR ESTIMATE</span>
-                  <h2>Configure Your Business Setup</h2>
-                  <div className="calculator-form-embed">
-                    <LazyFilloutEmbed filloutId="1nqKwwpPkQus" />
-                  </div>
-                  <p className="calculator-disclaimer">
-                    Final costs depend on your selected activities, licence requirements
-                    and applicable government fees.
-                  </p>
-                </div>
+              <div className="w-full mt-10" id="calculator">
+                <CostCalculator />
               </div>
 
             </div>

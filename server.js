@@ -140,8 +140,30 @@ app.use((request, response, next) => {
   return response.redirect(redirect.status, `${redirect.to}${query}`);
 });
 
+app.use(express.json());
+
 app.get('/api/health', (_request, response) => {
-  response.json({ status: 'ok' });
+  response.json({ status: 'ok', environment: process.env.VITE_ENVIRONMENT || 'production' });
+});
+
+app.post('/api/leads', (request, response) => {
+  const { name, email, phone, jurisdiction, estimateAed, breakdown } = request.body || {};
+  const leadId = 'KLAY-' + Date.now().toString(36).toUpperCase() + '-' + Math.floor(1000 + Math.random() * 9000);
+  console.log(`[LEAD RECEIVED - ${process.env.VITE_ENVIRONMENT || 'local'}] ID: ${leadId}`, {
+    name,
+    email,
+    phone,
+    jurisdiction,
+    estimateAed,
+    breakdownCount: Array.isArray(breakdown) ? breakdown.length : 0,
+    timestamp: new Date().toISOString(),
+  });
+
+  return response.status(201).json({
+    success: true,
+    leadId,
+    message: 'Estimate received. A Klay consultant will contact you with the itemised dossier.',
+  });
 });
 
 app.use('/api', (_request, response) => {
