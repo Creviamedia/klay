@@ -4,6 +4,20 @@
 [build]
 command = "npm run build"
 publish = "dist"
+functions = "netlify/functions"
+
+# API Serverless Functions
+[[redirects]]
+from = "/api/leads"
+to = "/.netlify/functions/leads"
+status = 200
+force = true
+
+[[redirects]]
+from = "/api/health"
+to = "/.netlify/functions/health"
+status = 200
+force = true
 
 # Host canonicalization, only used if the domain were ever pointed at Netlify (which would also need the
 # X-Robots-Tag below removed). On Hostinger, dist/.htaccess does this.
