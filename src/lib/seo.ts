@@ -188,7 +188,7 @@ const staticRoutes: PublicSeoRoute[] = [
   { path: ROUTES.services, source: 'page', lastmodSource: 'src/pages/ServicesPage.tsx' },
   { path: ROUTES.businessSetup, source: 'page', lastmodSource: 'src/pages/BusinessSetupPage.tsx' },
   { path: ROUTES.blog, source: 'page', lastmodSource: 'src/content/blog/posts.ts' },
-  { path: ROUTES.costCalculator, source: 'page', lastmodSource: 'src/pages/CostCalculatorPage.jsx' },
+  { path: ROUTES.costCalculator, source: 'page', lastmodSource: 'src/pages/CostCalculatorPage.tsx' },
   { path: ROUTES.contact, source: 'page', lastmodSource: 'src/pages/ContactPage.tsx' },
   { path: ROUTES.goldenVisa, source: 'page', lastmodSource: 'src/pages/GoldenVisaPage.tsx' },
   { path: ROUTES.privacy, source: 'page', lastmodSource: 'src/pages/PrivacyPage.tsx' },

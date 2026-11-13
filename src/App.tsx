@@ -18,7 +18,7 @@ const BlogPage = lazy(() => import('@/pages/BlogPage'));
 const BlogArticlePage = lazy(() => import('@/pages/BlogArticlePage'));
 const BusinessSetupPage = lazy(() => import('@/pages/BusinessSetupPage'));
 const ContactPage = lazy(() => import('@/pages/ContactPage'));
-const CostCalculatorPage = lazy(() => import('@/pages/CostCalculatorPage.jsx'));
+const CostCalculatorPage = lazy(() => import('@/pages/CostCalculatorPage'));
 const GoldenVisaPage = lazy(() => import('@/pages/GoldenVisaPage'));
 const PrivacyPage = lazy(() => import('@/pages/PrivacyPage'));
 const ServiceDetailPage = lazy(() => import('@/pages/ServiceDetailPage'));

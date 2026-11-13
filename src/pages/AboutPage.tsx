@@ -143,9 +143,9 @@ export default function AboutPage() {
         />
         <div className="section-padding relative z-10 mx-auto w-full max-w-7xl">
           <ScrollReveal className="mx-auto max-w-3xl text-center text-white">
-            <p className="mb-5 text-base font-black uppercase tracking-[0.22em] text-[#E8C37A] sm:text-lg">
+            <h1 className="mb-5 text-base font-black uppercase tracking-[0.22em] text-[#E8C37A] sm:text-lg">
               About Klay Consultants
-            </p>
+            </h1>
             <div className="mt-8 flex justify-center gap-3">
               <Link
                 href="/contact"

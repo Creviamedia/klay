@@ -63,7 +63,7 @@ function PaymentBadges() {
   );
 }
 
-function SectionButton({ children = "Calculate Now", onClick }) {
+function SectionButton({ children = "Calculate Now", onClick }: { children?: React.ReactNode; onClick?: () => void }) {
   return (
     <button className="primary-btn" onClick={onClick}>
       {children} <span>→</span>

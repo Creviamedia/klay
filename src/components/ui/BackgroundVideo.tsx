@@ -10,7 +10,7 @@ type BackgroundVideoProps = Omit<VideoHTMLAttributes<HTMLVideoElement>, 'autoPla
  * Playback starts after hydration and only when the visitor has not asked for reduced motion;
  * otherwise the poster is shown.
  */
-export function BackgroundVideo({ src, ...videoProps }: BackgroundVideoProps) {
+export function BackgroundVideo({ src, buttonClassName: _buttonClassName, ...videoProps }: BackgroundVideoProps) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const [wantsPlay, setWantsPlay] = useState<boolean | null>(null);
 
