@@ -146,23 +146,252 @@ app.get('/api/health', (_request, response) => {
   response.json({ status: 'ok', environment: process.env.VITE_ENVIRONMENT || 'production' });
 });
 
+const dataDir = path.join(__dirname, 'data');
+const leadsFilePath = path.join(dataDir, 'leads.json');
+const leadsCsvPath = path.join(dataDir, 'google-sheet-crm.csv');
+
+function generateSovereignReference() {
+  const year = new Date().getFullYear();
+  const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+  let randomPart = '';
+  for (let i = 0; i < 4; i++) {
+    randomPart += chars.charAt(Math.floor(Math.random() * chars.length));
+  }
+  return `KLAY-${year}-${randomPart}`;
+}
+
+function formatWhatsAppDetails(phone, name, jurisdiction) {
+  let cleanDigits = (phone || '').replace(/\D/g, '');
+  // UAE trunk prefix fix: e.g. +971 050 123 4567 -> 9710501234567 -> 971501234567
+  if (cleanDigits.startsWith('9710')) {
+    cleanDigits = '971' + cleanDigits.slice(4);
+  }
+  const cleanTel = (phone || '').replace(/[^\d+]/g, '');
+  const waUrl = cleanDigits
+    ? `https://wa.me/${cleanDigits}?text=${encodeURIComponent(`Hello ${name}, thank you for contacting Klay Consultants regarding your ${jurisdiction || 'UAE'} setup. How may our legal desk assist you?`)}`
+    : '';
+  const callUrl = cleanTel ? `tel:${cleanTel}` : '';
+  return { cleanDigits, cleanTel, waUrl, callUrl };
+}
+
+function persistLeadToDisk(leadRecord) {
+  try {
+    if (!fs.existsSync(dataDir)) {
+      fs.mkdirSync(dataDir, { recursive: true });
+    }
+    let leads = [];
+    if (fs.existsSync(leadsFilePath)) {
+      try {
+        const raw = fs.readFileSync(leadsFilePath, 'utf8');
+        leads = JSON.parse(raw);
+        if (!Array.isArray(leads)) leads = [];
+      } catch (parseErr) {
+        console.warn(`[LEADS DB] Warning reading ${leadsFilePath}, initializing empty array:`, parseErr.message);
+        leads = [];
+      }
+    }
+    leads.push(leadRecord);
+    fs.writeFileSync(leadsFilePath, JSON.stringify(leads, null, 2), 'utf8');
+
+    // Also maintain a local Google Sheets compatible CSV mirror for testing
+    const { waUrl } = formatWhatsAppDetails(leadRecord.phone, leadRecord.name, leadRecord.jurisdiction);
+
+    if (!fs.existsSync(leadsCsvPath)) {
+      const csvHeader = 'Reference ID,Timestamp,Name,Email,Phone,Jurisdiction,Activity,Timeline,Visa Count,Notes,Source,WhatsApp Link\r\n';
+      fs.writeFileSync(leadsCsvPath, csvHeader, 'utf8');
+    }
+    const escapeCsv = (val) => `"${String(val || '').replace(/"/g, '""')}"`;
+    const csvRow = [
+      escapeCsv(leadRecord.id),
+      escapeCsv(leadRecord.timestamp),
+      escapeCsv(leadRecord.name),
+      escapeCsv(leadRecord.email),
+      escapeCsv(leadRecord.phone),
+      escapeCsv(leadRecord.jurisdiction),
+      escapeCsv(leadRecord.activity),
+      escapeCsv(leadRecord.timeline),
+      escapeCsv(leadRecord.visaCount),
+      escapeCsv(leadRecord.notes),
+      escapeCsv(leadRecord.source),
+      escapeCsv(waUrl),
+    ].join(',') + '\r\n';
+    fs.appendFileSync(leadsCsvPath, csvRow, 'utf8');
+
+    return true;
+  } catch (err) {
+    console.error(`[LEADS DB ERROR] Failed to save lead ${leadRecord.id}:`, err.message);
+    return false;
+  }
+}
+
+function forwardLeadToGoogleSheet(leadRecord) {
+  const webhookUrl = process.env.GOOGLE_SHEET_WEBHOOK_URL;
+  if (!webhookUrl) return;
+
+  fetch(webhookUrl, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(leadRecord),
+    signal: AbortSignal.timeout(10000),
+  })
+    .then((res) => {
+      if (!res.ok) {
+        console.warn(`[GOOGLE SHEET WEBHOOK WARNING] HTTP ${res.status} for lead ${leadRecord.id}`);
+      } else {
+        console.log(`[GOOGLE SHEET WEBHOOK SUCCESS] Dispatched lead ${leadRecord.id}`);
+      }
+    })
+    .catch((err) => {
+      console.warn(`[GOOGLE SHEET WEBHOOK ERROR] Lead ${leadRecord.id}:`, err.message);
+    });
+}
+
+function sendPushNotification(leadRecord) {
+  const ntfyTarget = (process.env.NTFY_TOPIC_URL || 'https://ntfy.sh/klay-leads-dubai').trim();
+  if (!ntfyTarget) return;
+
+  let targetUrl = 'https://ntfy.sh';
+  let topic = 'klay-leads-dubai';
+
+  try {
+    if (ntfyTarget.startsWith('http://') || ntfyTarget.startsWith('https://')) {
+      const parsed = new URL(ntfyTarget);
+      const segments = parsed.pathname.split('/').filter(Boolean);
+      if (segments.length > 0) {
+        topic = segments[segments.length - 1];
+        targetUrl = parsed.origin;
+      } else {
+        targetUrl = parsed.origin;
+      }
+    } else {
+      topic = ntfyTarget;
+    }
+  } catch (err) {
+    console.warn(`[NTFY TARGET ERROR] Could not parse "${ntfyTarget}", falling back to default topic:`, err.message);
+  }
+
+  const { waUrl, callUrl } = formatWhatsAppDetails(leadRecord.phone, leadRecord.name, leadRecord.jurisdiction);
+
+  const notesLine = leadRecord.notes ? `\n📝 Notes: ${leadRecord.notes}` : '';
+  const waDirectLine = waUrl ? `\n💬 WhatsApp: ${waUrl}` : '';
+  const callDirectLine = leadRecord.phone ? `\n📞 Call: ${leadRecord.phone}` : '';
+
+  // Rich message body formatted for mobile notification shade and web client
+  const messageBody = `🏛️ ${leadRecord.jurisdiction || 'UAE'} · ${leadRecord.activity || 'General'}\n✉️ ${leadRecord.email}${callDirectLine}${waDirectLine}${notesLine}`;
+
+  const actions = [];
+  if (waUrl) {
+    actions.push({
+      action: 'view',
+      label: '💬 WhatsApp Lead',
+      url: waUrl,
+      clear: true,
+    });
+  }
+  if (callUrl) {
+    actions.push({
+      action: 'view',
+      label: '📞 Call Lead',
+      url: callUrl,
+      clear: true,
+    });
+  }
+
+  fetch(targetUrl, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      topic,
+      title: `🏛️ New Klay Lead: ${leadRecord.name}`,
+      priority: 4,
+      tags: ['briefcase', 'dubai', 'whatsapp'],
+      message: messageBody,
+      click: waUrl || undefined,
+      actions: actions.length > 0 ? actions : undefined,
+    }),
+    signal: AbortSignal.timeout(10000),
+  })
+    .then((res) => {
+      if (!res.ok) {
+        console.warn(`[NTFY WARNING] HTTP ${res.status} for lead ${leadRecord.id}`);
+      } else {
+        console.log(`[NTFY SUCCESS] Push alert with 1-tap WhatsApp and Call buttons dispatched for lead ${leadRecord.id} (topic: ${topic})`);
+      }
+    })
+    .catch((err) => {
+      console.warn(`[NTFY ERROR] Lead ${leadRecord.id}:`, err.message);
+    });
+}
+
 app.post('/api/leads', (request, response) => {
-  const { name, email, phone, jurisdiction, estimateAed, breakdown } = request.body || {};
-  const leadId = 'KLAY-' + Date.now().toString(36).toUpperCase() + '-' + Math.floor(1000 + Math.random() * 9000);
-  console.log(`[LEAD RECEIVED - ${process.env.VITE_ENVIRONMENT || 'local'}] ID: ${leadId}`, {
+  const {
     name,
     email,
     phone,
     jurisdiction,
-    estimateAed,
-    breakdownCount: Array.isArray(breakdown) ? breakdown.length : 0,
-    timestamp: new Date().toISOString(),
+    activity,
+    timeline,
+    visaCount,
+    notes,
+    source,
+    ...rest
+  } = request.body || {};
+
+  const trimmedName = typeof name === 'string' ? name.trim() : '';
+  const trimmedEmail = typeof email === 'string' ? email.trim() : '';
+  const trimmedPhone = typeof phone === 'string' ? phone.trim() : '';
+
+  if (!trimmedName || !trimmedEmail || !trimmedPhone) {
+    return response.status(400).json({
+      success: false,
+      error: "Validation failed: 'name', 'email', and 'phone' are required fields.",
+    });
+  }
+
+  const leadId = generateSovereignReference();
+  const timestamp = new Date().toISOString();
+
+  const leadRecord = {
+    id: leadId,
+    referenceNumber: leadId,
+    timestamp,
+    name: trimmedName,
+    email: trimmedEmail,
+    phone: trimmedPhone,
+    jurisdiction: jurisdiction || 'UAE',
+    activity: activity || 'General',
+    timeline: timeline || null,
+    visaCount: visaCount !== undefined ? visaCount : null,
+    notes: notes || null,
+    source: source || 'calculator',
+    ...rest,
+  };
+
+  console.log(`[LEAD RECEIVED - ${process.env.VITE_ENVIRONMENT || 'local'}] ID: ${leadId}`, {
+    name: trimmedName,
+    email: trimmedEmail,
+    phone: trimmedPhone,
+    jurisdiction: leadRecord.jurisdiction,
+    activity: leadRecord.activity,
+    source: leadRecord.source,
+    timestamp,
   });
 
+  // 1. Persist lead to local JSON database
+  persistLeadToDisk(leadRecord);
+
+  // 2. Asynchronously forward to Google Sheet Webhook if configured
+  forwardLeadToGoogleSheet(leadRecord);
+
+  // 3. Asynchronously send instant push notification via ntfy.sh
+  sendPushNotification(leadRecord);
+
+  // 4. Respond to client
   return response.status(201).json({
     success: true,
     leadId,
-    message: 'Estimate received. A Klay consultant will contact you with the itemised dossier.',
+    referenceNumber: leadId,
+    message: `Lead received and registered under ${leadId}`,
   });
 });
 

@@ -11,7 +11,7 @@ import { useEffect, useRef, useState, type ReactNode } from 'react';
 import { BusinessSetupProcess } from '@/components/sections/BusinessSetupProcess';
 import { Link } from '@/components/ui/link';
 import { BackgroundVideo } from '@/components/ui/BackgroundVideo';
-import { LazyFilloutEmbed } from '@/components/ui/LazyFilloutEmbed';
+import { KlayLeadForm } from '@/components/forms/KlayLeadForm';
 import { COMPANY, IMAGES } from '@/lib/data';
 
 const journeySteps = [
@@ -528,18 +528,8 @@ export default function BusinessSetupPage() {
                 className="mt-5 h-36 w-full rounded-xl object-cover"
               />
             </div>
-            <div className="min-w-0 overflow-hidden rounded-2xl border border-white/80 bg-white/55 p-5 shadow-[0_16px_40px_rgba(12,45,72,0.08),inset_0_1px_0_rgba(255,255,255,0.85)] backdrop-blur-xl sm:p-7">
-              <p className="mb-2 text-[10px] font-semibold uppercase tracking-[0.2em] text-[#426B3C]">
-                Your next step
-              </p>
-              <h3 className="mb-5 font-serif text-2xl font-medium text-[#151515] sm:text-3xl">
-                Send Us a Message
-              </h3>
-              <div className="w-full min-w-0 overflow-hidden [&_iframe]:block [&_iframe]:max-w-full [&_iframe]:border-0 [&_iframe]:w-full">
-                <LazyFilloutEmbed
-                  filloutId={import.meta.env.VITE_FILLOUT_SETUP_ID || 'tGKUNBZM4wus'}
-                />
-              </div>
+            <div className="min-w-0">
+              <KlayLeadForm variant="light" source="business-setup-page" />
             </div>
           </div>
         </div>

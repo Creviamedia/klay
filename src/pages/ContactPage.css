@@ -88,15 +88,15 @@
 .contact-hero-content h1 {
   margin: 0 0 12px;
   color: #0c2d48;
-  font-family: "Playfair Display", Georgia, "Times New Roman", serif;
+  font-family: "Outfit", Arial, sans-serif;
   font-size: clamp(32px, 3.8vw, 50px);
-  font-weight: 500;
+  font-weight: 600;
   line-height: 1.15;
-  letter-spacing: -0.035em;
+  letter-spacing: -0.02em;
 }
 
 .contact-hero-content h1 span {
-  color: #2f8f5b;
+  color: #E8A72E;
 }
 
 .contact-hero-content p {
@@ -115,26 +115,6 @@
   width: 100%;
   max-width: 760px;
   min-width: 0;
-  padding: 24px 26px;
-  border: 1px solid rgba(255, 255, 255, 0.3);
-  border-radius: 22px;
-  background: rgba(255, 255, 255, 0.12);
-  backdrop-filter: blur(18px) saturate(140%);
-  -webkit-backdrop-filter: blur(18px) saturate(140%);
-  box-shadow: 0 24px 60px rgba(11, 30, 46, 0.22), inset 0 1px 0 rgba(255, 255, 255, 0.18);
-}
-.contact-fillout-embed {
-  width: 100%;
-  min-width: 0;
-  min-height: 720px;
-  overflow: hidden;
-}
-
-.contact-fillout-embed iframe {
-  display: block;
-  width: 100% !important;
-  max-width: 100%;
-  border: 0;
 }
 
 /* ==========================================================================
@@ -281,12 +261,6 @@
 
   .contact-form-card {
     max-width: 100%;
-    padding: 14px 10px;
-    border-radius: 14px;
-  }
-
-  .contact-fillout-embed {
-    min-height: 700px;
   }
 
 }
@@ -300,9 +274,5 @@
   .contact-hero-container {
     padding-right: 12px;
     padding-left: 12px;
-  }
-
-  .contact-form-card {
-    padding: 12px 6px;
   }
 }

@@ -51,10 +51,10 @@ const NimbusIcons = {
 
 const DEFAULT_ITEMS: LiquidNavItem[] = [
   { label: "Home", icon: NimbusIcons.home, fx: "glow" },
-  { label: "Explore", icon: NimbusIcons.globe, fx: "spin" },
-  { label: "Flights", icon: NimbusIcons.plane, fx: "plane" },
-  { label: "Weather", icon: NimbusIcons.drop, fx: "drop" },
-  { label: "Profile", icon: NimbusIcons.user, fx: "wave" },
+  { label: "Services", icon: NimbusIcons.globe, fx: "spin" },
+  { label: "Setup", icon: NimbusIcons.plane, fx: "plane" },
+  { label: "About", icon: NimbusIcons.drop, fx: "drop" },
+  { label: "Contact", icon: NimbusIcons.user, fx: "wave" },
 ]
 
 const PAD = 14 // canvas bleed around the pill, for shadows and ripples
@@ -63,7 +63,7 @@ const PAD = 14 // canvas bleed around the pill, for shadows and ripples
 const NIMBUS_CSS = `
 .nimbus-nav{--n-tint:rgba(255,255,255,.82);--n-fg:#0C2D48;--n-fg-soft:rgba(12,45,72,.72);--n-rim:rgba(255,255,255,.96);
   position:relative;display:inline-flex;align-items:center;gap:2px;padding:6px;border-radius:999px;isolation:isolate;
-  font-family:ui-sans-serif,-apple-system,"SF Pro Text","Segoe UI",system-ui,sans-serif;-webkit-font-smoothing:antialiased;user-select:none;-webkit-tap-highlight-color:transparent}
+  font-family:"Plus Jakarta Sans",ui-sans-serif,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,system-ui,sans-serif;-webkit-font-smoothing:antialiased;user-select:none;-webkit-tap-highlight-color:transparent}
 .nimbus-nav.about-header-nav{--n-tint:rgba(237,251,226,.82);--n-rim:rgba(237,251,226,.96)}
 .nimbus-nav.about-header-nav .nimbus-drop{background:radial-gradient(120% 140% at 30% 0%,rgba(255,255,255,.82),rgba(255,255,255,0) 55%),rgba(237,251,226,.78);
   box-shadow:inset 0 1px 1px rgba(255,255,255,.96),inset 0 -2px 6px rgba(12,45,72,.08),inset 0 0 0 1px rgba(237,251,226,.9),0 6px 16px -6px rgba(12,45,72,.2)}
@@ -84,11 +84,11 @@ const NIMBUS_CSS = `
 .nimbus-item:hover,.nimbus-item[aria-current="page"]{color:var(--n-fg)}
 .nimbus-item:focus-visible{outline:2px solid #0C2D48;outline-offset:2px}
 .nv-ico{position:relative;display:inline-flex;flex:none}
-.nv-ico svg{transition:transform .45s cubic-bezier(.3,1.6,.5,1)}
+.nv-ico svg{transition:transform .45s cubic-bezier(0.16,1,0.3,1)}
 .nimbus-item[aria-current="page"] .nv-ico svg{transform:translateY(-1px) scale(1.08)}
 .nv-door{fill:transparent}
-.nv-ico[data-fx="pop"] svg{animation:nvPop .5s cubic-bezier(.3,1.6,.5,1) both}
-@keyframes nvPop{0%{transform:scale(.72)}60%{transform:scale(1.2)}100%{transform:translateY(-1px) scale(1.08)}}
+.nv-ico[data-fx="pop"] svg{animation:nvPop .5s cubic-bezier(0.16,1,0.3,1) both}
+@keyframes nvPop{0%{transform:scale(.72)}60%{transform:scale(1.1)}100%{transform:translateY(-1px) scale(1.08)}}
 .nv-ico[data-fx="plane"] svg{animation:nvPlane 1.15s cubic-bezier(.55,0,.3,1) both}
 @keyframes nvPlane{0%{transform:none}12%{transform:translate(-3px,2px) rotate(7deg)}42%{transform:translate(64px,-26px) rotate(-24deg) scale(.9);opacity:0}43%{transform:translate(-60px,16px) rotate(-12deg) scale(.9);opacity:0}58%{opacity:1}80%{transform:translate(3px,-1px) rotate(2deg)}100%{transform:translateY(-1px) scale(1.08)}}
 .nv-ico[data-fx="plane"]::after{content:"";position:absolute;left:55%;top:48%;height:2px;width:46px;border-radius:2px;transform-origin:0 50%;
@@ -103,8 +103,8 @@ const NIMBUS_CSS = `
 @keyframes nvSplashR{0%,44%{opacity:0;transform:none}50%{opacity:.9;transform:translate(5px,-7px)}75%,100%{opacity:0;transform:translate(12px,1px) scale(.4)}}
 .nv-ico[data-fx="spin"] svg{animation:nvSpin 1s cubic-bezier(.2,.75,.25,1) both}
 @keyframes nvSpin{0%{transform:perspective(80px) rotateY(0)}100%{transform:perspective(80px) rotateY(360deg) translateY(-1px) scale(1.08)}}
-.nv-ico[data-fx="glow"] svg{animation:nvHop .8s cubic-bezier(.3,1.4,.5,1) both;transform-origin:50% 100%}
-@keyframes nvHop{0%{transform:none}30%{transform:translateY(-5px) scale(1.04,.96)}55%{transform:translateY(0) scale(1.12,.88)}75%{transform:translateY(-2px) scale(.98,1.04)}100%{transform:translateY(-1px) scale(1.08)}}
+.nv-ico[data-fx="glow"] svg{animation:nvHop .8s cubic-bezier(0.16,1,0.3,1) both;transform-origin:50% 100%}
+@keyframes nvHop{0%{transform:none}30%{transform:translateY(-4px) scale(1.02,.98)}55%{transform:translateY(0) scale(1.06,.94)}75%{transform:translateY(-1px) scale(.99,1.02)}100%{transform:translateY(-1px) scale(1.08)}}
 .nv-ico[data-fx="glow"] .nv-door{animation:nvDoor 1.3s ease both}
 @keyframes nvDoor{0%{fill:transparent}30%{fill:#E8A72E}100%{fill:rgba(232,167,46,.6)}}
 .nv-ico[data-fx="wave"] svg{animation:nvWave .9s ease-in-out both;transform-origin:50% 92%}
@@ -112,7 +112,7 @@ const NIMBUS_CSS = `
 .nimbus-nav[data-compact="true"] .nimbus-item{padding:0 13px}
 .nimbus-nav[data-compact="true"] .nimbus-label{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
 @media (max-width:520px){.nimbus-nav:not([data-compact="false"]) .nimbus-item{padding:0 13px}.nimbus-nav:not([data-compact="false"]) .nimbus-label{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}}
-@media (prefers-reduced-motion:reduce){.nv-ico svg,.nv-ico::before,.nv-ico::after,.nv-door{animation:none!important;transition:none}}
+@media (prefers-reduced-motion:reduce){.nv-ico svg,.nv-ico::before,.nv-ico::after,.nv-door{animation:none!important;transition:none!important}}
 `
 
 /* ---------- the water shader ---------- */

@@ -65,7 +65,7 @@ export default function ServicesPage() {
               </span>
               <h1 className="text-balance text-6xl font-extrabold leading-[1.08] tracking-[-0.035em] text-[#FFFFFF]">
                 UAE Business Setup &amp;{' '}
-                <span className="bg-gradient-to-r from-[#E8C37A] via-[#D4AF37] to-[#E8C37A] bg-clip-text text-transparent">
+                <span className="text-[#E8C37A]">
                   Corporate Services
                 </span>{' '}
               </h1>

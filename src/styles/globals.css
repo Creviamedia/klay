@@ -795,11 +795,7 @@
   }
 
   .text-gradient-gold {
-    background: linear-gradient(135deg, #E8C37A 0%, #D4AF37 50%, #E8C37A 100%);
-    -webkit-background-clip: text;
-    background-clip: text;
-    -webkit-text-fill-color: transparent;
-    color: transparent;
+    color: #E8C37A;
   }
 
   .text-gradient-navy {

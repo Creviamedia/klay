@@ -24,7 +24,7 @@ const contactUrl = ROUTES.contact;
 export default function Home() {
   return (
     <div className="flex flex-col">
-      <section className="relative isolate min-h-[min(780px,calc(100vh-5rem))] overflow-hidden py-16 sm:py-20 lg:flex lg:items-center lg:py-24">
+      <section className="relative isolate min-h-[calc(100vh-5rem)] overflow-hidden py-8 sm:py-12 lg:flex lg:items-center lg:py-10">
         <div className="absolute inset-0 -z-10">
           <Image
             src={IMAGES.heroSkyline}
@@ -44,7 +44,7 @@ export default function Home() {
               </span>
               <h1 className="text-balance text-4xl font-bold leading-[1.08] tracking-tight text-white sm:text-5xl lg:text-6xl xl:text-7xl">
                 Shaping Ideas,{' '}
-                <span className="text-gradient-gold">Transforming Businesses</span>
+                <span className="text-[#E8C37A]">Transforming Businesses</span>
               </h1>
               <p className="mt-6 max-w-xl text-base leading-relaxed text-white sm:text-lg">
                 Dreaming of starting a business in Dubai, UAE? Klay Consultants helps entrepreneurs

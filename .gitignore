@@ -15,9 +15,20 @@
 .env
 .env*.local
 
+# local database & lead store (client PII)
+/data/
+
 # logs and caches
 npm-debug.log*
 *.tsbuildinfo
 .DS_Store
 .vercel
 lighthouse-*.json
+
+# agent internal workspaces
+.agents/
+.codex/
+.impeccable/
+.scratch/
+plugins/
+scrollcraft/

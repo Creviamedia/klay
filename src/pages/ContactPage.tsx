@@ -1,5 +1,5 @@
 import { Image } from '@/components/ui/image';
-import { LazyFilloutEmbed } from '@/components/ui/LazyFilloutEmbed';
+import { KlayLeadForm } from '@/components/forms/KlayLeadForm';
 // Styles live in ./ContactPage.css and are loaded with the main stylesheet (see src/main.tsx).
 
 export default function ContactPage() {
@@ -31,12 +31,7 @@ export default function ContactPage() {
             </div>
 
             <div className="contact-form-card" id="contact-form">
-              <div className="contact-fillout-embed">
-                <LazyFilloutEmbed
-                  filloutId={import.meta.env.VITE_FILLOUT_CONTACT_ID || 'tGKUNBZM4wus'}
-                  lazy={false}
-                />
-              </div>
+              <KlayLeadForm variant="light" source="contact-page" />
             </div>
 
           </div>
