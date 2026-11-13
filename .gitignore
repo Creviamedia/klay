@@ -32,3 +32,4 @@ lighthouse-*.json
 .scratch/
 plugins/
 scrollcraft/
+.netlify
