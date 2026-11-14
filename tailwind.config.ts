@@ -9,6 +9,42 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
+        // Direct Sovereign Tokens (PROJECT.md Interface Contract)
+        obsidian: {
+          DEFAULT: '#05131F',
+          dark: '#05131F',
+          card: '#0A1E30',
+          elevated: '#0E273E',
+        },
+        porcelain: {
+          DEFAULT: '#FBFBFB',
+          light: '#FBFBFB',
+          card: '#FFFFFF',
+        },
+        'klay-emerald': {
+          DEFAULT: '#22C55E',
+          hover: '#16A34A',
+          dark: '#15803D',
+          tint: 'rgba(34, 197, 94, 0.12)',
+        },
+        'klay-midnight': {
+          DEFAULT: '#0C2D48',
+          deep: '#05131F',
+          surface: '#103859',
+        },
+        'klay-amber': {
+          DEFAULT: '#E8A72E',
+          hover: '#D1921E',
+          tint: 'rgba(232, 167, 46, 0.12)',
+        },
+        'hairline-dark': {
+          DEFAULT: 'rgba(226, 226, 226, 0.15)',
+          hover: 'rgba(34, 197, 94, 0.40)',
+        },
+        'hairline-light': {
+          DEFAULT: 'rgba(0, 0, 0, 0.08)',
+          solid: '#E2E2E2',
+        },
         navy: {
           900: '#0C2D48',
           800: '#0C2D48',
@@ -31,39 +67,37 @@ const config: Config = {
         },
         cream: '#F6FBF4',
         'light-green': '#EDFBE2',
-        'canvas-light': 'var(--canvas-light)',
-        'canvas-dark': 'var(--canvas-dark)',
-        'canvas-dark-card': 'var(--canvas-dark-card)',
+        'canvas-light': '#FBFBFB',
+        'canvas-dark': '#05131F',
+        'canvas-dark-card': '#0A1E30',
         'brand-navy': {
-          DEFAULT: 'var(--brand-navy)',
-          deep: 'var(--brand-navy-deep)',
-          surface: 'var(--brand-navy-surface)',
+          DEFAULT: '#0C2D48',
+          deep: '#05131F',
+          surface: '#103859',
         },
         'brand-blue': {
-          DEFAULT: 'var(--brand-blue)',
-          deep: 'var(--brand-navy-deep)',
-          accent: 'var(--brand-blue-accent)',
+          DEFAULT: '#0C2D48',
+          deep: '#05131F',
+          accent: '#2563EB',
         },
         'brand-green': {
-          DEFAULT: 'var(--brand-green)',
-          hover: 'var(--brand-green-hover)',
-          dark: 'var(--brand-green-dark)',
-          tint: 'var(--brand-green-tint)',
+          DEFAULT: '#22C55E',
+          hover: '#16A34A',
+          dark: '#15803D',
+          tint: 'rgba(34, 197, 94, 0.12)',
         },
         'brand-gold': {
-          DEFAULT: 'var(--brand-gold)',
-          hover: 'var(--brand-gold-hover)',
+          DEFAULT: '#D4AF37',
+          hover: '#C59B27',
         },
         'accent-amber': {
-          DEFAULT: 'var(--accent-amber)',
-          hover: 'var(--accent-amber-hover)',
+          DEFAULT: '#E8A72E',
+          hover: '#D1921E',
         },
         'accent-champagne': {
-          DEFAULT: 'var(--accent-champagne)',
-          tint: 'var(--accent-champagne-tint)',
+          DEFAULT: '#E8C37A',
+          tint: 'rgba(232, 195, 122, 0.12)',
         },
-        'hairline-dark': 'var(--border-hairline-dark)',
-        'hairline-light': 'var(--border-hairline-light)',
         background: 'hsl(var(--background))',
         foreground: 'hsl(var(--foreground))',
         border: 'hsl(var(--border))',
@@ -99,10 +133,53 @@ const config: Config = {
         },
       },
       fontFamily: {
+        display: ['var(--font-display)'],
+        aspekta: ['var(--font-aspekta)'],
         heading: ['var(--font-heading)'],
         body: ['var(--font-body)'],
       },
+      letterSpacing: {
+        tightest: '-0.04em',
+        'display-tight': '-0.03em',
+        'body-tight': '-0.02em',
+      },
       fontSize: {
+        'display-hero': [
+          'clamp(2.94rem, 5.5vw, 4.93rem)',
+          { lineHeight: '1', letterSpacing: '-0.03em', fontWeight: '400' },
+        ],
+        'display-section': [
+          'clamp(2.63rem, 4.5vw, 4rem)',
+          { lineHeight: '1.1', letterSpacing: '-0.04em', fontWeight: '400' },
+        ],
+        'display-card': [
+          'clamp(2rem, 3.2vw, 3rem)',
+          { lineHeight: '1.2', letterSpacing: '-0.04em', fontWeight: '400' },
+        ],
+        'display-step': [
+          'clamp(1.5rem, 2.2vw, 2rem)',
+          { lineHeight: '1.2', letterSpacing: '-0.03em', fontWeight: '400' },
+        ],
+        'display-stat': [
+          'clamp(3.5rem, 6.5vw, 6rem)',
+          { lineHeight: '1', letterSpacing: '0em', fontWeight: '400' },
+        ],
+        'display-body': [
+          'clamp(1rem, 1.2vw, 1.125rem)',
+          { lineHeight: '1.3', letterSpacing: '-0.02em', fontWeight: '400' },
+        ],
+        'display-nav': [
+          '0.9375rem',
+          { lineHeight: '1.1', letterSpacing: '-0.02em', fontWeight: '400' },
+        ],
+        'display-eyebrow': [
+          'clamp(0.875rem, 1.1vw, 1.125rem)',
+          { lineHeight: '1', letterSpacing: '0em', fontWeight: '400' },
+        ],
+        'display-caption': [
+          '0.75rem',
+          { lineHeight: '1.1', letterSpacing: '-0.02em', fontWeight: '400' },
+        ],
         xs: ['var(--text-xs)', { lineHeight: 'var(--line-height-compact)' }],
         sm: ['var(--text-sm)', { lineHeight: 'var(--line-height-compact)' }],
         base: ['var(--text-base)', { lineHeight: 'var(--line-height-body)' }],

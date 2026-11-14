@@ -7,7 +7,32 @@
    Same files Google Fonts served for Outfit 600-800 and Plus Jakarta Sans 400-700: variable
    WOFF2, one file per family per subset. The latin files are preloaded in index.html (keep those
    URLs identical to the ones here); latin-ext is only fetched when a page uses those characters.
+/* ---------------------------------------------------------------------------
+   Aspekta Variable Web Font (public/fonts/aspekta-variable.woff2)
+   OFL 1.1 License by Ivo Dolenc (https://github.com/ivodolenc/aspekta)
+   Full variable weight axis 100-900 for Equitify display typography.
    --------------------------------------------------------------------------- */
+@font-face {
+  font-family: 'Aspekta';
+  font-style: normal;
+  font-weight: 100 900;
+  font-display: swap;
+  src: url('/fonts/aspekta-variable.woff2') format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC,
+    U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215,
+    U+FEFF, U+FFFD;
+}
+
+@font-face {
+  font-family: 'Aspekta Fallback';
+  src: local('Arial'), local('Helvetica');
+  font-weight: 100 900;
+  size-adjust: 100%;
+  ascent-override: 96%;
+  descent-override: 22%;
+  line-gap-override: 0%;
+}
+
 /* latin-ext */
 @font-face {
   font-family: 'Outfit';
@@ -295,6 +320,21 @@
     --canvas-dark: #05131F;
     --canvas-dark-card: #0A1E30;
     --canvas-dark-elevated: #0E273E;
+    --obsidian: #05131F;
+    --obsidian-card: #0A1E30;
+    --obsidian-elevated: #0E273E;
+    --porcelain: #FBFBFB;
+    --porcelain-card: #FFFFFF;
+    --klay-emerald: #22C55E;
+    --klay-emerald-hover: #16A34A;
+    --klay-emerald-dark: #15803D;
+    --klay-emerald-tint: rgba(34, 197, 94, 0.12);
+    --klay-midnight: #0C2D48;
+    --klay-midnight-deep: #05131F;
+    --klay-midnight-surface: #103859;
+    --klay-amber: #E8A72E;
+    --klay-amber-hover: #D1921E;
+    --klay-amber-tint: rgba(232, 167, 46, 0.12);
     --brand-navy: #0C2D48;
     --brand-navy-deep: #05131F;
     --brand-navy-surface: #103859;
@@ -310,10 +350,13 @@
     --accent-amber-hover: #D1921E;
     --accent-champagne: #E8C37A;
     --accent-champagne-tint: rgba(232, 195, 122, 0.12);
-    --border-hairline-dark: rgba(34, 197, 94, 0.22);
+    --border-hairline-dark: rgba(226, 226, 226, 0.15);
     --border-hairline-dark-active: rgba(34, 197, 94, 0.55);
-    --border-hairline-light: rgba(12, 45, 72, 0.12);
+    --border-hairline-dark-hover: rgba(34, 197, 94, 0.40);
+    --border-hairline-light: rgba(0, 0, 0, 0.08);
     --border-hairline-light-active: rgba(34, 197, 94, 0.45);
+    --border-hairline-light-hover: rgba(34, 197, 94, 0.35);
+    --border-hairline-light-solid: #E2E2E2;
     --green-horizon-glow: radial-gradient(ellipse 80% 50% at 50% 100%, rgba(34, 197, 94, 0.35) 0%, rgba(12, 45, 72, 0.2) 50%, transparent 80%);
     --amber-horizon-glow: radial-gradient(ellipse 80% 50% at 50% 100%, rgba(232, 167, 46, 0.35) 0%, rgba(34, 197, 94, 0.15) 50%, transparent 80%);
     --green-button-glow: 0 0 24px -2px rgba(34, 197, 94, 0.45);
@@ -323,10 +366,31 @@
     --radius-card: 0px;
     --radius-pill: 50px;
 
+    /* Typography Stacks */
+    --font-aspekta: 'Aspekta', 'Aspekta Fallback', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    --font-display: 'Aspekta', 'Aspekta Fallback', 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    --font-heading: 'Aspekta', 'Outfit', 'Plus Jakarta Sans', sans-serif;
+    --font-body: 'Plus Jakarta Sans', 'Plus Jakarta Sans Fallback', Arial, sans-serif;
     --font-outfit: 'Outfit';
     --font-plus-jakarta-sans: 'Plus Jakarta Sans';
-    --font-body: 'Plus Jakarta Sans', 'Plus Jakarta Sans Fallback', Arial, sans-serif;
-    --font-heading: 'Outfit', 'Outfit Fallback', Arial, sans-serif;
+
+    /* Equitify Display Preset Scales */
+    --font-size-hero: clamp(2.94rem, 5.5vw, 4.93rem);     /* 47.04px -> 78.88px */
+    --font-size-section: clamp(2.63rem, 4.5vw, 4rem);     /* 42.08px -> 64.00px */
+    --font-size-card: clamp(2rem, 3.2vw, 3rem);           /* 32.00px -> 48.00px */
+    --font-size-step: clamp(1.5rem, 2.2vw, 2rem);         /* 24.00px -> 32.00px */
+    --font-size-stat: clamp(3.5rem, 6.5vw, 6rem);         /* 56.00px -> 96.00px */
+    --font-size-body: clamp(1rem, 1.2vw, 1.125rem);       /* 16.00px -> 18.00px */
+    --font-size-nav: 0.9375rem;                           /* 15.00px */
+    --font-size-eyebrow: clamp(0.875rem, 1.1vw, 1.125rem);/* 14.00px -> 18.00px */
+    --font-size-caption: 0.75rem;                         /* 12.00px */
+
+    /* Negative Tracking Tokens */
+    --tracking-hero: -0.03em;
+    --tracking-section: -0.04em;
+    --tracking-card: -0.04em;
+    --tracking-step: -0.03em;
+    --tracking-body: -0.02em;
     --text-black: #000000;
     --text-white: #FFFFFF;
     --text-gold: #D4AF37;
@@ -445,31 +509,36 @@
     line-height: var(--line-height-body);
     font-weight: 400;
   }
+  /* Sovereign Display Typography: default to weight 400 with negative tracking */
   h1, h2, h3, h4, h5, h6 {
-    @apply font-heading;
-    line-height: var(--line-height-heading);
+    font-family: var(--font-display);
+    font-weight: 400;
   }
   h1 {
-    font-size: var(--h1-size);
-    font-weight: 800;
-    letter-spacing: -0.035em;
+    font-size: var(--font-size-section);
+    line-height: 1.1;
+    letter-spacing: var(--tracking-section);
   }
   h2 {
-    font-size: var(--h2-size);
-    font-weight: 700;
-    letter-spacing: -0.035em;
+    font-size: var(--font-size-section);
+    line-height: 1.1;
+    letter-spacing: var(--tracking-section);
   }
   h3 {
-    font-size: var(--h3-size);
-    font-weight: 600;
+    font-size: var(--font-size-card);
+    line-height: 1.2;
+    letter-spacing: var(--tracking-card);
   }
   h4 {
-    font-size: var(--h4-size);
-    font-weight: 600;
+    font-size: var(--font-size-step);
+    line-height: 1.2;
+    letter-spacing: var(--tracking-step);
   }
   h5,
   h6 {
-    font-weight: 600;
+    font-size: 1.25rem;
+    line-height: 1.3;
+    letter-spacing: -0.02em;
   }
   :target {
     scroll-margin-top: 7rem;
@@ -483,47 +552,20 @@
 }
 
 @layer components {
-  h1,
-  h2,
-  h3,
-  h4,
-  h5,
-  h6,
-  button,
-  [role='button'] {
-    font-family: var(--font-body);
-  }
-
-  h1,
-  h2,
-  h3,
-  h4,
-  h5,
-  h6 {
-    font-family: var(--font-heading);
-  }
-
   nav,
   label,
   input,
   select,
-  textarea,
-  button,
-  [role='button'] {
+  textarea {
     font-family: var(--font-body);
   }
 
   nav {
-    font-weight: 600;
+    font-weight: 400;
   }
 
   label {
-    font-weight: 600;
-  }
-
-  button,
-  [role='button'] {
-    font-weight: 700;
+    font-weight: 500;
   }
 }
 
@@ -1032,20 +1074,166 @@
   .shadow-green-glow {
     box-shadow: var(--green-button-glow);
   }
+  .shadow-emerald-glow {
+    box-shadow: 0 0 24px -2px rgba(34, 197, 94, 0.45);
+  }
+  .shadow-emerald-pill {
+    box-shadow: 0 4px 16px rgba(34, 197, 94, 0.35);
+  }
   .shadow-amber-card {
     box-shadow: var(--amber-card-glow);
   }
   .shadow-green-card {
     box-shadow: var(--green-card-glow);
   }
+
+  /* Structural Hairline Divider & Border Utilities */
   .border-hairline-dark {
-    border-color: var(--border-hairline-dark);
+    border-color: rgba(226, 226, 226, 0.15);
+  }
+  .border-hairline-dark-hover:hover {
+    border-color: rgba(34, 197, 94, 0.40);
   }
   .border-hairline-light {
-    border-color: var(--border-hairline-light);
+    border-color: rgba(0, 0, 0, 0.08);
+  }
+  .border-hairline-light-hover:hover {
+    border-color: rgba(34, 197, 94, 0.35);
+  }
+  .border-hairline-light-solid {
+    border-color: #E2E2E2;
+  }
+  .divide-hairline-dark > :not([hidden]) ~ :not([hidden]) {
+    border-color: rgba(226, 226, 226, 0.15);
+  }
+  .divide-hairline-light > :not([hidden]) ~ :not([hidden]) {
+    border-color: rgba(0, 0, 0, 0.08);
+  }
+  .bg-hairline-dark {
+    background-color: rgba(226, 226, 226, 0.15);
+  }
+  .bg-hairline-light {
+    background-color: rgba(0, 0, 0, 0.08);
+  }
+  .hairline-h {
+    height: 1px;
+    width: 100%;
+    background-color: var(--border-hairline-dark);
+  }
+  .hairline-h-light {
+    height: 1px;
+    width: 100%;
+    background-color: var(--border-hairline-light);
+  }
+  .hairline-v {
+    width: 1px;
+    height: 100%;
+    background-color: var(--border-hairline-dark);
+  }
+  .hairline-v-light {
+    width: 1px;
+    height: 100%;
+    background-color: var(--border-hairline-light);
   }
   .corner-crosshair-wrap {
     position: relative;
+  }
+
+  /* Equitify Display Preset Classes */
+  /* Hero Main Display & Rotating Ticker (kx5bzh) */
+  .display-hero {
+    font-family: var(--font-display);
+    font-size: var(--font-size-hero);
+    font-weight: 400;
+    line-height: 1;
+    letter-spacing: var(--tracking-hero);
+  }
+
+  /* Primary Section Headings (16a2jsa) */
+  .display-section {
+    font-family: var(--font-display);
+    font-size: var(--font-size-section);
+    font-weight: 400;
+    line-height: 1.1;
+    letter-spacing: var(--tracking-section);
+  }
+
+  /* Display Cards / Subheadings (1hytit) */
+  .display-card {
+    font-family: var(--font-display);
+    font-size: var(--font-size-card);
+    font-weight: 400;
+    line-height: 1.2;
+    letter-spacing: var(--tracking-card);
+  }
+
+  /* Step Titles & Card Subtitles (p241ey) */
+  .display-step {
+    font-family: var(--font-display);
+    font-size: var(--font-size-step);
+    font-weight: 400;
+    line-height: 1.2;
+    letter-spacing: var(--tracking-step);
+  }
+
+  /* Stat Numerals with Tabular Figures (LoaderCounter) */
+  .display-stat {
+    font-family: var(--font-display);
+    font-size: var(--font-size-stat);
+    font-weight: 400;
+    line-height: 1;
+    letter-spacing: 0em;
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* Editorial Body Descriptions (8p2wf) */
+  .display-body {
+    font-family: var(--font-body);
+    font-size: var(--font-size-body);
+    font-weight: 400;
+    line-height: 1.3;
+    letter-spacing: var(--tracking-body);
+  }
+
+  /* Nav Links and Uppercase Tags (1t3o1b5) */
+  .display-nav {
+    font-family: var(--font-display);
+    font-size: var(--font-size-nav);
+    font-weight: 400;
+    line-height: 1.1;
+    letter-spacing: -0.02em;
+    text-transform: uppercase;
+  }
+
+  /* Eyebrow Badge (ykvdam) */
+  .display-eyebrow {
+    font-family: var(--font-display);
+    font-size: var(--font-size-eyebrow);
+    font-weight: 400;
+    line-height: 1;
+    letter-spacing: 0em;
+    text-transform: uppercase;
+  }
+
+  /* Cinematic Section Overlays & Vignettes */
+  .hero-vignette {
+    background: linear-gradient(180deg, rgba(84, 84, 84, 0.17) 27%, rgba(5, 19, 31, 0.85) 100%);
+  }
+
+  /* Section 6: 4-Layer Property Card Overlays */
+  .card-overlay-grey {
+    background-color: rgba(112, 112, 112, 0.16);
+  }
+  .card-overlay-emerald {
+    background-color: rgba(34, 197, 94, 0.10);
+  }
+  .card-overlay-amber {
+    background-color: rgba(232, 167, 46, 0.20);
+    mix-blend-mode: overlay;
+  }
+  .card-overlay-gradient {
+    background: linear-gradient(180deg, rgba(12, 45, 72, 0.02) 36%, rgba(12, 45, 72, 0.60) 72%, rgb(5, 19, 31) 100%);
+    opacity: 0.88;
   }
 }
 

@@ -2,7 +2,9 @@ import { KlayLeadForm } from '@/components/forms/KlayLeadForm';
 
 /**
  * Sovereign Lead Capture Hero Form:
- * 100% native React form with zero third-party iframe overhead or layout shift.
+ * Note: Cleanly extracted from the Hero Fold in Milestone 2 in accordance with Equitify design parity.
+ * Relocated to dedicated Footer Consultation Zone in Milestone 4 and ContactPage.
+ * Retained for direct modular invocation and backward compatibility.
  */
 export function HomeHeroContactForm() {
   return (
