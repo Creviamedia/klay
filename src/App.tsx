@@ -163,7 +163,7 @@ export function SiteRoutes() {
       >
         Skip to main content
       </a>
-      <Header />
+      {/* Top Header removed in favor of unified sovereign bottom FloatingDock */}
       <main id="main-content" tabIndex={-1} className="flex-1 focus:outline-none">
         <ChunkErrorBoundary key={pathname}>
         <Suspense fallback={null}>

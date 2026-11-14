@@ -13,8 +13,8 @@ export interface StatCounterProps {
 }
 
 /**
- * Section 4 Numerical Stat Counter featuring 96px light display typography,
- * tabular figures, and fluid IntersectionObserver counter animation.
+ * Section 4 Numerical Stat Counter featuring fluid responsive display typography,
+ * tabular figures, and fluid IntersectionObserver counter animation that never overflows its container.
  */
 export const StatCounter: React.FC<StatCounterProps> = ({
   value,
@@ -88,21 +88,31 @@ export const StatCounter: React.FC<StatCounterProps> = ({
   return (
     <div
       ref={elementRef}
-      className={cn('flex flex-col items-start select-none', className)}
+      className={cn('flex flex-col items-start select-none w-full min-w-0', className)}
     >
-      <div className="flex items-baseline font-heading font-normal tracking-normal text-[#05131F] tabular-nums text-5xl md:text-7xl lg:text-8xl leading-none">
-        {prefix && <span className="mr-1 text-4xl md:text-6xl text-[#22C55E]">{prefix}</span>}
-        <span>{formattedNumber}</span>
-        {suffix && <span className="ml-0.5 text-3xl md:text-5xl text-[#22C55E]">{suffix}</span>}
+      <div className="flex flex-wrap items-baseline font-heading font-normal tracking-tight text-[#05131F] tabular-nums text-4xl sm:text-5xl md:text-5xl lg:text-6xl xl:text-7xl leading-none">
+        {prefix && (
+          <span className="mr-1 text-2xl sm:text-3xl md:text-3xl lg:text-4xl text-[#22C55E] font-normal">
+            {prefix}
+          </span>
+        )}
+        <span className="font-normal">{formattedNumber}</span>
+        {suffix && (
+          <span className="ml-0.5 text-2xl sm:text-3xl md:text-3xl lg:text-4xl text-[#22C55E] font-normal">
+            {suffix}
+          </span>
+        )}
       </div>
-      <div className="mt-4 text-base md:text-lg font-heading font-normal tracking-[-0.02em] text-[#05131F]/90">
+      <div className="mt-4 text-base md:text-lg font-heading font-medium tracking-tight text-[#05131F]/90 leading-snug">
         {label}
       </div>
       {description && (
-        <p className="mt-1 text-xs md:text-sm text-black/60 font-normal leading-relaxed max-w-xs">
+        <p className="mt-2 text-sm text-[#0C2D48]/70 leading-relaxed font-normal">
           {description}
         </p>
       )}
     </div>
   );
 };
+
+export default StatCounter;

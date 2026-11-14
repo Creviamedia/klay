@@ -141,15 +141,15 @@ export default function Home() {
         />
 
         <div className="mx-auto max-w-7xl px-6 lg:px-8 relative z-10">
-          <div className="max-w-3xl mb-16 lg:mb-20">
+          <div className="max-w-3xl mb-12 sm:mb-16 lg:mb-20">
             <span className="inline-block text-xs font-mono tracking-widest text-[#22C55E] uppercase mb-4">
               EXECUTION STRATEGY
             </span>
-            <h2 className="text-4xl sm:text-5xl lg:text-6xl font-heading font-normal tracking-[-0.03em] text-[#FBFBFB] leading-[1.08]">
-              Incorporate With Strategy, <br />
-              <span className="text-white">Scale With Confidence.</span>
+            <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-heading font-normal tracking-[-0.03em] text-[#FBFBFB] leading-tight">
+              Incorporate With Strategy,{' '}
+              <span className="block sm:inline text-white">Scale With Confidence.</span>
             </h2>
-            <p className="mt-6 text-base sm:text-lg text-white/70 font-normal leading-relaxed max-w-2xl">
+            <p className="mt-5 text-base sm:text-lg text-white/70 font-normal leading-relaxed max-w-2xl">
               At Klay Consultants, every entity is legally structured, underwritten, and pre-cleared for corporate banking before filing. Our institutional model ensures you own 100% of your venture from day one.
             </p>
           </div>
@@ -161,20 +161,20 @@ export default function Home() {
             {STRATEGY_WORKFLOW_STEPS.map((step) => (
               <div
                 key={step.number}
-                className="bg-[#05131F] p-8 lg:p-10 flex flex-col justify-between transition-colors duration-300 hover:bg-[#0A1E30]"
+                className="bg-[#05131F] p-6 sm:p-7 lg:p-8 flex flex-col justify-between transition-colors duration-300 hover:bg-[#0A1E30] min-w-0"
               >
                 <div>
-                  <span className="font-mono text-xs text-[#22C55E] tracking-widest uppercase block mb-8">
+                  <span className="font-mono text-xs text-[#22C55E] tracking-widest uppercase block mb-6">
                     PHASE // {step.number}
                   </span>
-                  <h3 className="text-3xl lg:text-4xl font-heading font-normal tracking-[-0.03em] text-[#FBFBFB] mb-4">
+                  <h3 className="text-xl sm:text-2xl lg:text-2xl font-heading font-normal tracking-[-0.02em] text-[#FBFBFB] mb-3 leading-snug break-words">
                     {step.title}
                   </h3>
-                  <p className="text-sm lg:text-base text-white/75 font-normal leading-relaxed mb-6">
+                  <p className="text-xs sm:text-sm text-white/75 font-normal leading-relaxed mb-6">
                     {step.description}
                   </p>
                 </div>
-                <div className="pt-6 border-t border-white/10 text-xs font-mono text-white/50 leading-relaxed">
+                <div className="pt-4 border-t border-white/10 text-[11px] sm:text-xs font-mono text-white/50 leading-relaxed">
                   {step.details}
                 </div>
               </div>
@@ -185,7 +185,7 @@ export default function Home() {
 
       {/* =========================================================================
           SECTION 4: Proven Record (Porcelain Ivory Canvas #FBFBFB)
-          3 Large Numerical Stat Counters (96px Tabular) + Pill CTA
+          3 Large Numerical Stat Counters (Fluid Responsive) + Pill CTA
           ========================================================================= */}
       <section className="py-20 lg:py-32 bg-[#FBFBFB] text-[#0C2D48] border-b border-[#0C2D48]/10 relative">
         <div className="mx-auto max-w-7xl px-6 lg:px-8">
@@ -194,11 +194,11 @@ export default function Home() {
               <span className="inline-block text-xs font-mono tracking-widest text-[#22C55E] uppercase mb-4">
                 PROVEN RECORD
               </span>
-              <h2 className="text-4xl sm:text-5xl lg:text-6xl font-heading font-normal tracking-[-0.03em] text-[#0C2D48] leading-[1.08]">
-                Regulations Shift, <br />
-                <span className="font-medium">Our Standards Don't.</span>
+              <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-heading font-normal tracking-[-0.03em] text-[#0C2D48] leading-tight">
+                Regulations Shift,{' '}
+                <span className="block sm:inline font-medium">Our Standards Don't.</span>
               </h2>
-              <p className="mt-6 text-base sm:text-lg text-[#0C2D48]/75 font-normal leading-relaxed">
+              <p className="mt-5 text-base sm:text-lg text-[#0C2D48]/75 font-normal leading-relaxed">
                 Every incorporation behind these figures was structured under rigorous legal standards: zero local nominee risk, verified banking dossiers, and sovereign title protection.
               </p>
             </div>
@@ -209,8 +209,8 @@ export default function Home() {
             </div>
           </div>
 
-          {/* 3 Stat Counters */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-12 lg:gap-16 pt-8 border-t border-[#0C2D48]/10">
+          {/* 3 Stat Counters with Fluid Responsive Widths */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 md:gap-10 lg:gap-16 pt-8 border-t border-[#0C2D48]/10">
             <StatCounter
               value={500}
               prefix="AED "

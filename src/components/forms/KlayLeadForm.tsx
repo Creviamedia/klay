@@ -15,7 +15,7 @@ import {
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
-export type JurisdictionOption = 'Free Zone' | 'Mainland DED' | 'DIFC / ADGM';
+export type JurisdictionOption = 'Free Zone' | 'Mainland DED' | 'Offshore';
 export type TimelineOption = 'Immediate (1-2 weeks)' | '1-3 months' | 'Planning stage';
 
 export interface KlayLeadFormProps {
@@ -50,10 +50,10 @@ const JURISDICTION_DETAILS: Record<JurisdictionOption, { label: string; tag: str
     tag: 'Direct UAE Trade',
     desc: 'Trade unrestricted across all 7 emirates & bid for government tenders.',
   },
-  'DIFC / ADGM': {
-    label: 'DIFC / ADGM',
-    tag: 'Common Law Hub',
-    desc: 'Premier financial jurisdiction with independent English common law courts.',
+  'Offshore': {
+    label: 'Offshore',
+    tag: 'Asset Protection & IP',
+    desc: 'RAK ICC & JAFZA international holding structures with zero local presence.',
   },
 };
 

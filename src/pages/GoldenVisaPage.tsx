@@ -312,9 +312,9 @@ function ResponsiveGoldenVisaTicket() {
           width={width}
           texture={{
             engine: 'generative',
-            colorBack: '#05131F',
-            colorFront: '#22C55E',
-            colorHighlight: '#E8A72E',
+            colorBack: '#251a08',
+            colorFront: '#d4af37',
+            colorHighlight: '#f6df98',
             shape: 'warp',
             type: 'random',
             size: 0.5,
@@ -347,14 +347,14 @@ export default function GoldenVisaPage() {
         {/* Atmospheric horizon glow */}
         <div
           aria-hidden="true"
-          className="pointer-events-none absolute left-1/2 top-0 h-[500px] w-full -translate-x-1/2 bg-[radial-gradient(ellipse_80%_50%_at_50%_-10%,rgba(34,197,94,0.18),rgba(232,167,46,0.08)_50%,transparent_80%)]"
+          className="pointer-events-none absolute left-1/2 top-0 h-[500px] w-full -translate-x-1/2 bg-[radial-gradient(ellipse_80%_50%_at_50%_-10%,rgba(212,175,55,0.22),rgba(232,167,46,0.12)_50%,transparent_80%)]"
         />
 
         <div className="relative z-10 mx-auto max-w-[1440px] px-6 lg:px-12">
           <div className="grid items-center gap-12 xl:grid-cols-[1fr_1.1fr]">
             <div className="max-w-2xl">
-              <div className="mb-6 inline-flex items-center gap-2 border border-white/10 bg-white/[0.03] px-3.5 py-1.5 text-xs font-semibold uppercase tracking-[0.2em] text-[#22C55E]">
-                <span className="h-1.5 w-1.5 rounded-full bg-[#22C55E] shadow-[0_0_8px_#22C55E]" />
+              <div className="mb-6 inline-flex items-center gap-2 border border-[#D4AF37]/40 bg-[#D4AF37]/10 px-3.5 py-1.5 text-xs font-semibold uppercase tracking-[0.2em] text-[#F6DF98]">
+                <span className="h-1.5 w-1.5 rounded-full bg-[#D4AF37] shadow-[0_0_10px_#D4AF37]" />
                 UAE Golden Visa · Residency Advisory
               </div>
               <h1 className="font-heading text-4xl font-light tracking-tight text-white sm:text-5xl lg:text-6xl">
