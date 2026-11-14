@@ -157,7 +157,7 @@ export default function ServicesPage() {
                   title={service.title}
                   badge={service.badge}
                   features={service.features}
-                  bookingHref={bookingHref}
+                  bookingHref={service.href || '/services/free-zone-company-setup/'}
                 />
               </ScrollReveal>
             ))}
@@ -195,7 +195,7 @@ export default function ServicesPage() {
                   number={service.number}
                   title={service.title}
                   features={service.features}
-                  bookingHref={bookingHref}
+                  bookingHref={service.href || '/services/free-zone-company-setup/'}
                   expandable
                 />
               </ScrollReveal>

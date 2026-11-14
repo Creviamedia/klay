@@ -81,60 +81,92 @@ export default function ContactPage() {
       {/* =========================================================================
           SECTION 2: 4-Column Office Information Grid (Equitify Signature)
           ========================================================================= */}
-      <section className="py-12 md:py-16 bg-canvas-light border-b border-hairline-light/30">
+      <section className="py-12 md:py-16 bg-[#FBFBFB] border-b border-[#0C2D48]/10">
         <div className="mx-auto max-w-7xl px-6 lg:px-8">
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-px bg-hairline-light/30 border border-hairline-light/40 relative corner-crosshair-wrap">
-            <CornerCrosshairs color="text-brand-green/70" size={10} />
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-px bg-[#0C2D48]/10 border border-[#0C2D48]/10 relative corner-crosshair-wrap">
+            <CornerCrosshairs color="text-[#0C2D48]/40" size={10} />
 
             {/* Location */}
-            <div className="bg-canvas-light-card p-8">
-              <span className="w-10 h-10 rounded-full border border-brand-green/30 flex items-center justify-center text-brand-green mb-6">
-                <MapPin className="w-5 h-5" />
-              </span>
-              <h3 className="text-xs font-mono uppercase tracking-widest text-text-muted-dark mb-2">Office Location</h3>
-              <p className="text-sm font-medium text-brand-navy leading-relaxed">
-                {COMPANY.address}
-              </p>
+            <div className="bg-white p-8 flex flex-col justify-between transition-colors duration-200 hover:bg-[#FDFDFD]">
+              <div>
+                <div className="flex items-center justify-between mb-6">
+                  <span className="font-mono text-[10px] uppercase tracking-[0.2em] text-[#0C2D48]/50">
+                    LOC // 01
+                  </span>
+                  <MapPin className="w-4 h-4 text-[#0C2D48]" />
+                </div>
+                <h3 className="text-xs font-mono uppercase tracking-widest text-[#0C2D48]/60 mb-2">Office Location</h3>
+                <p className="text-sm font-medium text-[#0C2D48] leading-relaxed">
+                  {COMPANY.address}
+                </p>
+              </div>
+              <div className="mt-6 pt-4 border-t border-[#0C2D48]/5 text-[11px] font-mono text-[#0C2D48]/40">
+                Downtown Dubai · UAE
+              </div>
             </div>
 
             {/* Phone */}
-            <div className="bg-canvas-light-card p-8">
-              <span className="w-10 h-10 rounded-full border border-brand-green/30 flex items-center justify-center text-brand-green mb-6">
-                <Phone className="w-5 h-5" />
-              </span>
-              <h3 className="text-xs font-mono uppercase tracking-widest text-text-muted-dark mb-2">Direct Phone</h3>
-              <a
-                href={`tel:${COMPANY.phone.replace(/\s/g, '')}`}
-                className="text-sm font-medium text-brand-navy hover:text-brand-green transition-colors"
-              >
-                {COMPANY.phone}
-              </a>
+            <div className="bg-white p-8 flex flex-col justify-between transition-colors duration-200 hover:bg-[#FDFDFD]">
+              <div>
+                <div className="flex items-center justify-between mb-6">
+                  <span className="font-mono text-[10px] uppercase tracking-[0.2em] text-[#0C2D48]/50">
+                    TEL // 02
+                  </span>
+                  <Phone className="w-4 h-4 text-[#0C2D48]" />
+                </div>
+                <h3 className="text-xs font-mono uppercase tracking-widest text-[#0C2D48]/60 mb-2">Direct Phone</h3>
+                <a
+                  href={`tel:${COMPANY.phone.replace(/\s/g, '')}`}
+                  className="text-sm font-medium text-[#0C2D48] hover:text-[#22C55E] transition-colors"
+                >
+                  {COMPANY.phone}
+                </a>
+              </div>
+              <div className="mt-6 pt-4 border-t border-[#0C2D48]/5 text-[11px] font-mono text-[#0C2D48]/40">
+                Direct Switchboard
+              </div>
             </div>
 
             {/* Email */}
-            <div className="bg-canvas-light-card p-8">
-              <span className="w-10 h-10 rounded-full border border-brand-green/30 flex items-center justify-center text-brand-green mb-6">
-                <Mail className="w-5 h-5" />
-              </span>
-              <h3 className="text-xs font-mono uppercase tracking-widest text-text-muted-dark mb-2">Corporate Email</h3>
-              <a
-                href={`mailto:${COMPANY.email}`}
-                className="text-sm font-medium text-brand-navy hover:text-brand-green transition-colors"
-              >
-                {COMPANY.email}
-              </a>
+            <div className="bg-white p-8 flex flex-col justify-between transition-colors duration-200 hover:bg-[#FDFDFD]">
+              <div>
+                <div className="flex items-center justify-between mb-6">
+                  <span className="font-mono text-[10px] uppercase tracking-[0.2em] text-[#0C2D48]/50">
+                    MAIL // 03
+                  </span>
+                  <Mail className="w-4 h-4 text-[#0C2D48]" />
+                </div>
+                <h3 className="text-xs font-mono uppercase tracking-widest text-[#0C2D48]/60 mb-2">Corporate Email</h3>
+                <a
+                  href={`mailto:${COMPANY.email}`}
+                  className="text-sm font-medium text-[#0C2D48] hover:text-[#22C55E] transition-colors break-all"
+                >
+                  {COMPANY.email}
+                </a>
+              </div>
+              <div className="mt-6 pt-4 border-t border-[#0C2D48]/5 text-[11px] font-mono text-[#0C2D48]/40">
+                Advisory &amp; Structuring
+              </div>
             </div>
 
             {/* Hours */}
-            <div className="bg-canvas-light-card p-8">
-              <span className="w-10 h-10 rounded-full border border-brand-green/30 flex items-center justify-center text-brand-green mb-6">
-                <Clock className="w-5 h-5" />
-              </span>
-              <h3 className="text-xs font-mono uppercase tracking-widest text-text-muted-dark mb-2">Advisory Hours</h3>
-              <p className="text-sm font-medium text-brand-navy">
-                Monday – Saturday <br />
-                <span className="text-xs text-text-muted-dark font-normal">9:00 AM – 6:00 PM GST</span>
-              </p>
+            <div className="bg-white p-8 flex flex-col justify-between transition-colors duration-200 hover:bg-[#FDFDFD]">
+              <div>
+                <div className="flex items-center justify-between mb-6">
+                  <span className="font-mono text-[10px] uppercase tracking-[0.2em] text-[#0C2D48]/50">
+                    HOURS // 04
+                  </span>
+                  <Clock className="w-4 h-4 text-[#0C2D48]" />
+                </div>
+                <h3 className="text-xs font-mono uppercase tracking-widest text-[#0C2D48]/60 mb-2">Advisory Hours</h3>
+                <p className="text-sm font-medium text-[#0C2D48]">
+                  Monday – Saturday <br />
+                  <span className="text-xs text-[#0C2D48]/60 font-normal">9:00 AM – 6:00 PM GST</span>
+                </p>
+              </div>
+              <div className="mt-6 pt-4 border-t border-[#0C2D48]/5 text-[11px] font-mono text-[#0C2D48]/40">
+                GST / UTC+4 Zone
+              </div>
             </div>
           </div>
         </div>

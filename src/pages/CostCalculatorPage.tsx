@@ -99,37 +99,58 @@ export default function CostCalculatorPage() {
             </h2>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-px bg-hairline-light/40 border border-hairline-light/40 relative corner-crosshair-wrap">
-            <CornerCrosshairs color="text-brand-green/70" size={12} />
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-px bg-[#0C2D48]/10 border border-[#0C2D48]/10 relative corner-crosshair-wrap">
+            <CornerCrosshairs color="text-[#0C2D48]/40" size={12} />
 
-            <div className="bg-canvas-light-card p-8 md:p-10">
-              <span className="font-mono text-xs font-bold text-brand-green block mb-4">01</span>
-              <h3 className="text-xl font-heading font-semibold text-brand-navy mb-3">
-                Review Structure &amp; Activity
-              </h3>
-              <p className="text-xs text-text-secondary-dark leading-relaxed">
-                Review your breakdown and verify whether a Free Zone (DMCC, IFZA, Meydan) or Mainland DED structure best fits your trade scope.
-              </p>
+            <div className="bg-white p-8 md:p-10 flex flex-col justify-between transition-colors duration-200 hover:bg-[#FDFDFD]">
+              <div>
+                <span className="font-mono text-xs font-bold text-[#0C2D48]/60 block mb-4">
+                  PHASE // 01
+                </span>
+                <h3 className="text-xl font-heading font-semibold text-[#0C2D48] mb-3">
+                  Review Structure &amp; Activity
+                </h3>
+                <p className="text-xs text-[#0C2D48]/70 leading-relaxed">
+                  Review your breakdown and verify whether a Free Zone (DMCC, IFZA, Meydan) or Mainland DED structure best fits your trade scope.
+                </p>
+              </div>
+              <div className="mt-6 pt-4 border-t border-[#0C2D48]/5 text-[11px] font-mono text-[#0C2D48]/40">
+                Statutory Activity Mapping
+              </div>
             </div>
 
-            <div className="bg-canvas-light-card p-8 md:p-10">
-              <span className="font-mono text-xs font-bold text-brand-green block mb-4">02</span>
-              <h3 className="text-xl font-heading font-semibold text-brand-navy mb-3">
-                Confirm Banking Eligibility
-              </h3>
-              <p className="text-xs text-text-secondary-dark leading-relaxed">
-                Our compliance desk pre-screens your business activity to ensure smooth corporate bank account opening with tier-1 UAE banks.
-              </p>
+            <div className="bg-white p-8 md:p-10 flex flex-col justify-between transition-colors duration-200 hover:bg-[#FDFDFD]">
+              <div>
+                <span className="font-mono text-xs font-bold text-[#0C2D48]/60 block mb-4">
+                  PHASE // 02
+                </span>
+                <h3 className="text-xl font-heading font-semibold text-[#0C2D48] mb-3">
+                  Confirm Banking Eligibility
+                </h3>
+                <p className="text-xs text-[#0C2D48]/70 leading-relaxed">
+                  Our compliance desk pre-screens your business activity to ensure smooth corporate bank account opening with tier-1 UAE banks.
+                </p>
+              </div>
+              <div className="mt-6 pt-4 border-t border-[#0C2D48]/5 text-[11px] font-mono text-[#0C2D48]/40">
+                KYC / AML Pre-Clearance
+              </div>
             </div>
 
-            <div className="bg-canvas-light-card p-8 md:p-10">
-              <span className="font-mono text-xs font-bold text-brand-green block mb-4">03</span>
-              <h3 className="text-xl font-heading font-semibold text-brand-navy mb-3">
-                Lock Fixed-Fee Agreement
-              </h3>
-              <p className="text-xs text-text-secondary-dark leading-relaxed">
-                Receive an itemized official agreement with zero hidden typing or renewal fees. Company formation begins in under 24 hours.
-              </p>
+            <div className="bg-white p-8 md:p-10 flex flex-col justify-between transition-colors duration-200 hover:bg-[#FDFDFD]">
+              <div>
+                <span className="font-mono text-xs font-bold text-[#0C2D48]/60 block mb-4">
+                  PHASE // 03
+                </span>
+                <h3 className="text-xl font-heading font-semibold text-[#0C2D48] mb-3">
+                  Lock Fixed-Fee Agreement
+                </h3>
+                <p className="text-xs text-[#0C2D48]/70 leading-relaxed">
+                  Receive an itemized official agreement with zero hidden typing or renewal fees. Company formation begins in under 24 hours.
+                </p>
+              </div>
+              <div className="mt-6 pt-4 border-t border-[#0C2D48]/5 text-[11px] font-mono text-[#0C2D48]/40">
+                Direct Sovereign Issuance
+              </div>
             </div>
           </div>
         </div>

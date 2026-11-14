@@ -11,18 +11,16 @@ import {
   type SetupOptions,
 } from '@/lib/calculator-engine';
 import {
-  CheckCircle2,
-  Download,
-  Send,
   Building2,
   Briefcase,
   Users,
   ShieldCheck,
   Sparkles,
-  HelpCircle,
-  FileText,
+  Download,
   Printer,
-  ChevronRight,
+  Check,
+  Send,
+  HelpCircle,
 } from 'lucide-react';
 
 export function CostCalculator() {
@@ -39,44 +37,38 @@ export function CostCalculator() {
     uaeWill: false,
   });
 
-  // Currency toggle
   const [currency, setCurrency] = useState<'AED' | 'USD'>('AED');
-
-  // Contact / Lead form state
   const [leadName, setLeadName] = useState('');
   const [leadEmail, setLeadEmail] = useState('');
   const [leadPhone, setLeadPhone] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitSuccess, setSubmitSuccess] = useState<string | null>(null);
-  const [submitError, setSubmitError] = useState<string | null>(null);
 
-  // Compute live estimate
-  const currentOptions: SetupOptions = useMemo(() => ({
-    jurisdiction,
-    activityType,
-    investorVisas,
-    employeeVisas,
-    officeType,
-    addOns,
-  }), [jurisdiction, activityType, investorVisas, employeeVisas, officeType, addOns]);
+  // Compute live calculation
+  const currentOptions: SetupOptions = useMemo(
+    () => ({
+      jurisdiction,
+      activityType,
+      investorVisas,
+      employeeVisas,
+      officeType,
+      addOns,
+    }),
+    [jurisdiction, activityType, investorVisas, employeeVisas, officeType, addOns]
+  );
 
   const calculation = useMemo(() => calculateSetupCost(currentOptions), [currentOptions]);
 
-  const displayTotal = currency === 'AED'
-    ? `AED ${calculation.totalAed.toLocaleString()}`
-    : `$${Math.round(calculation.totalUsd).toLocaleString()} USD`;
+  const displayTotal =
+    currency === 'AED'
+      ? `AED ${calculation.totalAed.toLocaleString()}`
+      : `$${Math.round(calculation.totalUsd).toLocaleString()} USD`;
 
-  // Submit lead
   const handleLeadSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!leadName || !leadEmail || !leadPhone) {
-      setSubmitError('Please provide your name, email, and phone number.');
-      return;
-    }
+    if (!leadName || !leadEmail || !leadPhone) return;
 
     setIsSubmitting(true);
-    setSubmitError(null);
-
     const leadPayload = {
       name: leadName,
       email: leadEmail,
@@ -96,72 +88,116 @@ export function CostCalculator() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(leadPayload),
       });
-
       if (res.ok) {
         const data = await res.json();
         setSubmitSuccess(data.leadId || 'CONFIRMED-' + Math.floor(100000 + Math.random() * 900000));
       } else {
-        // Fallback for preview or static hosting
         setSubmitSuccess('KLAY-' + Math.floor(100000 + Math.random() * 900000));
       }
     } catch {
-      // Local fallback mock
       setSubmitSuccess('KLAY-' + Math.floor(100000 + Math.random() * 900000));
     } finally {
       setIsSubmitting(false);
     }
   };
 
-  const handlePrint = () => {
-    window.print();
-  };
-
   return (
-    <div className="w-full max-w-6xl mx-auto rounded-3xl bg-white/95 backdrop-blur-xl shadow-2xl border border-white/60 overflow-hidden text-slate-900">
-      {/* Top Banner */}
-      <div className="bg-[#082C4B] text-white px-6 py-6 sm:px-10 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
-        <div>
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#E8C37A]/20 border border-[#E8C37A]/40 text-[#E8C37A] text-xs font-bold tracking-widest uppercase mb-2">
-            <Sparkles className="w-3.5 h-3.5" /> Interactive 2026 Calculator
+    <div className="w-full max-w-5xl mx-auto rounded-[24px] bg-[#16181A] border border-[#2B2E33] shadow-[0_30px_70px_rgba(0,0,0,0.65),inset_0_1px_1px_rgba(255,255,255,0.1)] overflow-hidden text-white font-sans">
+      
+      {/* =========================================================================
+          CONSOLE TOP BAR (DIETER RAMS / TEENAGE ENGINEERING INSPIRATION)
+          ========================================================================= */}
+      <div className="bg-[#1F2226] border-b border-[#2D3035] px-6 py-4 sm:px-8 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div className="flex items-center gap-3">
+          <div className="h-3 w-3 rounded-full bg-[#34D399] shadow-[0_0_10px_#34D399] animate-pulse" />
+          <div>
+            <div className="font-mono text-[10px] tracking-[0.25em] uppercase text-white/50">
+              OPERATING CONSOLE // 2026 OFFICIAL TARIFF
+            </div>
+            <div className="font-mono text-sm font-bold text-white tracking-wider">
+              UAE SOVEREIGN INCORPORATION COMPUTER
+            </div>
           </div>
-          <h2 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-white">
-            UAE Company Setup &amp; Licence Cost Estimator
-          </h2>
-          <p className="text-slate-300 text-sm mt-1">
-            Real-time calculation based on official authority tariffs across Dubai Mainland and Free Zones.
-          </p>
         </div>
 
-        {/* Currency Switcher */}
-        <div className="flex items-center self-end md:self-auto bg-slate-900/80 p-1.5 rounded-xl border border-white/10 text-xs font-bold">
+        {/* Currency Hardware Toggle */}
+        <div className="flex items-center gap-1 bg-[#121416] p-1 rounded-lg border border-[#2D3035] self-start sm:self-auto">
           <button
             type="button"
             onClick={() => setCurrency('AED')}
-            className={`px-3.5 py-1.5 rounded-lg transition ${currency === 'AED' ? 'bg-[#E8C37A] text-slate-950 shadow' : 'text-slate-400 hover:text-white'}`}
+            className={`px-3 py-1 font-mono text-xs font-bold rounded transition-all ${
+              currency === 'AED'
+                ? 'bg-[#34D399] text-[#0E1513] shadow-[0_0_8px_rgba(52,211,153,0.3)]'
+                : 'text-white/60 hover:text-white'
+            }`}
           >
-            AED (Dirhams)
+            AED
           </button>
           <button
             type="button"
             onClick={() => setCurrency('USD')}
-            className={`px-3.5 py-1.5 rounded-lg transition ${currency === 'USD' ? 'bg-[#E8C37A] text-slate-950 shadow' : 'text-slate-400 hover:text-white'}`}
+            className={`px-3 py-1 font-mono text-xs font-bold rounded transition-all ${
+              currency === 'USD'
+                ? 'bg-[#34D399] text-[#0E1513] shadow-[0_0_8px_rgba(52,211,153,0.3)]'
+                : 'text-white/60 hover:text-white'
+            }`}
           >
-            USD (Dollar)
+            USD
           </button>
         </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-12 divide-y lg:divide-y-0 lg:divide-x divide-slate-200">
+      {/* =========================================================================
+          RECESSED DUAL LCD READOUT DISPLAY TAPE
+          ========================================================================= */}
+      <div className="bg-[#0C1210] p-6 sm:p-8 border-b border-[#1A221E] relative overflow-hidden">
+        <div className="grid grid-cols-1 lg:grid-cols-[1.2fr_0.8fr] gap-6 items-end">
+          <div>
+            <div className="flex items-center gap-2 font-mono text-[11px] text-[#34D399]/70 uppercase tracking-widest mb-2">
+              <span className="h-1.5 w-1.5 rounded-full bg-[#34D399]" />
+              <span>SYSTEM OUTPUT // ESTIMATED STATUTORY INVESTMENT</span>
+            </div>
+            <div className="font-mono text-4xl sm:text-6xl font-normal text-[#34D399] drop-shadow-[0_0_15px_rgba(52,211,153,0.4)] tabular-nums">
+              {displayTotal}
+            </div>
+            <div className="mt-2 font-mono text-xs text-[#34D399]/50 tracking-wider">
+              INCLUDES MANDATORY GOVERNMENT FEES &amp; STATUTORY FILINGS
+            </div>
+          </div>
+
+          <div className="bg-[#121B17] p-4 rounded-xl border border-[#34D399]/20 font-mono text-xs text-[#34D399]/80 space-y-1.5">
+            <div className="flex justify-between">
+              <span className="text-white/50">JURISDICTION:</span>
+              <span className="font-semibold text-white">{calculation.jurisdictionName}</span>
+            </div>
+            <div className="flex justify-between">
+              <span className="text-white/50">RESIDENCY VISAS:</span>
+              <span>{investorVisas} Investor / {employeeVisas} Employee</span>
+            </div>
+            <div className="flex justify-between">
+              <span className="text-white/50">PREMISES:</span>
+              <span>{officeType === 'flexi-desk' ? 'Flexi Desk (0 AED)' : 'Executive Office'}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* =========================================================================
+          TACTILE CONTROLS GRID (Braun & Teenage Engineering Grammar)
+          ========================================================================= */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 divide-y lg:divide-y-0 lg:divide-x divide-[#2D3035]">
+        
         {/* Left Column: Form Controls (7 cols) */}
         <div className="lg:col-span-7 p-6 sm:p-8 space-y-8">
           
-          {/* Step 1: Jurisdiction */}
+          {/* Step 1: Select Jurisdiction */}
           <div>
-            <div className="flex items-center gap-2 mb-3">
-              <span className="flex items-center justify-center w-6 h-6 rounded-full bg-[#082C4B] text-[#E8C37A] text-xs font-black">1</span>
-              <h3 className="font-bold text-base text-slate-900 flex items-center gap-2">
-                <Building2 className="w-4 h-4 text-[#082C4B]" /> Select Jurisdiction
-              </h3>
+            <div className="flex items-center justify-between mb-3 font-mono text-xs uppercase tracking-widest text-white/50">
+              <span className="flex items-center gap-2">
+                <span className="h-5 w-5 rounded bg-[#25282C] border border-white/20 text-white flex items-center justify-center text-[10px] font-bold">1</span>
+                <span>Select Legal Jurisdiction</span>
+              </span>
+              <span className="text-[#34D399]">REQUIRED</span>
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
@@ -179,331 +215,230 @@ export function CostCalculator() {
                         setEmployeeVisas(0);
                       }
                     }}
-                    className={`text-left p-3.5 rounded-2xl border transition relative ${
+                    className={`text-left p-4 rounded-xl border transition-all duration-150 relative ${
                       isSelected
-                        ? 'border-[#082C4B] bg-[#082C4B]/5 ring-2 ring-[#082C4B]'
-                        : 'border-slate-200 hover:border-slate-300 bg-white'
+                        ? 'border-[#34D399] bg-[#1E2724] ring-1 ring-[#34D399] shadow-[0_0_12px_rgba(52,211,153,0.2)]'
+                        : 'border-[#2D3035] bg-[#1B1D20] text-white/70 hover:bg-[#202327] hover:border-white/20'
                     }`}
                   >
-                    <div className="flex items-center justify-between">
-                      <span className="text-xs font-semibold px-2 py-0.5 rounded-md bg-slate-100 text-slate-700">
+                    <div className="flex items-center justify-between mb-1">
+                      <span className="font-mono text-[10px] uppercase tracking-wider text-[#34D399]">
                         {j.category}
                       </span>
-                      <span className="text-xs font-bold text-[#082C4B]">
-                        From AED {j.baseLicenceAed.toLocaleString()}
+                      <span className="font-mono text-xs font-bold text-white">
+                        AED {j.baseLicenceAed.toLocaleString()}
                       </span>
                     </div>
-                    <div className="font-bold text-sm text-slate-900 mt-2 leading-tight">{j.name}</div>
-                    <p className="text-xs text-slate-500 mt-1 line-clamp-2">{j.description}</p>
+                    <div className="font-bold text-sm text-white">{j.name}</div>
+                    <p className="font-mono text-[11px] text-white/50 mt-1 line-clamp-2">{j.description}</p>
                   </button>
                 );
               })}
             </div>
           </div>
 
-          {/* Step 2: Business Activity */}
+          {/* Step 2: Commercial Activity */}
           <div>
-            <div className="flex items-center gap-2 mb-3">
-              <span className="flex items-center justify-center w-6 h-6 rounded-full bg-[#082C4B] text-[#E8C37A] text-xs font-black">2</span>
-              <h3 className="font-bold text-base text-slate-900 flex items-center gap-2">
-                <Briefcase className="w-4 h-4 text-[#082C4B]" /> Business Activity Type
-              </h3>
-            </div>
-
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
-              {(Object.keys(ACTIVITIES) as ActivityTypeId[]).map((actId) => {
-                const a = ACTIVITIES[actId];
-                const isSelected = activityType === actId;
-                return (
-                  <button
-                    key={actId}
-                    type="button"
-                    onClick={() => setActivityType(actId)}
-                    className={`text-left p-3 rounded-2xl border transition ${
-                      isSelected
-                        ? 'border-[#082C4B] bg-[#082C4B]/5 ring-2 ring-[#082C4B]'
-                        : 'border-slate-200 hover:border-slate-300 bg-white'
-                    }`}
-                  >
-                    <div className="font-bold text-sm text-slate-900">{a.name}</div>
-                    <p className="text-xs text-slate-500 mt-1">{a.description}</p>
-                  </button>
-                );
-              })}
-            </div>
-          </div>
-
-          {/* Step 3: Visas (Disabled for Offshore) */}
-          {jurisdiction !== 'offshore-rak' ? (
-            <div>
-              <div className="flex items-center gap-2 mb-3">
-                <span className="flex items-center justify-center w-6 h-6 rounded-full bg-[#082C4B] text-[#E8C37A] text-xs font-black">3</span>
-                <h3 className="font-bold text-base text-slate-900 flex items-center gap-2">
-                  <Users className="w-4 h-4 text-[#082C4B]" /> Visas &amp; Residence Permits
-                </h3>
-              </div>
-
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 bg-slate-50 p-4 rounded-2xl border border-slate-200">
-                <div>
-                  <div className="flex justify-between items-center mb-1.5">
-                    <label className="text-xs font-bold text-slate-700">Investor / Partner Visas</label>
-                    <span className="text-xs font-bold text-[#082C4B] bg-white px-2 py-0.5 rounded-full border border-slate-200">
-                      {investorVisas} visa{investorVisas !== 1 ? 's' : ''}
-                    </span>
-                  </div>
-                  <input
-                    type="range"
-                    min="0"
-                    max="5"
-                    step="1"
-                    value={investorVisas}
-                    onChange={(e) => setInvestorVisas(Number(e.target.value))}
-                    className="w-full accent-[#082C4B] cursor-pointer"
-                  />
-                  <div className="flex justify-between text-[11px] text-slate-400 mt-1">
-                    <span>0</span>
-                    <span>1</span>
-                    <span>2</span>
-                    <span>3</span>
-                    <span>5</span>
-                  </div>
-                </div>
-
-                <div>
-                  <div className="flex justify-between items-center mb-1.5">
-                    <label className="text-xs font-bold text-slate-700">Employee Residence Visas</label>
-                    <span className="text-xs font-bold text-[#082C4B] bg-white px-2 py-0.5 rounded-full border border-slate-200">
-                      {employeeVisas} visa{employeeVisas !== 1 ? 's' : ''}
-                    </span>
-                  </div>
-                  <input
-                    type="range"
-                    min="0"
-                    max="10"
-                    step="1"
-                    value={employeeVisas}
-                    onChange={(e) => setEmployeeVisas(Number(e.target.value))}
-                    className="w-full accent-[#082C4B] cursor-pointer"
-                  />
-                  <div className="flex justify-between text-[11px] text-slate-400 mt-1">
-                    <span>0</span>
-                    <span>2</span>
-                    <span>5</span>
-                    <span>8</span>
-                    <span>10+</span>
-                  </div>
-                </div>
-              </div>
-            </div>
-          ) : null}
-
-          {/* Step 4: Office Space */}
-          <div>
-            <div className="flex items-center gap-2 mb-3">
-              <span className="flex items-center justify-center w-6 h-6 rounded-full bg-[#082C4B] text-[#E8C37A] text-xs font-black">4</span>
-              <h3 className="font-bold text-base text-slate-900">Premises &amp; Office Solution</h3>
-            </div>
-
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
-              {(Object.keys(OFFICE_SPACES) as OfficeTypeId[]).map((offId) => {
-                const off = OFFICE_SPACES[offId];
-                const isSelected = officeType === offId;
-                return (
-                  <button
-                    key={offId}
-                    type="button"
-                    onClick={() => setOfficeType(offId)}
-                    className={`text-left p-3 rounded-2xl border transition ${
-                      isSelected
-                        ? 'border-[#082C4B] bg-[#082C4B]/5 ring-2 ring-[#082C4B]'
-                        : 'border-slate-200 hover:border-slate-300 bg-white'
-                    }`}
-                  >
-                    <div className="font-bold text-xs text-slate-900">{off.name}</div>
-                    <div className="text-[11px] font-bold text-[#082C4B] mt-1">
-                      {off.costAed === 0 ? 'Included in Licence' : `+ AED ${off.costAed.toLocaleString()}/yr`}
-                    </div>
-                  </button>
-                );
-              })}
-            </div>
-          </div>
-
-          {/* Step 5: Advisory & Compliance Add-ons */}
-          <div>
-            <div className="flex items-center gap-2 mb-3">
-              <span className="flex items-center justify-center w-6 h-6 rounded-full bg-[#082C4B] text-[#E8C37A] text-xs font-black">5</span>
-              <h3 className="font-bold text-base text-slate-900 flex items-center gap-2">
-                <ShieldCheck className="w-4 h-4 text-[#082C4B]" /> Recommended Compliance &amp; Setup Support
-              </h3>
-            </div>
-
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
-              {Object.entries(ADDON_SERVICES).map(([key, item]) => {
-                const k = key as keyof typeof addOns;
-                const checked = addOns[k];
-                return (
-                  <label
-                    key={key}
-                    className={`flex items-start gap-3 p-3 rounded-2xl border cursor-pointer transition select-none ${
-                      checked ? 'bg-[#082C4B]/5 border-[#082C4B]' : 'bg-white border-slate-200 hover:border-slate-300'
-                    }`}
-                  >
-                    <input
-                      type="checkbox"
-                      checked={checked}
-                      onChange={(e) => setAddOns({ ...addOns, [k]: e.target.checked })}
-                      className="mt-1 accent-[#082C4B] rounded"
-                    />
-                    <div>
-                      <div className="font-bold text-xs text-slate-900 leading-tight">{item.name}</div>
-                      <p className="text-[11px] text-slate-500 mt-0.5">{item.description}</p>
-                      <span className="inline-block text-[11px] font-extrabold text-[#082C4B] mt-1">
-                        + AED {item.costAed.toLocaleString()}
-                      </span>
-                    </div>
-                  </label>
-                );
-              })}
-            </div>
-          </div>
-
-        </div>
-
-        {/* Right Column: Live Summary, Breakdown & Lead Capture (5 cols) */}
-        <div className="lg:col-span-5 bg-slate-50/80 p-6 sm:p-8 flex flex-col justify-between space-y-6">
-          
-          <div>
-            <div className="flex items-center justify-between pb-4 border-b border-slate-200">
-              <span className="text-xs font-bold tracking-wider text-slate-500 uppercase">Estimated Total</span>
-              <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800">
-                ⏱ {calculation.turnaroundDays}
+            <div className="flex items-center justify-between mb-3 font-mono text-xs uppercase tracking-widest text-white/50">
+              <span className="flex items-center gap-2">
+                <span className="h-5 w-5 rounded bg-[#25282C] border border-white/20 text-white flex items-center justify-center text-[10px] font-bold">2</span>
+                <span>Commercial Activity Class</span>
               </span>
             </div>
 
-            {/* Total Amount Display */}
-            <div className="my-5 text-center sm:text-left">
-              <div className="text-3xl sm:text-4xl font-black text-[#082C4B] tracking-tight">
-                {displayTotal}
-              </div>
-              <p className="text-xs text-slate-500 mt-1">
-                {currency === 'AED'
-                  ? `Equivalent to approx. $${Math.round(calculation.totalUsd).toLocaleString()} USD`
-                  : `Equivalent to AED ${calculation.totalAed.toLocaleString()}`}
-              </p>
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+              {(Object.keys(ACTIVITIES) as ActivityTypeId[]).map((id) => {
+                const a = ACTIVITIES[id];
+                const isSelected = activityType === id;
+                return (
+                  <button
+                    key={id}
+                    type="button"
+                    onClick={() => setActivityType(id)}
+                    className={`p-3 rounded-lg border text-center transition-all duration-150 ${
+                      isSelected
+                        ? 'border-[#34D399] bg-[#1E2724] text-white ring-1 ring-[#34D399]'
+                        : 'border-[#2D3035] bg-[#1B1D20] text-white/70 hover:bg-[#202327]'
+                    }`}
+                  >
+                    <div className="font-mono text-[10px] font-bold uppercase">{a.name}</div>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* Step 3: Residency Visas */}
+          <div>
+            <div className="flex items-center justify-between mb-3 font-mono text-xs uppercase tracking-widest text-white/50">
+              <span className="flex items-center gap-2">
+                <span className="h-5 w-5 rounded bg-[#25282C] border border-white/20 text-white flex items-center justify-center text-[10px] font-bold">3</span>
+                <span>Residency Visas Required</span>
+              </span>
             </div>
 
-            {/* Golden Visa Flag */}
-            {calculation.goldenVisaEligible && (
-              <div className="mb-4 p-3 rounded-2xl bg-[#E8C37A]/15 border border-[#E8C37A]/40 flex items-start gap-2.5 text-xs text-slate-800">
-                <Sparkles className="w-4 h-4 text-amber-700 shrink-0 mt-0.5" />
-                <div>
-                  <strong className="text-amber-950 font-bold block">10-Year Golden Visa Candidate:</strong>
-                  Your chosen structure or investment volume may qualify the founder for UAE long-term residency.
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <label className="block font-mono text-[10px] text-white/60 mb-2 uppercase">
+                  Investor / Partner Visas
+                </label>
+                <div className="flex items-center gap-1.5">
+                  {[0, 1, 2, 3].map((num) => (
+                    <button
+                      key={num}
+                      type="button"
+                      onClick={() => setInvestorVisas(num)}
+                      className={`flex-1 h-10 rounded font-mono text-xs font-bold border transition ${
+                        investorVisas === num
+                          ? 'bg-[#34D399] text-[#0E1513] border-[#34D399]'
+                          : 'bg-[#1B1D20] text-white/70 border-[#2D3035] hover:bg-[#202327]'
+                      }`}
+                    >
+                      {num}
+                    </button>
+                  ))}
                 </div>
               </div>
-            )}
 
-            {/* Line Item Breakdown */}
-            <div className="space-y-2 mt-4">
-              <h4 className="text-xs font-bold uppercase tracking-wider text-slate-500 mb-2">Itemised Breakdown</h4>
-              <div className="max-h-56 overflow-y-auto pr-1 space-y-2 text-xs">
-                {calculation.breakdown.map((item) => (
-                  <div key={item.id} className="flex justify-between items-start py-1.5 border-b border-slate-200/60 last:border-0">
-                    <div className="pr-2">
-                      <span className="font-semibold text-slate-800 block">{item.label}</span>
-                      {item.note && <span className="text-[11px] text-slate-500">{item.note}</span>}
-                    </div>
-                    <span className="font-bold text-slate-900 whitespace-nowrap">
-                      {item.amountAed === 0 ? 'Free' : `AED ${item.amountAed.toLocaleString()}`}
-                    </span>
-                  </div>
-                ))}
+              <div>
+                <label className="block font-mono text-[10px] text-white/60 mb-2 uppercase">
+                  Employee Visas
+                </label>
+                <div className="flex items-center gap-1.5">
+                  {[0, 1, 2, 3].map((num) => (
+                    <button
+                      key={num}
+                      type="button"
+                      onClick={() => setEmployeeVisas(num)}
+                      className={`flex-1 h-10 rounded font-mono text-xs font-bold border transition ${
+                        employeeVisas === num
+                          ? 'bg-[#34D399] text-[#0E1513] border-[#34D399]'
+                          : 'bg-[#1B1D20] text-white/70 border-[#2D3035] hover:bg-[#202327]'
+                      }`}
+                    >
+                      {num}
+                    </button>
+                  ))}
+                </div>
               </div>
             </div>
           </div>
 
-          {/* Lead Capture or Actions */}
-          <div className="pt-4 border-t border-slate-200">
+          {/* Step 4: Office Facility */}
+          <div>
+            <div className="flex items-center justify-between mb-3 font-mono text-xs uppercase tracking-widest text-white/50">
+              <span className="flex items-center gap-2">
+                <span className="h-5 w-5 rounded bg-[#25282C] border border-white/20 text-white flex items-center justify-center text-[10px] font-bold">4</span>
+                <span>Commercial Office Facility</span>
+              </span>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+              {(Object.keys(OFFICE_SPACES) as OfficeTypeId[]).map((id) => {
+                const off = OFFICE_SPACES[id];
+                const isSelected = officeType === id;
+                return (
+                  <button
+                    key={id}
+                    type="button"
+                    onClick={() => setOfficeType(id)}
+                    className={`p-3 rounded-lg border text-left transition-all duration-150 ${
+                      isSelected
+                        ? 'border-[#34D399] bg-[#1E2724] text-white ring-1 ring-[#34D399]'
+                        : 'border-[#2D3035] bg-[#1B1D20] text-white/70 hover:bg-[#202327]'
+                    }`}
+                  >
+                    <div className="font-semibold text-xs text-white">{off.name}</div>
+                    <div className="font-mono text-[10px] text-[#34D399] mt-0.5">
+                      {off.costAed === 0 ? 'INCLUDED' : `+AED ${off.costAed.toLocaleString()}`}
+                    </div>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        </div>
+
+        {/* Right Column: Itemized Tariff Ledger & Proposal Request (5 cols) */}
+        <div className="lg:col-span-5 p-6 sm:p-8 bg-[#131517] flex flex-col justify-between">
+          <div>
+            <div className="flex items-center justify-between mb-4 pb-3 border-b border-[#2D3035]">
+              <span className="font-mono text-xs uppercase tracking-widest text-[#34D399]">
+                ITEMIZED STATUTORY LEDGER
+              </span>
+              <span className="font-mono text-[10px] text-white/40">2026 SCHEDULE</span>
+            </div>
+
+            <div className="space-y-3 font-mono text-xs">
+              {calculation.breakdown.map((item, idx) => (
+                <div key={idx} className="flex justify-between py-1 border-b border-[#2D3035]/60 text-white/80">
+                  <span className="text-white/60">{item.label}</span>
+                  <span className="text-white font-semibold">AED {item.amountAed.toLocaleString()}</span>
+                </div>
+              ))}
+            </div>
+
+            <div className="mt-6 pt-4 border-t-2 border-[#34D399]/40 flex justify-between font-mono text-sm">
+              <span className="text-white font-bold">TOTAL STATUTORY TARIFF</span>
+              <span className="text-[#34D399] font-bold">{displayTotal}</span>
+            </div>
+          </div>
+
+          {/* Lead Proposal Form */}
+          <div className="mt-8 pt-6 border-t border-[#2D3035]">
             {submitSuccess ? (
-              <div className="p-4 rounded-2xl bg-emerald-50 border border-emerald-200 text-center space-y-2">
-                <CheckCircle2 className="w-8 h-8 text-emerald-600 mx-auto" />
-                <h4 className="font-bold text-emerald-950 text-sm">Quote Reserved Successfully!</h4>
-                <p className="text-xs text-emerald-800">
-                  Your reference ID is <strong className="font-mono font-bold text-emerald-900">{submitSuccess}</strong>.
-                  A senior setup consultant has been notified and will email you the full itemised dossier.
+              <div className="p-4 rounded-xl bg-[#0E1513] border border-[#34D399] text-center font-mono">
+                <Check className="w-6 h-6 text-[#34D399] mx-auto mb-2" />
+                <div className="text-sm font-bold text-white mb-1">PROPOSAL LOCKED</div>
+                <div className="text-xs text-[#34D399]">Ref: {submitSuccess}</div>
+                <p className="text-[11px] text-white/60 mt-2">
+                  Our corporate structuring director will reach out within 4 business hours.
                 </p>
-                <button
-                  type="button"
-                  onClick={handlePrint}
-                  className="mt-2 inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-emerald-600 text-white text-xs font-bold hover:bg-emerald-700 transition"
-                >
-                  <Printer className="w-3.5 h-3.5" /> Print / Save Summary
-                </button>
               </div>
             ) : (
               <form onSubmit={handleLeadSubmit} className="space-y-3">
-                <h4 className="text-xs font-bold uppercase tracking-wider text-slate-700 flex items-center justify-between">
-                  <span>Lock in This Estimate</span>
-                  <button
-                    type="button"
-                    onClick={handlePrint}
-                    className="text-slate-500 hover:text-slate-800 flex items-center gap-1 font-normal lowercase"
-                  >
-                    <Download className="w-3 h-3" /> print pdf
-                  </button>
-                </h4>
-
-                <div className="space-y-2">
-                  <input
-                    type="text"
-                    required
-                    placeholder="Full Name"
-                    value={leadName}
-                    onChange={(e) => setLeadName(e.target.value)}
-                    className="w-full text-xs px-3 py-2 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-[#082C4B] bg-white"
-                  />
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                    <input
-                      type="email"
-                      required
-                      placeholder="Email Address"
-                      value={leadEmail}
-                      onChange={(e) => setLeadEmail(e.target.value)}
-                      className="w-full text-xs px-3 py-2 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-[#082C4B] bg-white"
-                    />
-                    <input
-                      type="tel"
-                      required
-                      placeholder="WhatsApp / Phone"
-                      value={leadPhone}
-                      onChange={(e) => setLeadPhone(e.target.value)}
-                      className="w-full text-xs px-3 py-2 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-[#082C4B] bg-white"
-                    />
-                  </div>
+                <div className="font-mono text-[10px] uppercase tracking-wider text-white/50 mb-2">
+                  REQUEST OFFICIAL ITEMIZED DOSSIER
                 </div>
-
-                {submitError && (
-                  <p className="text-[11px] text-rose-600 font-medium">{submitError}</p>
-                )}
+                <input
+                  type="text"
+                  required
+                  placeholder="Full Name"
+                  value={leadName}
+                  onChange={(e) => setLeadName(e.target.value)}
+                  className="w-full bg-[#1A1C1E] border border-[#2D3035] rounded-lg px-3 py-2 text-xs text-white placeholder-white/30 focus:outline-none focus:border-[#34D399] font-sans"
+                />
+                <input
+                  type="email"
+                  required
+                  placeholder="Work Email"
+                  value={leadEmail}
+                  onChange={(e) => setLeadEmail(e.target.value)}
+                  className="w-full bg-[#1A1C1E] border border-[#2D3035] rounded-lg px-3 py-2 text-xs text-white placeholder-white/30 focus:outline-none focus:border-[#34D399] font-sans"
+                />
+                <input
+                  type="tel"
+                  required
+                  placeholder="WhatsApp / Phone Number"
+                  value={leadPhone}
+                  onChange={(e) => setLeadPhone(e.target.value)}
+                  className="w-full bg-[#1A1C1E] border border-[#2D3035] rounded-lg px-3 py-2 text-xs text-white placeholder-white/30 focus:outline-none focus:border-[#34D399] font-sans"
+                />
 
                 <button
                   type="submit"
                   disabled={isSubmitting}
-                  className="w-full py-3 px-4 rounded-xl bg-[#082C4B] hover:bg-[#0c395e] text-white font-bold text-xs flex items-center justify-center gap-2 shadow-lg transition active:scale-[0.99] disabled:opacity-50"
+                  className="w-full py-3 rounded-lg bg-[#34D399] text-[#0E1513] font-bold text-xs tracking-wider uppercase hover:bg-[#34D399]/90 active:scale-[0.99] transition font-mono shadow-[0_0_12px_rgba(52,211,153,0.3)] disabled:opacity-50"
                 >
-                  <Send className="w-3.5 h-3.5 text-[#E8C37A]" />
-                  {isSubmitting ? 'Reserving Estimate...' : 'Receive Formal Quotation & Dossier'}
+                  {isSubmitting ? 'DISPATCHING...' : '= LOCK & RECEIVE OFFICIAL QUOTE ='}
                 </button>
-                <p className="text-[10px] text-slate-400 text-center">
-                  100% confidential. No hidden fees or automated sales calls.
-                </p>
               </form>
             )}
           </div>
-
         </div>
       </div>
     </div>
   );
 }
+
+export default CostCalculator;

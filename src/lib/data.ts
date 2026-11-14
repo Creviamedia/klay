@@ -502,61 +502,68 @@ export const HOMEPAGE_PROCESS_STEPS = [
 export const SERVICE_PACKAGES: {
   title: string;
   badge?: string;
+  href: string;
   features: string[];
 }[] = [
   {
-    title: 'UAE Free Zone',
-    badge: 'LOWEST PRICE OFFER',
+    title: 'UAE Free Zone Starter',
+    badge: 'LOWEST STATUTORY COST',
+    href: '/services/free-zone-company-setup/',
     features: [
-      'Zero Visa Package',
-      'Up To 5 Business Activities',
-      'Trade License & Approvals',
-      'Free Corporate Tax Registration',
-      'Bank Account Opening',
+      'Zero Visa Baseline Package',
+      'Up To 5 Commercial Activities',
+      'Official Trade License & Chamber Registration',
+      'Corporate Tax Registration Included',
+      'Digital Bank Account Assistance',
     ],
   },
   {
-    title: 'All-Inclusive UAE Free Zone',
+    title: 'All-Inclusive Free Zone',
+    badge: 'MOST POPULAR',
+    href: '/services/free-zone-company-setup/',
     features: [
-      'One Visa Package',
-      'Business License + Approvals',
-      'Free Digital Bank Account',
-      'Exercise Files',
-      'Free Flexi Desk',
-      'Free VAT & C.T Registration',
-      'Full Lifetime Access',
+      'One 3-Year Investor Residency Visa',
+      'Business License + Sovereign Pre-Approvals',
+      'VIP Corporate Bank Account Opening',
+      'Registered Office Flexi-Desk Address',
+      'VAT & Corporate Tax Structuring',
+      'Dedicated Corporate Account Director',
     ],
   },
   {
-    title: 'Mergers & Acquisition Advisory',
+    title: 'Mainland DED LLC Formation',
+    badge: '100% LOCAL MARKET TRADE',
+    href: '/services/mainland-company-setup/',
     features: [
-      'Legal Support for Structured Transactions',
-      'Transaction Structuring and Regulatory Review',
-      'Legal and Compliance Due Diligence',
-      'Drafting and Review of Transaction Documents',
-      'Ongoing Legal and Regulatory Support',
+      '100% Sovereign Foreign Ownership',
+      'Unrestricted Trade Across All 7 Emirates',
+      'Direct UAE Government Procurement Access',
+      'Commercial Lease Registration (Ejari)',
+      'Tier-1 Corporate Banking Activation',
     ],
   },
   {
-    title: 'Inheritance And Succession Planning',
+    title: 'Offshore Holding & Asset Shield',
+    badge: 'GLOBAL PROTECTION',
+    href: '/services/offshore-company-setup/',
     features: [
-      'One Visa Package',
-      'Business License + Approvals',
-      'Free Digital Bank Account',
-      'Exercise Files',
-      'Free Flexi Desk',
-      'Free VAT & C.T Registration',
-      'Full Lifetime Access',
+      'RAK ICC & JAFZA International Holding',
+      '0% Corporate Tax on Foreign Income',
+      'Strict Statutory Confidentiality',
+      'Cross-Border Intellectual Property Protection',
+      'Succession & Multi-Currency Banking',
     ],
   },
   {
-    title: 'Dubai Free Zone',
+    title: 'Corporate Banking Priority',
+    badge: 'PRE-CLEARED DOSSIER',
+    href: '/services/corporate-bank-account/',
     features: [
-      'Zero Visa Package',
-      'Business License + Approvals',
-      'Free Digital Bank Account',
-      'Free Flexi Desk',
-      'Free VAT & C.T Registration',
+      'Institutional KYC & AML Profile Underwriting',
+      'Direct Escalation to Senior Bank Relationship Managers',
+      'Emirates NBD, Mashreq, FAB & Wio Coverage',
+      'Multi-Currency Accounts (AED, USD, EUR, GBP)',
+      'Zero Nominee Exposure Guarantee',
     ],
   },
 ];
@@ -564,6 +571,7 @@ export const SERVICE_PACKAGES: {
 export const JURISDICTION_SERVICES: {
   number: string;
   title: string;
+  href?: string;
   features: string[];
 }[] = [
   {

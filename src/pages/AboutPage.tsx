@@ -191,37 +191,37 @@ export default function AboutPage() {
             </h2>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-px bg-hairline-light/30 border border-hairline-light/40 relative corner-crosshair-wrap">
-            <CornerCrosshairs color="text-brand-green/70" size={12} />
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-px bg-[#0C2D48]/10 border border-[#0C2D48]/10 relative corner-crosshair-wrap">
+            <CornerCrosshairs color="text-[#0C2D48]/40" size={12} />
 
             {/* Mission Card */}
-            <div className="bg-canvas-light-card p-8 md:p-12 transition-transform duration-200 hover:-translate-y-0.5">
-              <span className="inline-block text-xs font-mono tracking-widest text-brand-green uppercase mb-4">
+            <div className="bg-white p-8 md:p-12 transition-colors duration-200 hover:bg-[#FDFDFD]">
+              <span className="inline-block text-xs font-mono tracking-widest text-[#0C2D48]/60 uppercase mb-4">
                 OUR MISSION
               </span>
-              <h3 className="text-2xl md:text-3xl font-heading font-semibold text-brand-navy mb-4">
+              <h3 className="text-2xl md:text-3xl font-heading font-semibold text-[#0C2D48] mb-4">
                 Helping Businesses Start Right
               </h3>
-              <p className="text-sm md:text-base text-text-secondary-dark leading-relaxed mb-4">
+              <p className="text-sm md:text-base text-[#0C2D48]/75 leading-relaxed mb-4">
                 Our mission is to help entrepreneurs and enterprises establish and operate in the UAE through clear structuring, compliant incorporation, and practical advisory support.
               </p>
-              <p className="text-sm md:text-base text-text-secondary-dark leading-relaxed">
+              <p className="text-sm md:text-base text-[#0C2D48]/75 leading-relaxed">
                 By integrating incorporation, banking alignment, visa processing, and compliance support, we build strong foundations that reduce regulatory risk and support sustainable growth.
               </p>
             </div>
 
             {/* Vision Card */}
-            <div className="bg-canvas-light-card p-8 md:p-12 transition-transform duration-200 hover:-translate-y-0.5">
-              <span className="inline-block text-xs font-mono tracking-widest text-brand-green uppercase mb-4">
+            <div className="bg-white p-8 md:p-12 transition-colors duration-200 hover:bg-[#FDFDFD]">
+              <span className="inline-block text-xs font-mono tracking-widest text-[#0C2D48]/60 uppercase mb-4">
                 OUR VISION
               </span>
-              <h3 className="text-2xl md:text-3xl font-heading font-semibold text-brand-navy mb-4">
+              <h3 className="text-2xl md:text-3xl font-heading font-semibold text-[#0C2D48] mb-4">
                 A Trusted Partner for Regional Expansion
               </h3>
-              <p className="text-sm md:text-base text-text-secondary-dark leading-relaxed mb-4">
+              <p className="text-sm md:text-base text-[#0C2D48]/75 leading-relaxed mb-4">
                 Our vision is to be the premier sovereign advisory partner for international businesses operating in the UAE, renowned for clarity, reliability, and institutional precision.
               </p>
-              <p className="text-sm md:text-base text-text-secondary-dark leading-relaxed">
+              <p className="text-sm md:text-base text-[#0C2D48]/75 leading-relaxed">
                 As the UAE economic landscape matures, we empower founders with the foresight and compliance architecture needed to scale regionally and globally.
               </p>
             </div>

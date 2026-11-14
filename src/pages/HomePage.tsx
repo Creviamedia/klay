@@ -367,24 +367,25 @@ export default function Home() {
           <div className="grid items-start gap-8 lg:grid-cols-[0.9fr_1.1fr] lg:gap-12">
             <div className="relative border border-[#0C2D48]/10 bg-white p-8 sm:p-10 shadow-sm corner-crosshair-wrap">
               <CornerCrosshairs color="text-[#22C55E]/60" size={10} />
-              <span className="mb-4 inline-flex items-center gap-2 px-3 py-1 text-xs font-mono uppercase tracking-wider text-[#16A34A] bg-[#22C55E]/10 border border-[#22C55E]/20">
-                INSTANT SETUP ESTIMATE
+              <span className="mb-4 inline-block text-xs font-mono uppercase tracking-[0.2em] text-[#0C2D48]/60">
+                STATUTORY PRICING MATRIX
               </span>
-              <h2 className="text-2xl sm:text-3xl font-heading font-normal tracking-tight text-[#0C2D48] mb-3">
-                UAE Business Formation Pricing
+              <h2 className="text-3xl sm:text-4xl font-heading font-normal tracking-[-0.03em] text-[#0C2D48] leading-tight mb-4">
+                Transparent UAE Formation Tariffs
               </h2>
-              <p className="text-sm text-[#0C2D48]/75 leading-relaxed mb-6">
+              <p className="text-sm sm:text-base text-[#0C2D48]/75 leading-relaxed mb-8">
                 Your investment is determined by jurisdiction, activity category, visa allocation, and premises requirements. Calculate statutory fees with full transparency.
               </p>
-              <div className="grid gap-3 sm:grid-cols-2">
-                {HOMEPAGE_SETUP_FACTORS.map(({ icon: Icon, title, text }) => (
-                  <div key={title} className="flex items-start gap-3 border border-[#0C2D48]/10 bg-[#FBFBFB] p-3.5">
-                    <span className="flex h-8 w-8 shrink-0 items-center justify-center bg-[#0C2D48] text-[#22C55E]">
-                      <Icon className="h-4 w-4" />
+
+              <div className="space-y-4 border-t border-[#0C2D48]/10 pt-6">
+                {HOMEPAGE_SETUP_FACTORS.map(({ title, text }, idx) => (
+                  <div key={title} className="flex items-baseline gap-4 py-1.5 border-b border-[#0C2D48]/5 last:border-b-0">
+                    <span className="font-mono text-xs text-[#0C2D48]/40 shrink-0">
+                      0{idx + 1} //
                     </span>
                     <div>
-                      <span className="block text-xs font-semibold text-[#0C2D48]">{title}</span>
-                      <span className="mt-0.5 block text-[11px] leading-relaxed text-[#0C2D48]/60">{text}</span>
+                      <span className="text-sm font-semibold text-[#0C2D48] block mb-0.5">{title}</span>
+                      <span className="text-xs text-[#0C2D48]/65 leading-relaxed block">{text}</span>
                     </div>
                   </div>
                 ))}

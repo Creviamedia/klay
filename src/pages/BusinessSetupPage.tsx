@@ -204,7 +204,7 @@ export default function BusinessSetupPage() {
                     className={`px-4 py-2 rounded-full text-xs font-mono uppercase tracking-wider transition-colors duration-200 cursor-pointer ${
                       isActive
                         ? 'bg-brand-green text-brand-navy-deep font-bold shadow-green-glow'
-                        : 'border border-hairline-light/50 bg-canvas-light-card text-brand-navy/70 hover:text-brand-navy hover:border-brand-green'
+                        : 'border border-[#0C2D48]/10 bg-white text-[#0C2D48]/70 hover:text-[#0C2D48] hover:border-[#0C2D48]/30'
                     }`}
                   >
                     {cat}
@@ -220,9 +220,9 @@ export default function BusinessSetupPage() {
               <Link
                 key={service.number}
                 href={service.href}
-                className="group relative border border-hairline-light/40 bg-canvas-light-card overflow-hidden transition-transform duration-200 hover:-translate-y-1 corner-crosshair-wrap"
+                className="group relative border border-[#0C2D48]/10 bg-white overflow-hidden transition-all duration-300 hover:-translate-y-1 hover:shadow-md hover:border-[#0C2D48]/30 corner-crosshair-wrap"
               >
-                <CornerCrosshairs color="text-brand-green/60" size={10} />
+                <CornerCrosshairs color="text-[#0C2D48]/40" size={10} />
 
                 {/* Card Visual with warm amber gradient vignette on bottom */}
                 <div className="relative aspect-[16/10] overflow-hidden bg-canvas-dark">
@@ -328,10 +328,12 @@ export default function BusinessSetupPage() {
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 {benefits.map((b) => (
-                  <div key={b.number} className="border border-hairline-light/50 bg-canvas-light-card p-5">
-                    <span className="font-mono text-xs text-brand-green font-bold block mb-1">{b.number}</span>
-                    <h4 className="text-sm font-semibold text-brand-navy mb-2">{b.title}</h4>
-                    <p className="text-xs text-text-secondary-dark leading-relaxed">{b.description}</p>
+                  <div key={b.number} className="border border-[#0C2D48]/10 bg-white p-5 shadow-sm">
+                    <span className="font-mono text-xs text-[#0C2D48]/50 font-bold block mb-1">
+                      BENEFIT // {b.number}
+                    </span>
+                    <h4 className="text-sm font-semibold text-[#0C2D48] mb-2">{b.title}</h4>
+                    <p className="text-xs text-[#0C2D48]/70 leading-relaxed">{b.description}</p>
                   </div>
                 ))}
               </div>
