@@ -190,14 +190,12 @@ export function SiteRoutes() {
         </Suspense>
         </ChunkErrorBoundary>
       </main>
-      {!isBusinessSetupPage && (
-        <ChunkErrorBoundary fallback={null}>
-          <Suspense fallback={null}>
-            <FloatingContactWidget />
-            <FloatingDock />
-          </Suspense>
-        </ChunkErrorBoundary>
-      )}
+      <ChunkErrorBoundary fallback={null}>
+        <Suspense fallback={null}>
+          <FloatingContactWidget />
+          <FloatingDock />
+        </Suspense>
+      </ChunkErrorBoundary>
       <Footer flushTop={isContactPage} />
     </>
   );

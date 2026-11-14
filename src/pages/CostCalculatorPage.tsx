@@ -40,47 +40,32 @@ const CALCULATOR_FAQS: AccordionItem[] = [
 ];
 
 export default function CostCalculatorPage() {
-  const scrollToCalculator = () => {
-    document.getElementById('calculator')?.scrollIntoView({
-      behavior: 'smooth',
-      block: 'center',
-    });
-  };
-
   return (
-    <div className="flex flex-col w-full bg-canvas-light text-text-primary-dark">
+    <div className="flex flex-col w-full bg-[#FBFBFB] text-[#0C2D48] pb-24 md:pb-28">
       {/* =========================================================================
-          HERO & CALCULATOR SECTION: Obsidian Dark Canvas with Green Horizon Glow
+          HERO & CALCULATOR SECTION: Porcelain Light Executive Canvas
           ========================================================================= */}
-      <section className="relative isolate min-h-[560px] overflow-hidden bg-canvas-dark text-canvas-light py-16 md:py-24 border-b border-hairline-dark/40">
-        {/* Ambient Green Horizon Glow at Baseline */}
-        <div
-          aria-hidden="true"
-          className="pointer-events-none absolute inset-x-0 bottom-0 h-96 bg-green-horizon-glow opacity-80 -z-10"
-        />
-
+      <section className="relative isolate overflow-hidden bg-[#FAFBFD] py-16 md:py-20 border-b border-[#0C2D48]/10">
         <div className="mx-auto w-full max-w-7xl px-6 lg:px-8 relative corner-crosshair-wrap">
-          <CornerCrosshairs color="text-brand-green/60" size={14} />
+          <CornerCrosshairs color="text-[#22C55E]/60" size={14} />
 
-          <div className="max-w-3xl mx-auto text-center mb-12">
-            <span className="inline-block text-xs font-mono tracking-widest text-brand-green uppercase mb-3">
-              INSTANT PRICING TRANSPARENCY
+          <div className="max-w-3xl mx-auto text-center mb-10">
+            <span className="inline-block text-xs font-mono tracking-widest text-[#16A34A] uppercase mb-3 bg-[#22C55E]/10 px-3 py-1 rounded-full font-semibold">
+              INSTANT PRICING TRANSPARENCY · 2026 TARIFFS
             </span>
-            <h1 className="text-3xl sm:text-5xl md:text-6xl font-heading font-medium tracking-tight text-canvas-light leading-[1.08] mb-5">
+            <h1 className="text-3xl sm:text-5xl md:text-6xl font-heading font-semibold tracking-tight text-[#0C2D48] leading-[1.08] mb-4">
               Plan Your Setup, <br />
-              <span className="text-brand-green">Understand Your True Costs.</span>
+              <span className="text-[#16A34A]">Understand Your True Costs.</span>
             </h1>
-            <p className="text-base text-canvas-light/80 font-normal leading-relaxed max-w-2xl mx-auto">
+            <p className="text-base text-[#0C2D48]/75 font-normal leading-relaxed max-w-2xl mx-auto">
               Calculate exact government fees, trade licensing, shareholder quotas, and visa allocations across Dubai Mainland and Free Zones. Zero hidden markups.
             </p>
           </div>
 
-          {/* Interactive Calculator Shell */}
-          <div className="w-full max-w-4xl mx-auto relative corner-crosshair-wrap" id="calculator">
-            <CornerCrosshairs color="text-brand-green/70" size={12} />
-            <div className="bg-canvas-dark-card/90 border border-hairline-dark/60 p-4 sm:p-8 shadow-2xl backdrop-blur-xl">
-              <CostCalculator />
-            </div>
+          {/* Interactive Calculator Shell (One-Fold Friendly) */}
+          <div className="w-full max-w-6xl mx-auto relative corner-crosshair-wrap" id="calculator">
+            <CornerCrosshairs color="text-[#0C2D48]/30" size={12} />
+            <CostCalculator />
           </div>
         </div>
       </section>
@@ -88,13 +73,13 @@ export default function CostCalculatorPage() {
       {/* =========================================================================
           SECTION 2: 3-Step Execution Grid (Equitify Format)
           ========================================================================= */}
-      <section className="py-16 md:py-24 bg-canvas-light text-text-primary-dark border-b border-hairline-light/30">
+      <section className="py-16 md:py-24 bg-white text-[#0C2D48] border-b border-[#0C2D48]/10">
         <div className="mx-auto max-w-7xl px-6 lg:px-8">
           <div className="max-w-3xl mb-12">
-            <span className="inline-block text-xs font-mono tracking-widest text-brand-navy/60 uppercase mb-3">
+            <span className="inline-block text-xs font-mono tracking-widest text-[#0C2D48]/60 uppercase mb-3">
               NEXT STEPS
             </span>
-            <h2 className="text-3xl sm:text-4xl md:text-5xl font-heading font-medium tracking-tight text-brand-navy">
+            <h2 className="text-3xl sm:text-4xl md:text-5xl font-heading font-medium tracking-tight text-[#0C2D48]">
               What Happens After Your Cost Estimate.
             </h2>
           </div>
@@ -102,54 +87,54 @@ export default function CostCalculatorPage() {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-px bg-[#0C2D48]/10 border border-[#0C2D48]/10 relative corner-crosshair-wrap">
             <CornerCrosshairs color="text-[#0C2D48]/40" size={12} />
 
-            <div className="bg-white p-8 md:p-10 flex flex-col justify-between transition-colors duration-200 hover:bg-[#FDFDFD]">
+            <div className="bg-white p-8 md:p-10 flex flex-col justify-between transition-colors duration-200 hover:bg-[#FAFBFD]">
               <div>
                 <span className="font-mono text-xs font-bold text-[#0C2D48]/60 block mb-4">
                   PHASE // 01
                 </span>
                 <h3 className="text-xl font-heading font-semibold text-[#0C2D48] mb-3">
-                  Review Structure &amp; Activity
+                  Scope &amp; Activity Verification
                 </h3>
-                <p className="text-xs text-[#0C2D48]/70 leading-relaxed">
-                  Review your breakdown and verify whether a Free Zone (DMCC, IFZA, Meydan) or Mainland DED structure best fits your trade scope.
+                <p className="text-sm text-[#0C2D48]/75 leading-relaxed mb-6">
+                  Our regulatory desk reviews your target business activities against the official Department of Economy (DED) or Free Zone activity lists to ensure 100% compliance.
                 </p>
               </div>
-              <div className="mt-6 pt-4 border-t border-[#0C2D48]/5 text-[11px] font-mono text-[#0C2D48]/40">
-                Statutory Activity Mapping
+              <div className="pt-4 border-t border-[#0C2D48]/10 font-mono text-xs text-[#0C2D48]/50">
+                TIMEFRAME: 2–4 HOURS
               </div>
             </div>
 
-            <div className="bg-white p-8 md:p-10 flex flex-col justify-between transition-colors duration-200 hover:bg-[#FDFDFD]">
+            <div className="bg-white p-8 md:p-10 flex flex-col justify-between transition-colors duration-200 hover:bg-[#FAFBFD]">
               <div>
                 <span className="font-mono text-xs font-bold text-[#0C2D48]/60 block mb-4">
                   PHASE // 02
                 </span>
                 <h3 className="text-xl font-heading font-semibold text-[#0C2D48] mb-3">
-                  Confirm Banking Eligibility
+                  Name Reservation &amp; Security Clearance
                 </h3>
-                <p className="text-xs text-[#0C2D48]/70 leading-relaxed">
-                  Our compliance desk pre-screens your business activity to ensure smooth corporate bank account opening with tier-1 UAE banks.
+                <p className="text-sm text-[#0C2D48]/75 leading-relaxed mb-6">
+                  We submit your trade name for initial approval, prepare founding resolutions, and complete digital identity verification without requiring your physical presence.
                 </p>
               </div>
-              <div className="mt-6 pt-4 border-t border-[#0C2D48]/5 text-[11px] font-mono text-[#0C2D48]/40">
-                KYC / AML Pre-Clearance
+              <div className="pt-4 border-t border-[#0C2D48]/10 font-mono text-xs text-[#0C2D48]/50">
+                TIMEFRAME: 24–48 HOURS
               </div>
             </div>
 
-            <div className="bg-white p-8 md:p-10 flex flex-col justify-between transition-colors duration-200 hover:bg-[#FDFDFD]">
+            <div className="bg-white p-8 md:p-10 flex flex-col justify-between transition-colors duration-200 hover:bg-[#FAFBFD]">
               <div>
                 <span className="font-mono text-xs font-bold text-[#0C2D48]/60 block mb-4">
                   PHASE // 03
                 </span>
                 <h3 className="text-xl font-heading font-semibold text-[#0C2D48] mb-3">
-                  Lock Fixed-Fee Agreement
+                  License Issuance &amp; Bank Account
                 </h3>
-                <p className="text-xs text-[#0C2D48]/70 leading-relaxed">
-                  Receive an itemized official agreement with zero hidden typing or renewal fees. Company formation begins in under 24 hours.
+                <p className="text-sm text-[#0C2D48]/75 leading-relaxed mb-6">
+                  Your commercial trade license is issued. We immediately dispatch your pre-cleared compliance dossier to tier-1 UAE banks (Emirates NBD, Wio, Mashreq) for rapid activation.
                 </p>
               </div>
-              <div className="mt-6 pt-4 border-t border-[#0C2D48]/5 text-[11px] font-mono text-[#0C2D48]/40">
-                Direct Sovereign Issuance
+              <div className="pt-4 border-t border-[#0C2D48]/10 font-mono text-xs text-[#0C2D48]/50">
+                TIMEFRAME: 3–5 BUSINESS DAYS
               </div>
             </div>
           </div>
@@ -157,29 +142,29 @@ export default function CostCalculatorPage() {
       </section>
 
       {/* =========================================================================
-          SECTION 3: Numbered FAQ Accordion (Equitify Format)
+          SECTION 3: Calculator FAQs (Accordion)
           ========================================================================= */}
-      <section className="py-16 md:py-24 bg-canvas-dark text-canvas-light">
+      <section className="py-16 md:py-24 bg-[#FAFBFD] text-[#0C2D48] border-b border-[#0C2D48]/10">
         <div className="mx-auto max-w-7xl px-6 lg:px-8">
           <NumberedAccordion
             items={CALCULATOR_FAQS}
-            eyebrow="FREQUENTLY ASKED"
-            heading="Cost &amp; Setup Considerations"
-            subheading="Clear answers regarding UAE company formation pricing, visa quotas, and banking fees."
+            eyebrow="TRANSPARENT ANSWERS"
+            heading="Frequently Asked Cost Questions"
+            subheading="Clear details regarding statutory licensing, residency fees, and ongoing maintenance."
           />
         </div>
       </section>
 
       {/* =========================================================================
-          SECTION 4: Atmospheric Amber Horizon Glow Banner
+          SECTION 4: Pre-Footer Banner
           ========================================================================= */}
       <AtmosphericBanner
-        eyebrow="READY TO FORM YOUR COMPANY"
-        headline="Lock Your 2026 Dubai Setup Package."
-        subheadline="Speak directly with an accredited corporate structuring director today."
-        ctaText="BOOK CONSULTATION"
+        eyebrow="READY TO FORM?"
+        headline="Lock In Your 2026 Sovereign Pricing Today."
+        subheadline="Speak directly with our senior corporate structuring directors to receive your binding itemized proposal."
+        ctaText="SCHEDULE CONSULTATION"
         ctaTo={ROUTES.contact}
-        glow="amber"
+        glow="green"
       />
     </div>
   );

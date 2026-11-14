@@ -1,25 +1,47 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowRight, Check, Send, Sparkles } from 'lucide-react';
+import { ArrowRight, Check, Send, Sparkles, Building2, Shield, Landmark } from 'lucide-react';
 import { ROUTES } from '@/lib/routes';
 
 interface JurisdictionPreset {
   id: string;
-  code: string;
   name: string;
+  subtitle: string;
   basePrice: number;
-  taxTag: string;
+  badge: string;
+  icon: typeof Building2;
 }
 
 const JURISDICTIONS: JurisdictionPreset[] = [
-  { id: 'freezone', code: 'FZ-01', name: 'Free Zone (Meydan / IFZA)', basePrice: 12500, taxTag: '0% Tax' },
-  { id: 'mainland', code: 'ML-02', name: 'Dubai Mainland (DED LLC)', basePrice: 18500, taxTag: 'Local Mkt' },
-  { id: 'offshore', code: 'OF-03', name: 'RAK ICC Offshore Holding', basePrice: 24000, taxTag: 'Asset Shield' },
+  {
+    id: 'freezone',
+    name: 'Free Zone',
+    subtitle: 'Meydan / IFZA / DMCC',
+    basePrice: 12500,
+    badge: '100% Tax Exemption',
+    icon: Landmark,
+  },
+  {
+    id: 'mainland',
+    name: 'Dubai Mainland',
+    subtitle: 'DED Commercial LLC',
+    basePrice: 18500,
+    badge: 'Local UAE Market',
+    icon: Building2,
+  },
+  {
+    id: 'offshore',
+    name: 'Offshore Holding',
+    subtitle: 'RAK ICC / JAFZA',
+    basePrice: 24000,
+    badge: 'Asset Protection',
+    icon: Shield,
+  },
 ];
 
 /**
- * Dieter Rams / Braun ET66 & Teenage Engineering inspired Physical Formation Calculator.
- * Precision industrial casing, recessed LCD segmented screen, tactile convex push keys, and LED indicators.
+ * Executive Instant Formation Calculator (Single-Fold, High-Conversion Design).
+ * Clean white Swiss architectural aesthetic, instant reactive pricing, and 1-tap quote capture.
  */
 export function SetupCalculator() {
   const navigate = useNavigate();
@@ -29,17 +51,12 @@ export function SetupCalculator() {
   const [contactInput, setContactInput] = useState<string>('');
   const [isSubmitted, setIsSubmitted] = useState<boolean>(false);
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
-  const [activeButton, setActiveButton] = useState<string | null>(null);
 
   const selectedJur = JURISDICTIONS.find((j) => j.id === jurisdiction) || JURISDICTIONS[0];
   const visaPrice = visas * 3750;
   const officePrice = officeType === 'physical' ? 12000 : 0;
   const grandTotal = selectedJur.basePrice + visaPrice + officePrice;
-
-  const triggerButtonFeedback = (id: string) => {
-    setActiveButton(id);
-    setTimeout(() => setActiveButton(null), 120);
-  };
+  const usdTotal = Math.round(grandTotal / 3.6725);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -55,13 +72,14 @@ export function SetupCalculator() {
           jurisdiction: selectedJur.name,
           visas,
           officeType: officeType === 'flexi' ? 'Flexi Desk' : 'Physical Lease',
-          estimatedTotal: grandTotal,
-          source: 'braun_et66_calculator',
+          estimatedTotalAed: grandTotal,
+          estimatedTotalUsd: usdTotal,
+          source: 'executive_instant_calculator',
           timestamp: new Date().toISOString(),
         }),
       });
     } catch {
-      // Local fallback
+      // Graceful local fallback
     } finally {
       setIsSubmitting(false);
       setIsSubmitted(true);
@@ -69,244 +87,220 @@ export function SetupCalculator() {
   };
 
   return (
-    <div className="w-full max-w-xl mx-auto select-none font-sans">
+    <div className="w-full max-w-2xl mx-auto font-sans">
       {/* =========================================================================
-          BRAUN ET66 / TEENAGE ENGINEERING CHASSIS
-          Matte charcoal casing, recessed perimeter bezel, physical screws
+          EXECUTIVE CALCULATOR CARD: Clean White Canvas, Deep Navy & Emerald Accents
+          Single-Fold Friendly Layout
           ========================================================================= */}
-      <div className="relative rounded-[28px] bg-[#1A1C1E] p-5 sm:p-7 shadow-[0_25px_60px_rgba(0,0,0,0.55),inset_0_1px_1px_rgba(255,255,255,0.15)] border border-[#2D3035] ring-1 ring-black/40">
+      <div className="bg-white rounded-2xl border border-[#0C2D48]/12 shadow-[0_20px_50px_rgba(12,45,72,0.08)] p-6 sm:p-8 relative overflow-hidden transition-all duration-300">
         
-        {/* Chassis Brand Plate & Serial */}
-        <div className="flex items-center justify-between pb-4 px-1 text-white/50">
-          <div className="flex items-center gap-2">
-            <span className="h-2 w-2 rounded-full bg-[#E8A72E] shadow-[0_0_8px_#E8A72E]" />
-            <span className="font-mono text-[11px] font-bold tracking-[0.22em] uppercase text-white/80">
-              KLAY · ET-26
-            </span>
-          </div>
-          <div className="flex items-center gap-3">
-            <span className="font-mono text-[9px] tracking-widest uppercase text-white/40">
-              TE-SYSTEM // STATUTORY CALC
-            </span>
-            <div className="w-2.5 h-2.5 rounded-full border border-white/20 flex items-center justify-center">
-              <span className="w-1 h-0.5 bg-white/40 rotate-45 inline-block" />
-            </div>
-          </div>
-        </div>
-
-        {/* =========================================================================
-            RECESSED LCD DIGITAL SCREEN
-            Dark jade-tinted liquid-crystal background with high-contrast digits
-            ========================================================================= */}
-        <div className="mb-6 rounded-[14px] bg-[#0E1513] p-4 sm:p-5 border-2 border-[#121B18] shadow-[inset_0_3px_10px_rgba(0,0,0,0.8),0_1px_1px_rgba(255,255,255,0.06)] relative overflow-hidden">
-          {/* Subtle LCD Scanline Texture */}
-          <div
-            aria-hidden="true"
-            className="pointer-events-none absolute inset-0 opacity-[0.03] bg-[repeating-linear-gradient(0deg,transparent,transparent_2px,#fff_2px,#fff_3px)]"
-          />
-
-          {/* LCD Status Readout Bar */}
-          <div className="flex items-center justify-between font-mono text-[10px] tracking-wider text-[#34D399]/70 pb-2 border-b border-[#34D399]/15">
-            <div className="flex items-center gap-2">
-              <span className="inline-block px-1.5 py-0.5 rounded bg-[#34D399]/15 text-[#34D399] font-bold">
-                {selectedJur.code}
-              </span>
-              <span>VISA:{visas}</span>
-              <span>LEASE:{officeType.toUpperCase()}</span>
-            </div>
-            <div className="flex items-center gap-1.5">
-              <span className="inline-block h-1.5 w-1.5 rounded-full bg-[#34D399] animate-pulse" />
-              <span>LIVE 2026 TARIFF</span>
-            </div>
-          </div>
-
-          {/* LCD Giant Digital Total Readout */}
-          <div className="py-3 sm:py-4 flex flex-col sm:flex-row sm:items-baseline justify-between gap-2">
-            <div className="font-mono text-3xl sm:text-5xl font-normal tracking-tight text-[#34D399] drop-shadow-[0_0_12px_rgba(52,211,153,0.35)] tabular-nums">
-              <span className="text-xl sm:text-2xl mr-2 text-[#34D399]/80 font-light">AED</span>
-              {grandTotal.toLocaleString()}
-            </div>
-            <span className="text-[11px] font-mono uppercase tracking-widest text-[#34D399]/50">
-              100% Guaranteed Tariff
-            </span>
-          </div>
-
-          {/* Micro Inclusions Ticker */}
-          <div className="pt-2 border-t border-[#34D399]/15 flex items-center justify-between font-mono text-[9px] sm:text-[10px] text-[#34D399]/60">
-            <span>INCL: TRADE LICENSE + BANKING DOSSIER</span>
-            <span className="text-[#34D399] font-semibold">ZERO NOMINEE RISK</span>
-          </div>
-        </div>
-
-        {/* =========================================================================
-            TACTILE PHYSICAL CONTROLS MATRIX (BRAUN CONVEX KEYS)
-            ========================================================================= */}
-        <div className="space-y-4">
-          
-          {/* Key Group 1: Jurisdiction Selector Keys */}
+        {/* Top Header */}
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-6 border-b border-[#0C2D48]/10">
           <div>
-            <div className="flex items-center justify-between px-1 mb-2 font-mono text-[10px] uppercase tracking-widest text-white/50">
-              <span>01 // SELECT JURISDICTION</span>
-              <span className="text-[#E8A72E]">REQUIRED</span>
+            <div className="inline-flex items-center gap-2 px-2.5 py-1 rounded-full bg-[#22C55E]/10 border border-[#22C55E]/20 text-[#16A34A] text-[11px] font-mono font-semibold uppercase tracking-wider mb-1.5">
+              <span className="w-1.5 h-1.5 rounded-full bg-[#22C55E] animate-pulse" />
+              2026 STATUTORY TARIFFS VERIFIED
             </div>
-            <div className="grid grid-cols-3 gap-2">
+            <h3 className="text-xl sm:text-2xl font-heading font-semibold text-[#0C2D48] tracking-tight">
+              Instant Formation Cost Calculator
+            </h3>
+          </div>
+          <button
+            type="button"
+            onClick={() => navigate(ROUTES.costCalculator)}
+            className="text-xs font-mono text-[#0C2D48]/70 hover:text-[#0C2D48] underline underline-offset-4 shrink-0 transition-colors"
+          >
+            Full Breakdown &rarr;
+          </button>
+        </div>
+
+        {/* Form Controls */}
+        <div className="space-y-6 pt-6">
+          {/* 1. Jurisdiction Selector */}
+          <div>
+            <label className="block text-xs font-mono uppercase tracking-wider text-[#0C2D48]/70 mb-3">
+              1. Choose Jurisdiction Structure
+            </label>
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
               {JURISDICTIONS.map((jur) => {
-                const isSelected = jur.id === jurisdiction;
+                const isSelected = jurisdiction === jur.id;
+                const Icon = jur.icon;
                 return (
                   <button
                     key={jur.id}
                     type="button"
-                    onClick={() => {
-                      triggerButtonFeedback(jur.id);
-                      setJurisdiction(jur.id);
-                    }}
-                    className={`relative group rounded-xl p-3 text-left transition-all duration-150 border flex flex-col justify-between h-[68px] ${
+                    onClick={() => setJurisdiction(jur.id)}
+                    className={`flex flex-col text-left p-3.5 rounded-xl border transition-all ${
                       isSelected
-                        ? 'bg-[#25282C] border-[#34D399] shadow-[0_0_12px_rgba(52,211,153,0.25),inset_0_1px_1px_rgba(255,255,255,0.2)] text-white'
-                        : 'bg-[#202225] border-[#2C2F33] text-white/70 hover:bg-[#25282B] hover:text-white shadow-[inset_0_1px_1px_rgba(255,255,255,0.06),0_2px_4px_rgba(0,0,0,0.3)]'
-                    } ${activeButton === jur.id ? 'scale-[0.97]' : ''}`}
+                        ? 'border-[#0C2D48] bg-[#0C2D48]/[0.03] ring-2 ring-[#0C2D48]/10 shadow-sm'
+                        : 'border-[#0C2D48]/10 hover:border-[#0C2D48]/30 bg-white'
+                    }`}
                   >
-                    <div className="flex items-center justify-between w-full">
-                      <span className="font-mono text-[9px] uppercase tracking-wider text-white/40">
-                        {jur.code}
-                      </span>
-                      <span
-                        className={`h-2 w-2 rounded-full transition-colors ${
-                          isSelected ? 'bg-[#34D399] shadow-[0_0_6px_#34D399]' : 'bg-white/10'
-                        }`}
-                      />
+                    <div className="flex items-center justify-between mb-2">
+                      <div className={`p-1.5 rounded-lg ${isSelected ? 'bg-[#0C2D48] text-white' : 'bg-[#0C2D48]/5 text-[#0C2D48]'}`}>
+                        <Icon className="w-4 h-4" />
+                      </div>
+                      {isSelected ? (
+                        <span className="flex h-4 w-4 items-center justify-center rounded-full bg-[#22C55E] text-white">
+                          <Check className="w-2.5 h-2.5 stroke-[3]" />
+                        </span>
+                      ) : (
+                        <span className="text-[10px] font-mono text-[#0C2D48]/40">SELECT</span>
+                      )}
                     </div>
-                    <div className="font-semibold text-xs leading-tight">{jur.name.split(' (')[0]}</div>
-                    <div className="font-mono text-[10px] text-[#34D399]">{jur.taxTag}</div>
+                    <span className="text-sm font-semibold text-[#0C2D48] leading-snug">
+                      {jur.name}
+                    </span>
+                    <span className="text-[11px] text-[#0C2D48]/60 leading-tight mt-0.5">
+                      {jur.subtitle}
+                    </span>
+                    <span className="text-xs font-mono font-medium text-[#16A34A] mt-2">
+                      From AED {jur.basePrice.toLocaleString()}
+                    </span>
                   </button>
                 );
               })}
             </div>
           </div>
 
-          {/* Key Group 2: Visa Allocation & Commercial Office */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            {/* Visa Circular Numeric Buttons */}
+          {/* 2. Visas & Office Space (2 Columns in One Fold) */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-1">
+            {/* Visa Stepper */}
             <div>
-              <div className="px-1 mb-2 font-mono text-[10px] uppercase tracking-widest text-white/50">
-                02 // VISAS ALLOCATED
+              <div className="flex items-center justify-between mb-2.5">
+                <label className="text-xs font-mono uppercase tracking-wider text-[#0C2D48]/70">
+                  2. Residency Visas
+                </label>
+                <span className="text-[11px] font-mono text-[#0C2D48]/50">
+                  +AED 3,750 / visa
+                </span>
               </div>
-              <div className="grid grid-cols-4 gap-1.5">
-                {[0, 1, 2, 3].map((num) => {
-                  const isSelected = visas === num;
-                  return (
-                    <button
-                      key={num}
-                      type="button"
-                      onClick={() => {
-                        triggerButtonFeedback(`visa-${num}`);
-                        setVisas(num);
-                      }}
-                      className={`h-11 rounded-lg font-mono text-xs font-bold transition-all duration-150 border flex items-center justify-center ${
-                        isSelected
-                          ? 'bg-[#34D399] text-[#0E1513] border-[#34D399] shadow-[0_0_12px_rgba(52,211,153,0.4)]'
-                          : 'bg-[#202225] text-white/75 border-[#2C2F33] hover:bg-[#25282B] hover:text-white shadow-[inset_0_1px_1px_rgba(255,255,255,0.06)]'
-                      } ${activeButton === `visa-${num}` ? 'scale-95' : ''}`}
-                    >
-                      {num === 0 ? '0' : `+${num}`}
-                    </button>
-                  );
-                })}
+              <div className="grid grid-cols-4 gap-1.5 bg-[#0C2D48]/5 p-1 rounded-xl border border-[#0C2D48]/10">
+                {[0, 1, 2, 3].map((num) => (
+                  <button
+                    key={num}
+                    type="button"
+                    onClick={() => setVisas(num)}
+                    className={`py-2 text-center rounded-lg text-sm font-semibold transition-all ${
+                      visas === num
+                        ? 'bg-[#0C2D48] text-white shadow-sm'
+                        : 'text-[#0C2D48]/75 hover:bg-white/60'
+                    }`}
+                  >
+                    {num === 3 ? '3+' : num}
+                  </button>
+                ))}
               </div>
             </div>
 
-            {/* Office Facility Tactile Toggles */}
+            {/* Office Space Toggle */}
             <div>
-              <div className="px-1 mb-2 font-mono text-[10px] uppercase tracking-widest text-white/50">
-                03 // LEASE FACILITY
-              </div>
-              <div className="grid grid-cols-2 gap-1.5">
+              <label className="block text-xs font-mono uppercase tracking-wider text-[#0C2D48]/70 mb-2.5">
+                3. Facility &amp; Workspace
+              </label>
+              <div className="grid grid-cols-2 gap-1.5 bg-[#0C2D48]/5 p-1 rounded-xl border border-[#0C2D48]/10">
                 <button
                   type="button"
-                  onClick={() => {
-                    triggerButtonFeedback('lease-flexi');
-                    setOfficeType('flexi');
-                  }}
-                  className={`h-11 rounded-lg px-2 text-center transition-all duration-150 border flex flex-col items-center justify-center ${
+                  onClick={() => setOfficeType('flexi')}
+                  className={`py-2 px-2 text-center rounded-lg text-xs font-semibold transition-all ${
                     officeType === 'flexi'
-                      ? 'bg-[#25282C] border-[#34D399] text-white shadow-[0_0_8px_rgba(52,211,153,0.2)]'
-                      : 'bg-[#202225] border-[#2C2F33] text-white/70 hover:bg-[#25282B]'
+                      ? 'bg-[#0C2D48] text-white shadow-sm'
+                      : 'text-[#0C2D48]/75 hover:bg-white/60'
                   }`}
                 >
-                  <span className="font-semibold text-xs leading-none">Flexi Desk</span>
-                  <span className="font-mono text-[9px] text-[#34D399] mt-0.5">INCLUDED</span>
+                  Flexi Desk (0 AED)
                 </button>
                 <button
                   type="button"
-                  onClick={() => {
-                    triggerButtonFeedback('lease-physical');
-                    setOfficeType('physical');
-                  }}
-                  className={`h-11 rounded-lg px-2 text-center transition-all duration-150 border flex flex-col items-center justify-center ${
+                  onClick={() => setOfficeType('physical')}
+                  className={`py-2 px-2 text-center rounded-lg text-xs font-semibold transition-all ${
                     officeType === 'physical'
-                      ? 'bg-[#25282C] border-[#34D399] text-white shadow-[0_0_8px_rgba(52,211,153,0.2)]'
-                      : 'bg-[#202225] border-[#2C2F33] text-white/70 hover:bg-[#25282B]'
+                      ? 'bg-[#0C2D48] text-white shadow-sm'
+                      : 'text-[#0C2D48]/75 hover:bg-white/60'
                   }`}
                 >
-                  <span className="font-semibold text-xs leading-none">Physical</span>
-                  <span className="font-mono text-[9px] text-[#34D399] mt-0.5">+12K AED</span>
+                  Physical (+12k)
                 </button>
               </div>
             </div>
           </div>
 
-          {/* Terminal Input Bar & Braun Trigger Key */}
-          {isSubmitted ? (
-            <div className="p-4 rounded-xl bg-[#0E1513] border border-[#34D399]/40 text-[#FBFBFB] flex items-center gap-3">
-              <div className="w-7 h-7 rounded-full bg-[#34D399]/20 flex items-center justify-center text-[#34D399] shrink-0">
-                <Check className="w-4 h-4" />
+          {/* 3. Live Price Result Card */}
+          <div className="rounded-xl bg-[#0C2D48] text-white p-5 sm:p-6 shadow-md relative overflow-hidden">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+              <div>
+                <span className="text-[11px] font-mono uppercase tracking-widest text-[#22C55E] block mb-1">
+                  TOTAL ESTIMATED STATUTORY FEE
+                </span>
+                <div className="flex items-baseline gap-2.5">
+                  <span className="text-3xl sm:text-4xl font-heading font-semibold text-white tracking-tight">
+                    AED {grandTotal.toLocaleString()}
+                  </span>
+                  <span className="text-xs sm:text-sm font-mono text-white/60">
+                    (&asymp; ${usdTotal.toLocaleString()} USD)
+                  </span>
+                </div>
               </div>
-              <div className="text-xs">
-                <span className="font-bold text-sm text-[#34D399] block">DOSSIER DISPATCHED</span>
-                Your itemized 2026 tariff breakdown has been sent. An accredited legal structuring partner will follow up.
+
+              {/* Line items mini-pill */}
+              <div className="flex flex-wrap gap-2 text-[11px] font-mono text-white/80 border-t sm:border-t-0 sm:border-l border-white/10 pt-3 sm:pt-0 sm:pl-4">
+                <span className="bg-white/10 px-2 py-0.5 rounded">
+                  License: AED {selectedJur.basePrice.toLocaleString()}
+                </span>
+                <span className="bg-white/10 px-2 py-0.5 rounded">
+                  Visas: AED {visaPrice.toLocaleString()}
+                </span>
+                <span className="bg-white/10 px-2 py-0.5 rounded">
+                  Office: {officePrice === 0 ? 'Included' : `AED ${officePrice.toLocaleString()}`}
+                </span>
               </div>
             </div>
-          ) : (
-            <form onSubmit={handleSubmit} className="pt-2 space-y-2">
-              <div className="relative">
+          </div>
+
+          {/* 4. Instant Quote Capture / Dispatch */}
+          <div>
+            {!isSubmitted ? (
+              <form onSubmit={handleSubmit} className="flex flex-col sm:flex-row gap-2.5">
                 <input
                   type="text"
                   required
-                  placeholder="ENTER WHATSAPP OR WORK EMAIL"
                   value={contactInput}
                   onChange={(e) => setContactInput(e.target.value)}
-                  className="w-full bg-[#121416] border border-[#2A2D32] rounded-xl px-4 py-3.5 text-xs font-mono text-white placeholder-white/35 focus:outline-none focus:border-[#34D399] shadow-inner tracking-wider"
+                  placeholder="Enter email or WhatsApp (+971...)"
+                  className="flex-1 px-4 py-3 rounded-xl border border-[#0C2D48]/15 text-sm text-[#0C2D48] placeholder:text-[#0C2D48]/40 focus:outline-none focus:ring-2 focus:ring-[#22C55E]/40 focus:border-[#22C55E]"
                 />
+                <button
+                  type="submit"
+                  disabled={isSubmitting}
+                  className="px-6 py-3 rounded-xl bg-[#22C55E] hover:bg-[#16A34A] text-white font-medium text-sm flex items-center justify-center gap-2 shadow-sm transition-all shrink-0 disabled:opacity-50"
+                >
+                  {isSubmitting ? (
+                    'Sending...'
+                  ) : (
+                    <>
+                      <span>Get Official Quote</span>
+                      <ArrowRight className="w-4 h-4" />
+                    </>
+                  )}
+                </button>
+              </form>
+            ) : (
+              <div className="p-4 rounded-xl bg-[#22C55E]/10 border border-[#22C55E]/20 text-[#16A34A] text-sm flex items-center justify-between">
+                <div className="flex items-center gap-2.5">
+                  <Check className="w-5 h-5 stroke-[2.5]" />
+                  <span className="font-medium">
+                    Verified estimate dispatched! Our senior structuring director will reach out shortly.
+                  </span>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setIsSubmitted(false)}
+                  className="text-xs underline font-mono text-[#16A34A] hover:text-[#15803D]"
+                >
+                  Recalculate
+                </button>
               </div>
-
-              {/* Signature Braun Large Tactile Trigger Button */}
-              <button
-                type="submit"
-                disabled={isSubmitting}
-                className="w-full h-12 rounded-xl bg-gradient-to-r from-[#22C55E] to-[#16A34A] text-[#05131F] font-bold text-xs tracking-[0.16em] uppercase transition-all duration-150 hover:brightness-110 active:translate-y-0.5 shadow-[0_4px_12px_rgba(34,197,94,0.35),inset_0_1px_1px_rgba(255,255,255,0.4)] flex items-center justify-center gap-2 font-mono disabled:opacity-50"
-              >
-                {isSubmitting ? (
-                  <span>DISPATCHING...</span>
-                ) : (
-                  <>
-                    <span>= COMPUTE &amp; DISPATCH DOSSIER =</span>
-                    <ArrowRight className="w-4 h-4" />
-                  </>
-                )}
-              </button>
-            </form>
-          )}
-
-          {/* Footer Subtext & Full Console Deep Link */}
-          <div className="pt-2 flex items-center justify-between text-[10px] font-mono text-white/40 px-1">
-            <span>OFFICIAL UAE TARIFF STANDARDS</span>
-            <button
-              onClick={() => navigate(ROUTES.costCalculator)}
-              className="text-[#34D399] hover:underline flex items-center gap-1 font-semibold"
-            >
-              <span>OPEN FULL CONSOLE</span>
-              <ArrowRight className="w-3 h-3" />
-            </button>
+            )}
           </div>
         </div>
       </div>

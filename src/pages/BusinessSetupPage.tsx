@@ -129,21 +129,24 @@ export default function BusinessSetupPage() {
       : formationServices.filter((s) => s.category === filter);
 
   return (
-    <div className="flex flex-col w-full bg-canvas-light text-text-primary-dark">
+    <div className="flex flex-col w-full bg-canvas-light text-text-primary-dark pb-24 md:pb-28">
       {/* =========================================================================
-          HERO SECTION: Obsidian Dark Canvas with Green & Amber Horizon Glow
+          HERO SECTION: Full-Motion Video Hero with Green & Amber Horizon Glow
           ========================================================================= */}
-      <section className="relative isolate min-h-[520px] lg:min-h-[620px] flex items-center overflow-hidden bg-canvas-dark text-canvas-light py-20 md:py-28 border-b border-hairline-dark/40">
-        <div className="absolute inset-0 -z-20">
-          <Image
-            src={IMAGES.heroSkyline}
-            alt="Dubai business district skyline"
-            fill
-            priority
-            sizes="100vw"
-            className="object-cover opacity-25 filter saturate-50"
-          />
-          <div className="absolute inset-0 bg-gradient-to-b from-canvas-dark/95 via-canvas-dark/85 to-canvas-dark" />
+      <section className="relative isolate min-h-[560px] lg:min-h-[660px] flex items-center overflow-hidden bg-canvas-dark text-canvas-light py-24 md:py-32 border-b border-hairline-dark/40">
+        <div className="absolute inset-0 -z-20 overflow-hidden">
+          <video
+            autoPlay
+            loop
+            muted
+            playsInline
+            poster={IMAGES.heroSkyline}
+            className="w-full h-full object-cover opacity-40 scale-105"
+            style={{ filter: 'brightness(0.9) contrast(1.1)' }}
+          >
+            <source src="/videos/equitify-hero-bg.mp4" type="video/mp4" />
+          </video>
+          <div className="absolute inset-0 bg-gradient-to-b from-[#05131F]/90 via-[#05131F]/70 to-[#05131F]" />
         </div>
 
         {/* Ambient Green Horizon Glow */}

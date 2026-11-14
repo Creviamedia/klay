@@ -1410,27 +1410,10 @@ const SHADER_SKIP_QUERY = "(hover: none), (max-width: 767px), (prefers-reduced-m
 const SHADER_START_EVENTS = ["pointermove", "pointerdown", "keydown", "wheel", "touchstart", "scroll"] as const;
 
 function whenShaderAllowed(start: () => void): () => void {
-  if (typeof window === "undefined" || window.matchMedia(SHADER_SKIP_QUERY).matches) return () => {};
-  let triggered = false;
-  let idleId = 0;
-  let timeoutId = 0;
-  const removeListeners = () => {
-    for (const type of SHADER_START_EVENTS) window.removeEventListener(type, onInteraction);
-  };
-  function onInteraction() {
-    if (triggered) return;
-    triggered = true;
-    removeListeners();
-    if (typeof window.requestIdleCallback === "function") idleId = window.requestIdleCallback(start, { timeout: 1000 });
-    else timeoutId = window.setTimeout(start, 0);
-  }
-  for (const type of SHADER_START_EVENTS) window.addEventListener(type, onInteraction, { passive: true });
-  return () => {
-    triggered = true;
-    removeListeners();
-    if (idleId) window.cancelIdleCallback(idleId);
-    if (timeoutId) window.clearTimeout(timeoutId);
-  };
+  if (typeof window === "undefined") return () => {};
+  // Execute immediately so the shader initializes on mount with zero flash or delay
+  const timer = window.setTimeout(start, 0);
+  return () => window.clearTimeout(timer);
 }
 
 var ShaderMount2 = forwardRef(
@@ -1896,7 +1879,15 @@ function TicketCard({
       className={`relative select-none ${className ?? ""}`}
       style={{ width, height, clipPath: `path('${ticketClipPath(width, height, geometry)}')` }}
     >
-        <div className="absolute inset-0" style={{ background: texture.colorBack }} />
+        <div
+          className="absolute inset-0"
+          style={{
+            background:
+              texture.colorFront && texture.colorHighlight
+                ? `linear-gradient(135deg, ${texture.colorBack || '#1a1305'} 0%, #3d2b0f 25%, #78531a 50%, ${texture.colorFront} 75%, ${texture.colorHighlight} 90%, #9a7b1c 100%)`
+                : texture.colorBack || '#1a1305',
+          }}
+        />
         {texture.engine === "image" && sourceImage ? (
           <ImageDithering
             image={sourceImage}

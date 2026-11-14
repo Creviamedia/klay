@@ -15,12 +15,13 @@ import {
   Briefcase,
   Users,
   ShieldCheck,
-  Sparkles,
-  Download,
-  Printer,
   Check,
   Send,
   HelpCircle,
+  ArrowRight,
+  Landmark,
+  FileText,
+  BadgeCheck,
 } from 'lucide-react';
 
 export function CostCalculator() {
@@ -102,33 +103,33 @@ export function CostCalculator() {
   };
 
   return (
-    <div className="w-full max-w-5xl mx-auto rounded-[24px] bg-[#16181A] border border-[#2B2E33] shadow-[0_30px_70px_rgba(0,0,0,0.65),inset_0_1px_1px_rgba(255,255,255,0.1)] overflow-hidden text-white font-sans">
+    <div className="w-full max-w-6xl mx-auto rounded-2xl bg-white border border-[#0C2D48]/12 shadow-[0_20px_50px_rgba(12,45,72,0.06)] overflow-hidden text-[#0C2D48] font-sans">
       
       {/* =========================================================================
-          CONSOLE TOP BAR (DIETER RAMS / TEENAGE ENGINEERING INSPIRATION)
+          TOP EXECUTIVE HEADER BAR
           ========================================================================= */}
-      <div className="bg-[#1F2226] border-b border-[#2D3035] px-6 py-4 sm:px-8 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        <div className="flex items-center gap-3">
-          <div className="h-3 w-3 rounded-full bg-[#34D399] shadow-[0_0_10px_#34D399] animate-pulse" />
-          <div>
-            <div className="font-mono text-[10px] tracking-[0.25em] uppercase text-white/50">
-              OPERATING CONSOLE // 2026 OFFICIAL TARIFF
-            </div>
-            <div className="font-mono text-sm font-bold text-white tracking-wider">
-              UAE SOVEREIGN INCORPORATION COMPUTER
-            </div>
+      <div className="bg-[#FAFBFD] border-b border-[#0C2D48]/10 px-6 py-5 sm:px-8 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div>
+          <div className="flex items-center gap-2 mb-1">
+            <span className="h-2 w-2 rounded-full bg-[#22C55E] animate-pulse" />
+            <span className="font-mono text-[11px] font-semibold tracking-wider uppercase text-[#16A34A]">
+              2026 STATUTORY TARIFF SCHEDULE
+            </span>
           </div>
+          <h2 className="text-xl sm:text-2xl font-heading font-semibold text-[#0C2D48] tracking-tight">
+            UAE Company Formation Cost Calculator
+          </h2>
         </div>
 
-        {/* Currency Hardware Toggle */}
-        <div className="flex items-center gap-1 bg-[#121416] p-1 rounded-lg border border-[#2D3035] self-start sm:self-auto">
+        {/* Currency Switch */}
+        <div className="flex items-center gap-1 bg-white p-1 rounded-xl border border-[#0C2D48]/10 shadow-sm self-start sm:self-auto">
           <button
             type="button"
             onClick={() => setCurrency('AED')}
-            className={`px-3 py-1 font-mono text-xs font-bold rounded transition-all ${
+            className={`px-3.5 py-1.5 font-mono text-xs font-semibold rounded-lg transition-all ${
               currency === 'AED'
-                ? 'bg-[#34D399] text-[#0E1513] shadow-[0_0_8px_rgba(52,211,153,0.3)]'
-                : 'text-white/60 hover:text-white'
+                ? 'bg-[#0C2D48] text-white shadow-sm'
+                : 'text-[#0C2D48]/60 hover:text-[#0C2D48]'
             }`}
           >
             AED
@@ -136,10 +137,10 @@ export function CostCalculator() {
           <button
             type="button"
             onClick={() => setCurrency('USD')}
-            className={`px-3 py-1 font-mono text-xs font-bold rounded transition-all ${
+            className={`px-3.5 py-1.5 font-mono text-xs font-semibold rounded-lg transition-all ${
               currency === 'USD'
-                ? 'bg-[#34D399] text-[#0E1513] shadow-[0_0_8px_rgba(52,211,153,0.3)]'
-                : 'text-white/60 hover:text-white'
+                ? 'bg-[#0C2D48] text-white shadow-sm'
+                : 'text-[#0C2D48]/60 hover:text-[#0C2D48]'
             }`}
           >
             USD
@@ -148,209 +149,203 @@ export function CostCalculator() {
       </div>
 
       {/* =========================================================================
-          RECESSED DUAL LCD READOUT DISPLAY TAPE
+          TWO-COLUMN EXECUTIVE WORKSPACE (ONE-FOLD FRIENDLY)
           ========================================================================= */}
-      <div className="bg-[#0C1210] p-6 sm:p-8 border-b border-[#1A221E] relative overflow-hidden">
-        <div className="grid grid-cols-1 lg:grid-cols-[1.2fr_0.8fr] gap-6 items-end">
-          <div>
-            <div className="flex items-center gap-2 font-mono text-[11px] text-[#34D399]/70 uppercase tracking-widest mb-2">
-              <span className="h-1.5 w-1.5 rounded-full bg-[#34D399]" />
-              <span>SYSTEM OUTPUT // ESTIMATED STATUTORY INVESTMENT</span>
-            </div>
-            <div className="font-mono text-4xl sm:text-6xl font-normal text-[#34D399] drop-shadow-[0_0_15px_rgba(52,211,153,0.4)] tabular-nums">
-              {displayTotal}
-            </div>
-            <div className="mt-2 font-mono text-xs text-[#34D399]/50 tracking-wider">
-              INCLUDES MANDATORY GOVERNMENT FEES &amp; STATUTORY FILINGS
-            </div>
-          </div>
-
-          <div className="bg-[#121B17] p-4 rounded-xl border border-[#34D399]/20 font-mono text-xs text-[#34D399]/80 space-y-1.5">
-            <div className="flex justify-between">
-              <span className="text-white/50">JURISDICTION:</span>
-              <span className="font-semibold text-white">{calculation.jurisdictionName}</span>
-            </div>
-            <div className="flex justify-between">
-              <span className="text-white/50">RESIDENCY VISAS:</span>
-              <span>{investorVisas} Investor / {employeeVisas} Employee</span>
-            </div>
-            <div className="flex justify-between">
-              <span className="text-white/50">PREMISES:</span>
-              <span>{officeType === 'flexi-desk' ? 'Flexi Desk (0 AED)' : 'Executive Office'}</span>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* =========================================================================
-          TACTILE CONTROLS GRID (Braun & Teenage Engineering Grammar)
-          ========================================================================= */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 divide-y lg:divide-y-0 lg:divide-x divide-[#2D3035]">
+      <div className="grid grid-cols-1 lg:grid-cols-12 divide-y lg:divide-y-0 lg:divide-x divide-[#0C2D48]/10">
         
         {/* Left Column: Form Controls (7 cols) */}
-        <div className="lg:col-span-7 p-6 sm:p-8 space-y-8">
+        <div className="lg:col-span-7 p-6 sm:p-8 space-y-7">
           
           {/* Step 1: Select Jurisdiction */}
           <div>
-            <div className="flex items-center justify-between mb-3 font-mono text-xs uppercase tracking-widest text-white/50">
-              <span className="flex items-center gap-2">
-                <span className="h-5 w-5 rounded bg-[#25282C] border border-white/20 text-white flex items-center justify-center text-[10px] font-bold">1</span>
-                <span>Select Legal Jurisdiction</span>
+            <div className="flex items-center justify-between mb-3">
+              <label className="text-xs font-mono uppercase tracking-wider text-[#0C2D48]/70 font-semibold flex items-center gap-2">
+                <span className="h-5 w-5 rounded bg-[#0C2D48] text-white flex items-center justify-center text-[10px]">1</span>
+                <span>Select Jurisdiction</span>
+              </label>
+              <span className="text-[11px] font-mono text-[#16A34A] bg-[#22C55E]/10 px-2 py-0.5 rounded">
+                VERIFIED TARIFFS
               </span>
-              <span className="text-[#34D399]">REQUIRED</span>
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
-              {(Object.keys(JURISDICTIONS) as JurisdictionId[]).map((id) => {
-                const j = JURISDICTIONS[id];
-                const isSelected = jurisdiction === id;
+              {Object.values(JURISDICTIONS).map((jur) => {
+                const isSelected = jurisdiction === jur.id;
                 return (
                   <button
-                    key={id}
+                    key={jur.id}
                     type="button"
-                    onClick={() => {
-                      setJurisdiction(id);
-                      if (id === 'offshore-rak') {
-                        setInvestorVisas(0);
-                        setEmployeeVisas(0);
-                      }
-                    }}
-                    className={`text-left p-4 rounded-xl border transition-all duration-150 relative ${
+                    onClick={() => setJurisdiction(jur.id)}
+                    className={`p-3.5 rounded-xl border text-left transition-all ${
                       isSelected
-                        ? 'border-[#34D399] bg-[#1E2724] ring-1 ring-[#34D399] shadow-[0_0_12px_rgba(52,211,153,0.2)]'
-                        : 'border-[#2D3035] bg-[#1B1D20] text-white/70 hover:bg-[#202327] hover:border-white/20'
+                        ? 'border-[#0C2D48] bg-[#0C2D48]/[0.03] ring-2 ring-[#0C2D48]/10 shadow-sm'
+                        : 'border-[#0C2D48]/10 hover:border-[#0C2D48]/25 bg-white'
+                    }`}
+                  >
+                    <div className="flex items-center justify-between mb-1.5">
+                      <span className="text-xs font-mono font-medium text-[#0C2D48]/60 uppercase">
+                        {jur.category.toUpperCase()}
+                      </span>
+                      {isSelected && (
+                        <span className="flex h-4 w-4 items-center justify-center rounded-full bg-[#22C55E] text-white">
+                          <Check className="w-2.5 h-2.5 stroke-[3]" />
+                        </span>
+                      )}
+                    </div>
+                    <div className="text-sm font-semibold text-[#0C2D48] leading-tight">
+                      {jur.name}
+                    </div>
+                    <div className="text-[11px] text-[#0C2D48]/65 mt-1 leading-snug">
+                      {jur.description}
+                    </div>
+                    <div className="mt-2 text-xs font-mono font-semibold text-[#16A34A]">
+                      Base: AED {jur.baseLicenceAed.toLocaleString()}
+                    </div>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* Step 2: Activity Category */}
+          <div>
+            <label className="text-xs font-mono uppercase tracking-wider text-[#0C2D48]/70 font-semibold flex items-center gap-2 mb-3">
+              <span className="h-5 w-5 rounded bg-[#0C2D48] text-white flex items-center justify-center text-[10px]">2</span>
+              <span>Primary Commercial Activity</span>
+            </label>
+
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+              {Object.values(ACTIVITIES).map((act) => {
+                const isSelected = activityType === act.id;
+                return (
+                  <button
+                    key={act.id}
+                    type="button"
+                    onClick={() => setActivityType(act.id)}
+                    className={`p-3 rounded-xl border text-center transition-all ${
+                      isSelected
+                        ? 'border-[#0C2D48] bg-[#0C2D48] text-white shadow-sm'
+                        : 'border-[#0C2D48]/10 bg-white text-[#0C2D48] hover:border-[#0C2D48]/25'
+                    }`}
+                  >
+                    <div className="text-xs font-semibold leading-tight">{act.name}</div>
+                    <div className={`text-[10px] font-mono mt-1 ${isSelected ? 'text-[#22C55E]' : 'text-[#0C2D48]/60'}`}>
+                      {act.extraFeeAed === 0 ? 'Included' : `+AED ${act.extraFeeAed.toLocaleString()}`}
+                    </div>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* Step 3: Visas & Office (Side by Side) */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            {/* Investor & Employee Visas */}
+            <div className="p-4 rounded-xl border border-[#0C2D48]/10 bg-[#FAFBFD]">
+              <div className="text-xs font-mono uppercase tracking-wider text-[#0C2D48]/70 font-semibold mb-3 flex items-center justify-between">
+                <span>Residency Visas</span>
+                <span className="text-[10px] text-[#0C2D48]/50">+AED 3,750/ea</span>
+              </div>
+              
+              <div className="space-y-3">
+                <div className="flex items-center justify-between">
+                  <span className="text-xs text-[#0C2D48] font-medium">Investor / Partner:</span>
+                  <div className="flex items-center gap-1.5">
+                    {[0, 1, 2, 3].map((v) => (
+                      <button
+                        key={v}
+                        type="button"
+                        onClick={() => setInvestorVisas(v)}
+                        className={`w-7 h-7 rounded text-xs font-semibold ${
+                          investorVisas === v ? 'bg-[#0C2D48] text-white' : 'bg-white border border-[#0C2D48]/15 text-[#0C2D48]'
+                        }`}
+                      >
+                        {v}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="flex items-center justify-between pt-2 border-t border-[#0C2D48]/10">
+                  <span className="text-xs text-[#0C2D48] font-medium">Employee Quota:</span>
+                  <div className="flex items-center gap-1.5">
+                    {[0, 1, 2, 5].map((v) => (
+                      <button
+                        key={v}
+                        type="button"
+                        onClick={() => setEmployeeVisas(v)}
+                        className={`w-7 h-7 rounded text-xs font-semibold ${
+                          employeeVisas === v ? 'bg-[#0C2D48] text-white' : 'bg-white border border-[#0C2D48]/15 text-[#0C2D48]'
+                        }`}
+                      >
+                        {v}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Office Premises */}
+            <div className="p-4 rounded-xl border border-[#0C2D48]/10 bg-[#FAFBFD]">
+              <div className="text-xs font-mono uppercase tracking-wider text-[#0C2D48]/70 font-semibold mb-3">
+                Workspace / Facility
+              </div>
+              <div className="space-y-2">
+                {Object.values(OFFICE_SPACES).map((off) => {
+                  const isSelected = officeType === off.id;
+                  return (
+                    <button
+                      key={off.id}
+                      type="button"
+                      onClick={() => setOfficeType(off.id)}
+                      className={`w-full p-2.5 rounded-lg border text-left flex items-center justify-between transition-all ${
+                        isSelected
+                          ? 'border-[#0C2D48] bg-white ring-1 ring-[#0C2D48] shadow-sm'
+                          : 'border-[#0C2D48]/10 bg-white/70 hover:bg-white text-[#0C2D48]/80'
+                      }`}
+                    >
+                      <span className="text-xs font-medium text-[#0C2D48]">{off.name}</span>
+                      <span className="text-[11px] font-mono text-[#16A34A] font-semibold">
+                        {off.costAed === 0 ? 'Included' : `+AED ${off.costAed.toLocaleString()}`}
+                      </span>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          </div>
+
+          {/* Step 4: Statutory Compliance Services */}
+          <div>
+            <label className="text-xs font-mono uppercase tracking-wider text-[#0C2D48]/70 font-semibold block mb-2.5">
+              Statutory Services &amp; Banking
+            </label>
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+              {Object.values(ADDON_SERVICES).map((addon) => {
+                const isChecked = addOns[addon.id as keyof typeof addOns];
+                return (
+                  <button
+                    key={addon.id}
+                    type="button"
+                    onClick={() =>
+                      setAddOns((prev) => ({
+                        ...prev,
+                        [addon.id]: !prev[addon.id as keyof typeof prev],
+                      }))
+                    }
+                    className={`p-2.5 rounded-xl border text-left transition-all ${
+                      isChecked
+                        ? 'border-[#22C55E] bg-[#22C55E]/5 text-[#0C2D48]'
+                        : 'border-[#0C2D48]/10 bg-white text-[#0C2D48]/60'
                     }`}
                   >
                     <div className="flex items-center justify-between mb-1">
-                      <span className="font-mono text-[10px] uppercase tracking-wider text-[#34D399]">
-                        {j.category}
-                      </span>
-                      <span className="font-mono text-xs font-bold text-white">
-                        AED {j.baseLicenceAed.toLocaleString()}
-                      </span>
+                      <span className="text-[11px] font-semibold truncate">{addon.name}</span>
+                      {isChecked && <Check className="w-3.5 h-3.5 text-[#16A34A] shrink-0" />}
                     </div>
-                    <div className="font-bold text-sm text-white">{j.name}</div>
-                    <p className="font-mono text-[11px] text-white/50 mt-1 line-clamp-2">{j.description}</p>
-                  </button>
-                );
-              })}
-            </div>
-          </div>
-
-          {/* Step 2: Commercial Activity */}
-          <div>
-            <div className="flex items-center justify-between mb-3 font-mono text-xs uppercase tracking-widest text-white/50">
-              <span className="flex items-center gap-2">
-                <span className="h-5 w-5 rounded bg-[#25282C] border border-white/20 text-white flex items-center justify-center text-[10px] font-bold">2</span>
-                <span>Commercial Activity Class</span>
-              </span>
-            </div>
-
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
-              {(Object.keys(ACTIVITIES) as ActivityTypeId[]).map((id) => {
-                const a = ACTIVITIES[id];
-                const isSelected = activityType === id;
-                return (
-                  <button
-                    key={id}
-                    type="button"
-                    onClick={() => setActivityType(id)}
-                    className={`p-3 rounded-lg border text-center transition-all duration-150 ${
-                      isSelected
-                        ? 'border-[#34D399] bg-[#1E2724] text-white ring-1 ring-[#34D399]'
-                        : 'border-[#2D3035] bg-[#1B1D20] text-white/70 hover:bg-[#202327]'
-                    }`}
-                  >
-                    <div className="font-mono text-[10px] font-bold uppercase">{a.name}</div>
-                  </button>
-                );
-              })}
-            </div>
-          </div>
-
-          {/* Step 3: Residency Visas */}
-          <div>
-            <div className="flex items-center justify-between mb-3 font-mono text-xs uppercase tracking-widest text-white/50">
-              <span className="flex items-center gap-2">
-                <span className="h-5 w-5 rounded bg-[#25282C] border border-white/20 text-white flex items-center justify-center text-[10px] font-bold">3</span>
-                <span>Residency Visas Required</span>
-              </span>
-            </div>
-
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div>
-                <label className="block font-mono text-[10px] text-white/60 mb-2 uppercase">
-                  Investor / Partner Visas
-                </label>
-                <div className="flex items-center gap-1.5">
-                  {[0, 1, 2, 3].map((num) => (
-                    <button
-                      key={num}
-                      type="button"
-                      onClick={() => setInvestorVisas(num)}
-                      className={`flex-1 h-10 rounded font-mono text-xs font-bold border transition ${
-                        investorVisas === num
-                          ? 'bg-[#34D399] text-[#0E1513] border-[#34D399]'
-                          : 'bg-[#1B1D20] text-white/70 border-[#2D3035] hover:bg-[#202327]'
-                      }`}
-                    >
-                      {num}
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              <div>
-                <label className="block font-mono text-[10px] text-white/60 mb-2 uppercase">
-                  Employee Visas
-                </label>
-                <div className="flex items-center gap-1.5">
-                  {[0, 1, 2, 3].map((num) => (
-                    <button
-                      key={num}
-                      type="button"
-                      onClick={() => setEmployeeVisas(num)}
-                      className={`flex-1 h-10 rounded font-mono text-xs font-bold border transition ${
-                        employeeVisas === num
-                          ? 'bg-[#34D399] text-[#0E1513] border-[#34D399]'
-                          : 'bg-[#1B1D20] text-white/70 border-[#2D3035] hover:bg-[#202327]'
-                      }`}
-                    >
-                      {num}
-                    </button>
-                  ))}
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Step 4: Office Facility */}
-          <div>
-            <div className="flex items-center justify-between mb-3 font-mono text-xs uppercase tracking-widest text-white/50">
-              <span className="flex items-center gap-2">
-                <span className="h-5 w-5 rounded bg-[#25282C] border border-white/20 text-white flex items-center justify-center text-[10px] font-bold">4</span>
-                <span>Commercial Office Facility</span>
-              </span>
-            </div>
-
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
-              {(Object.keys(OFFICE_SPACES) as OfficeTypeId[]).map((id) => {
-                const off = OFFICE_SPACES[id];
-                const isSelected = officeType === id;
-                return (
-                  <button
-                    key={id}
-                    type="button"
-                    onClick={() => setOfficeType(id)}
-                    className={`p-3 rounded-lg border text-left transition-all duration-150 ${
-                      isSelected
-                        ? 'border-[#34D399] bg-[#1E2724] text-white ring-1 ring-[#34D399]'
-                        : 'border-[#2D3035] bg-[#1B1D20] text-white/70 hover:bg-[#202327]'
-                    }`}
-                  >
-                    <div className="font-semibold text-xs text-white">{off.name}</div>
-                    <div className="font-mono text-[10px] text-[#34D399] mt-0.5">
-                      {off.costAed === 0 ? 'INCLUDED' : `+AED ${off.costAed.toLocaleString()}`}
+                    <div className="text-[10px] font-mono text-[#16A34A]">
+                      {addon.costAed === 0 ? 'Complimentary' : `+AED ${addon.costAed.toLocaleString()}`}
                     </div>
                   </button>
                 );
@@ -359,80 +354,121 @@ export function CostCalculator() {
           </div>
         </div>
 
-        {/* Right Column: Itemized Tariff Ledger & Proposal Request (5 cols) */}
-        <div className="lg:col-span-5 p-6 sm:p-8 bg-[#131517] flex flex-col justify-between">
+        {/* Right Column: Dynamic Price Ledger & 1-Tap Proposal (5 cols) */}
+        <div className="lg:col-span-5 bg-[#FAFBFD] p-6 sm:p-8 flex flex-col justify-between">
           <div>
-            <div className="flex items-center justify-between mb-4 pb-3 border-b border-[#2D3035]">
-              <span className="font-mono text-xs uppercase tracking-widest text-[#34D399]">
-                ITEMIZED STATUTORY LEDGER
+            {/* Live Fee Ledger */}
+            <div className="rounded-2xl bg-[#0C2D48] text-white p-6 shadow-md mb-6">
+              <span className="text-[11px] font-mono uppercase tracking-widest text-[#22C55E] block mb-1">
+                ESTIMATED STATUTORY INVESTMENT
               </span>
-              <span className="font-mono text-[10px] text-white/40">2026 SCHEDULE</span>
-            </div>
+              <div className="text-3xl sm:text-4xl font-heading font-semibold text-white tracking-tight tabular-nums">
+                {displayTotal}
+              </div>
+              <div className="mt-1 text-xs font-mono text-white/60">
+                Official Government Tariff Schedule
+              </div>
 
-            <div className="space-y-3 font-mono text-xs">
-              {calculation.breakdown.map((item, idx) => (
-                <div key={idx} className="flex justify-between py-1 border-b border-[#2D3035]/60 text-white/80">
-                  <span className="text-white/60">{item.label}</span>
-                  <span className="text-white font-semibold">AED {item.amountAed.toLocaleString()}</span>
+              {/* Mini Summary */}
+              <div className="mt-4 pt-4 border-t border-white/10 space-y-1.5 text-xs font-mono text-white/80">
+                <div className="flex justify-between">
+                  <span className="text-white/60">Jurisdiction:</span>
+                  <span className="font-semibold text-white">{calculation.jurisdictionName}</span>
                 </div>
-              ))}
+                <div className="flex justify-between">
+                  <span className="text-white/60">Residency Visas:</span>
+                  <span>{investorVisas} Investor / {employeeVisas} Employee</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-white/60">Premises:</span>
+                  <span>{officeType === 'flexi-desk' ? 'Flexi Desk (0 AED)' : 'Executive Office'}</span>
+                </div>
+              </div>
             </div>
 
-            <div className="mt-6 pt-4 border-t-2 border-[#34D399]/40 flex justify-between font-mono text-sm">
-              <span className="text-white font-bold">TOTAL STATUTORY TARIFF</span>
-              <span className="text-[#34D399] font-bold">{displayTotal}</span>
+            {/* Line Item Breakdown */}
+            <div className="bg-white rounded-xl border border-[#0C2D48]/10 p-4 mb-6 shadow-sm">
+              <div className="text-xs font-mono uppercase tracking-wider text-[#0C2D48]/70 font-semibold mb-3">
+                Itemized Statutory Fees
+              </div>
+              <div className="space-y-2 max-h-48 overflow-y-auto pr-1">
+                {calculation.breakdown.map((item, idx) => (
+                  <div key={idx} className="flex justify-between text-xs py-1 border-b border-[#0C2D48]/5 last:border-b-0">
+                    <span className="text-[#0C2D48]/75 truncate max-w-[200px]">{item.label}</span>
+                    <span className="font-mono font-medium text-[#0C2D48]">
+                      AED {item.amountAed.toLocaleString()}
+                    </span>
+                  </div>
+                ))}
+              </div>
             </div>
           </div>
 
-          {/* Lead Proposal Form */}
-          <div className="mt-8 pt-6 border-t border-[#2D3035]">
-            {submitSuccess ? (
-              <div className="p-4 rounded-xl bg-[#0E1513] border border-[#34D399] text-center font-mono">
-                <Check className="w-6 h-6 text-[#34D399] mx-auto mb-2" />
-                <div className="text-sm font-bold text-white mb-1">PROPOSAL LOCKED</div>
-                <div className="text-xs text-[#34D399]">Ref: {submitSuccess}</div>
-                <p className="text-[11px] text-white/60 mt-2">
-                  Our corporate structuring director will reach out within 4 business hours.
-                </p>
-              </div>
-            ) : (
+          {/* Lead Dispatch Form */}
+          <div className="bg-white rounded-xl border border-[#0C2D48]/10 p-5 shadow-sm">
+            {!submitSuccess ? (
               <form onSubmit={handleLeadSubmit} className="space-y-3">
-                <div className="font-mono text-[10px] uppercase tracking-wider text-white/50 mb-2">
-                  REQUEST OFFICIAL ITEMIZED DOSSIER
+                <div className="text-xs font-semibold text-[#0C2D48] mb-1">
+                  Request Official Proposal &amp; Dossier
                 </div>
                 <input
                   type="text"
                   required
-                  placeholder="Full Name"
                   value={leadName}
                   onChange={(e) => setLeadName(e.target.value)}
-                  className="w-full bg-[#1A1C1E] border border-[#2D3035] rounded-lg px-3 py-2 text-xs text-white placeholder-white/30 focus:outline-none focus:border-[#34D399] font-sans"
+                  placeholder="Full Name"
+                  className="w-full px-3.5 py-2.5 rounded-lg border border-[#0C2D48]/15 text-xs text-[#0C2D48] placeholder:text-[#0C2D48]/40 focus:outline-none focus:border-[#22C55E]"
                 />
                 <input
                   type="email"
                   required
-                  placeholder="Work Email"
                   value={leadEmail}
                   onChange={(e) => setLeadEmail(e.target.value)}
-                  className="w-full bg-[#1A1C1E] border border-[#2D3035] rounded-lg px-3 py-2 text-xs text-white placeholder-white/30 focus:outline-none focus:border-[#34D399] font-sans"
+                  placeholder="Work Email"
+                  className="w-full px-3.5 py-2.5 rounded-lg border border-[#0C2D48]/15 text-xs text-[#0C2D48] placeholder:text-[#0C2D48]/40 focus:outline-none focus:border-[#22C55E]"
                 />
                 <input
                   type="tel"
                   required
-                  placeholder="WhatsApp / Phone Number"
                   value={leadPhone}
                   onChange={(e) => setLeadPhone(e.target.value)}
-                  className="w-full bg-[#1A1C1E] border border-[#2D3035] rounded-lg px-3 py-2 text-xs text-white placeholder-white/30 focus:outline-none focus:border-[#34D399] font-sans"
+                  placeholder="WhatsApp / Phone (+971...)"
+                  className="w-full px-3.5 py-2.5 rounded-lg border border-[#0C2D48]/15 text-xs text-[#0C2D48] placeholder:text-[#0C2D48]/40 focus:outline-none focus:border-[#22C55E]"
                 />
-
                 <button
                   type="submit"
                   disabled={isSubmitting}
-                  className="w-full py-3 rounded-lg bg-[#34D399] text-[#0E1513] font-bold text-xs tracking-wider uppercase hover:bg-[#34D399]/90 active:scale-[0.99] transition font-mono shadow-[0_0_12px_rgba(52,211,153,0.3)] disabled:opacity-50"
+                  className="w-full py-3 rounded-xl bg-[#22C55E] hover:bg-[#16A34A] text-white font-medium text-xs flex items-center justify-center gap-2 shadow-sm transition-all disabled:opacity-50"
                 >
-                  {isSubmitting ? 'DISPATCHING...' : '= LOCK & RECEIVE OFFICIAL QUOTE ='}
+                  {isSubmitting ? (
+                    'Preparing Official Dossier...'
+                  ) : (
+                    <>
+                      <span>Receive Verified Breakdown &amp; PDF</span>
+                      <ArrowRight className="w-4 h-4" />
+                    </>
+                  )}
                 </button>
               </form>
+            ) : (
+              <div className="p-4 rounded-xl bg-[#22C55E]/10 border border-[#22C55E]/20 text-center space-y-2">
+                <div className="inline-flex p-2 rounded-full bg-[#22C55E] text-white">
+                  <Check className="w-4 h-4 stroke-[3]" />
+                </div>
+                <div className="text-sm font-semibold text-[#16A34A]">
+                  Proposal Dispatched!
+                </div>
+                <p className="text-xs text-[#0C2D48]/75 leading-relaxed">
+                  Your reference ID is <span className="font-mono font-bold text-[#0C2D48]">{submitSuccess}</span>. A senior corporate director has been notified and will deliver your verified regulatory dossier.
+                </p>
+                <button
+                  type="button"
+                  onClick={() => setSubmitSuccess(null)}
+                  className="text-xs text-[#16A34A] underline font-mono pt-1"
+                >
+                  New Calculation
+                </button>
+              </div>
             )}
           </div>
         </div>

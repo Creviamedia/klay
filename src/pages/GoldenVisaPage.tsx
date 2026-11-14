@@ -334,7 +334,21 @@ function ResponsiveGoldenVisaTicket() {
 
 export default function GoldenVisaPage() {
   const [selectedCategory, setSelectedCategory] = useState(eligibilityCategories[0].id);
+  const [isPaused, setIsPaused] = useState(false);
   const [selectedRequirements, setSelectedRequirements] = useState(requirementGroups[0].id);
+
+  // Auto-cycle through categories every 4 seconds unless paused by user hover/interaction
+  useEffect(() => {
+    if (isPaused) return;
+    const interval = setInterval(() => {
+      setSelectedCategory((prev) => {
+        const idx = eligibilityCategories.findIndex((c) => c.id === prev);
+        const nextIdx = (idx + 1) % eligibilityCategories.length;
+        return eligibilityCategories[nextIdx].id;
+      });
+    }, 4200);
+    return () => clearInterval(interval);
+  }, [isPaused]);
 
   const activeCategory = eligibilityCategories.find((category) => category.id === selectedCategory) ?? eligibilityCategories[0];
   const activeRequirements =
@@ -491,8 +505,12 @@ export default function GoldenVisaPage() {
           </div>
 
           <div className="grid gap-8 lg:grid-cols-[0.8fr_1.2fr]">
-            {/* Category selection column */}
-            <div className="space-y-2">
+            {/* Category selection column with auto-cycle indicator */}
+            <div
+              className="space-y-2"
+              onMouseEnter={() => setIsPaused(true)}
+              onMouseLeave={() => setIsPaused(false)}
+            >
               {eligibilityCategories.map((category) => {
                 const Icon = category.icon;
                 const isActive = selectedCategory === category.id;
@@ -500,13 +518,24 @@ export default function GoldenVisaPage() {
                   <button
                     key={category.id}
                     type="button"
-                    onClick={() => setSelectedCategory(category.id)}
-                    className={`group relative flex w-full items-center justify-between border p-5 text-left transition-all ${
+                    onClick={() => {
+                      setSelectedCategory(category.id);
+                      setIsPaused(true);
+                    }}
+                    className={`group relative flex w-full items-center justify-between overflow-hidden border p-5 text-left transition-all ${
                       isActive
                         ? 'border-[#0C2D48] bg-[#0C2D48] text-white shadow-md'
                         : 'border-[#0C2D48]/10 bg-white text-[#0C2D48] hover:border-[#0C2D48]/30'
                     }`}
                   >
+                    {isActive && !isPaused && (
+                      <motion.div
+                        className="absolute bottom-0 left-0 top-0 w-1 bg-[#22C55E]"
+                        initial={{ scaleY: 0 }}
+                        animate={{ scaleY: 1 }}
+                        transition={{ duration: 4.2, ease: 'linear' }}
+                      />
+                    )}
                     <div className="flex items-center gap-4">
                       <div
                         className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-none border ${
