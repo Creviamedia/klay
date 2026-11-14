@@ -4,6 +4,41 @@ All notable changes to the Klay Consultants platform are documented here followi
 
 ---
 
+## [2.2.0-staging] - 2026-11-14 (Prototypes Lock-In: Sliders, Quiz & Pricing Simulator)
+
+### Added
+- **Cost Calculator Variant C Default (`VariantC_FinancialSliders.tsx`)**: Locked in dynamic financial modeling simulator as the permanent default on `/cost-calculator`. Features interactive range sliders for investor & employee quotas, stacked percentage budget allocation matrix (`Licensing`, `Visas`, `Premises`, `Advisory`), and instant lead locking.
+- **Golden Visa Variant C Default (`VariantC_Quiz.tsx`)**: Locked in 30-second interactive qualification quiz as the permanent default on `/golden-visa`. Features dynamic profile screening (Real Estate, Corporate Founder, Salaried Executive, Tech Creator), statutory bracket filtering, live match rate calculation (`98% ELIGIBLE`), and priority pre-clearance claim form.
+- **Option 3 Standalone Statutory Pricing Engine (`public/pricing-engine-demo.html`)**: Zero-dependency, self-contained mathematical simulator running at `/pricing-engine-demo.html`. Features 5 1-click scenario presets (Meydan Solo Tech, IFZA Commercial Multi-Visa, Dubai Mainland Ejari, RAK ICC Offshore 0-Visa, and Industrial Scaling), deterministic USD peg calculation, live statutory fee tape, in-browser automated assertion runner (5/5 passing), and raw CRM JSON inspector.
+- **Prototype Switcher Component (`PrototypeSwitcher.tsx`)**: Reusable floating pill bar supporting variant switching (`?variant=A|B|C`) and keyboard arrow navigation (`←` / `→`) across both `/cost-calculator` and `/golden-visa`.
+
+### Changed & Optimized
+- **Icon Cleanups**: Removed 12 unused icon imports across `App.tsx`, `CostCalculator.tsx`, `SetupCalculator.tsx`, and `BusinessSetupPage.tsx`.
+- **Clean Production Routing**: Pages render their designated default variant directly; the floating prototype switcher activates dynamically only when `?variant=` query parameter is explicitly provided.
+
+---
+
+## [2.1.0-staging] - 2026-11-14 (Staging Refinements & Architecture Audit)
+
+### Added
+- **Executive Light Calculator (`SetupCalculator.tsx` & `CostCalculator.tsx`)**: Re-engineered the corporate formation calculator from dark sci-fi industrial aesthetic into a high-conversion, single-fold Swiss financial card (white porcelain canvas, hairline borders, deep navy `#0C2D48`, emerald `#22C55E`, and amber badges). Features live AED/USD dual currency, interactive statutory tariffs, and 1-tap quote capture.
+- **Cinematic Video Hero in Business Setup (`BusinessSetupPage.tsx`)**: Upgraded the business setup page hero with an autoplaying, looping background video (`/videos/equitify-hero-bg.mp4`), gradient scrim, and ambient horizon glow.
+- **Persistent Floating Dock Across All Pages**: Removed route exclusions in `App.tsx` ensuring the sovereign floating dock and contact widget persist across `/business-setup` and all 126 pre-rendered routes with proper bottom padding (`pb-28`).
+- **Instant Radiant Gold Ticket (`AdmitOneTicket.tsx`)**: Removed the deferred interaction gate in `whenShaderAllowed` so the WebGL shader initializes immediately on mount. Upgraded the fallback background to a rich metallic gold gradient (`#fef3c7` → `#f59e0b` → `#d97706` → `#92400e`), eliminating any flash of brown or delay.
+- **Auto-Cycling Golden Visa Eligibility Framework (`GoldenVisaPage.tsx`)**: Added a 4.2-second smooth auto-rotator cycling through 5 categories (Investors, Entrepreneurs, Skilled Professionals, Students & Graduates, Specialized Talent) with live vertical progress bars and hover-pause capability.
+- **Turnkey Service Package Routing**: Re-routed all turnkey package cards in `ServicesPage.tsx` directly to their dedicated service pages (`/services/free-zone-company-setup/`, `/services/mainland-company-setup/`, `/services/offshore-company-setup/`, `/services/corporate-bank-account/`) rather than funnelling everything into `/contact`.
+- **Dual Live Netlify Environments**:
+  - `klay-consulting-staging`: Live staging target at `https://klay-consulting-staging.netlify.app` running branch `staging` (`8ccc544`).
+  - `klay-consulting-uat`: Preserved UAT target at `https://klay-consulting-uat.netlify.app` running branch `uat` (`4f2570d`).
+
+### Architecture & API Audit Findings
+- **126 Routes Integrity**: Verified 100% mathematical route distribution: 18 standard pages (incl. 8 blog pagination routes), 7 service detail routes, and 101 blog articles.
+- **Identified Legacy Route Typo**: `/bussines-setup-page/` has a double 's' inherited from the original Webflow CMS import. Both `/business-setup` and `/bussines-setup-page/` render identically with redirects in place.
+- **Backend API Simplification**: The Express server (`server.js`, 457 lines) duplicates Netlify serverless functions (`netlify/functions/leads.cjs`). Recommended moving dev to `netlify dev` to remove `express` and `compression` production dependencies.
+- **Security Privacy Risk Identified**: The default lead push notifications target a public unauthenticated topic (`ntfy.sh/klay-leads-dubai`). Recommended migrating to an authenticated Telegram bot or private webhook to safeguard client contact data and budgets.
+
+---
+
 ## [2.0.0-staging] - 2026-11-13 (Modernization & Staging Architecture)
 
 ### Added

@@ -10,19 +10,7 @@ import {
   type OfficeTypeId,
   type SetupOptions,
 } from '@/lib/calculator-engine';
-import {
-  Building2,
-  Briefcase,
-  Users,
-  ShieldCheck,
-  Check,
-  Send,
-  HelpCircle,
-  ArrowRight,
-  Landmark,
-  FileText,
-  BadgeCheck,
-} from 'lucide-react';
+import { Check, ArrowRight } from 'lucide-react';
 
 export function CostCalculator() {
   // Calculator state

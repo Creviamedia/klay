@@ -15,7 +15,7 @@ import {
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
-export type JurisdictionOption = 'Free Zone' | 'Mainland DED' | 'Offshore';
+export type JurisdictionOption = 'Free Zone' | 'Mainland DED' | 'Offshore' | 'DIFC / ADGM';
 export type TimelineOption = 'Immediate (1-2 weeks)' | '1-3 months' | 'Planning stage';
 
 export interface KlayLeadFormProps {
@@ -39,7 +39,10 @@ export interface KlayLeadFormProps {
   eyebrow?: string;
 }
 
-const JURISDICTION_DETAILS: Record<JurisdictionOption, { label: string; tag: string; desc: string }> = {
+const JURISDICTION_DETAILS: Record<
+  JurisdictionOption,
+  { label: string; tag: string; desc: string }
+> = {
   'Free Zone': {
     label: 'Free Zone',
     tag: '100% Foreign Ownership',
@@ -50,12 +53,19 @@ const JURISDICTION_DETAILS: Record<JurisdictionOption, { label: string; tag: str
     tag: 'Direct UAE Trade',
     desc: 'Trade unrestricted across all 7 emirates & bid for government tenders.',
   },
-  'Offshore': {
+  Offshore: {
     label: 'Offshore',
     tag: 'Asset Protection & IP',
     desc: 'RAK ICC & JAFZA international holding structures with zero local presence.',
   },
+  'DIFC / ADGM': {
+    label: 'DIFC / ADGM',
+    tag: 'Common Law Financial Centre',
+    desc: 'Independent common law jurisdiction, zero corporate tax guarantee, ideal for funds and fintech.',
+  },
 };
+
+const JURISDICTION_OPTIONS: JurisdictionOption[] = ['Free Zone', 'Mainland DED', 'DIFC / ADGM'];
 
 const COUNTRY_DIAL_CODES = [
   { code: '+971', label: 'UAE (+971)', flag: '🇦🇪' },
@@ -110,7 +120,13 @@ export function KlayLeadForm({
   const isDark = variant === 'dark';
   const shouldRenderHeader = showHeader ?? true;
 
-  const defaultEyebrow = eyebrow || (isDark ? 'Get in touch' : source === 'contact-page' ? 'Direct Legal Inquiry' : 'Your next step');
+  const defaultEyebrow =
+    eyebrow ||
+    (isDark
+      ? 'Get in touch'
+      : source === 'contact-page'
+        ? 'Direct Legal Inquiry'
+        : 'Your next step');
   const defaultTitle = title || (isDark ? 'Tell us about your plans' : 'Send Us a Message');
   const defaultSubtitle =
     subtitle ||
@@ -215,7 +231,9 @@ export function KlayLeadForm({
       } else {
         const errorData = await response.json().catch(() => ({}));
         setErrorMessage(
-          errorData.error || errorData.message || 'Unable to register your request with the Legal Desk. Please try again or call us directly.'
+          errorData.error ||
+            errorData.message ||
+            'Unable to register your request with the Legal Desk. Please try again or call us directly.'
         );
         setStatus('error');
       }
@@ -292,9 +310,7 @@ export function KlayLeadForm({
           <div
             className={cn(
               'mt-3.5 rounded-xl p-3.5 text-left border',
-              isDark
-                ? 'bg-white/[0.06] border-white/15'
-                : 'bg-[#0C2D48]/[0.04] border-[#0C2D48]/12'
+              isDark ? 'bg-white/[0.06] border-white/15' : 'bg-[#0C2D48]/[0.04] border-[#0C2D48]/12'
             )}
           >
             <div className="flex items-center justify-between">
@@ -357,7 +373,8 @@ export function KlayLeadForm({
                   2
                 </span>
                 <span>
-                  <strong>Direct Contact:</strong> Senior Consultant will reach out via WhatsApp / Email.
+                  <strong>Direct Contact:</strong> Senior Consultant will reach out via WhatsApp /
+                  Email.
                 </span>
               </div>
               <div className="flex items-start gap-2">
@@ -365,7 +382,8 @@ export function KlayLeadForm({
                   3
                 </span>
                 <span>
-                  <strong>Turnaround:</strong> Within 2 hours during UAE business hours (09:00 - 18:00 GST).
+                  <strong>Turnaround:</strong> Within 2 hours during UAE business hours (09:00 -
+                  18:00 GST).
                 </span>
               </div>
             </div>
@@ -410,10 +428,20 @@ export function KlayLeadForm({
           {/* 1. SEGMENTED JURISDICTION PILLS */}
           <div>
             <div className="flex items-center justify-between mb-1">
-              <label className={cn('text-xs font-bold uppercase tracking-wider', isDark ? 'text-white/90' : 'text-[#0C2D48]')}>
+              <label
+                className={cn(
+                  'text-xs font-bold uppercase tracking-wider',
+                  isDark ? 'text-white/90' : 'text-[#0C2D48]'
+                )}
+              >
                 Target Jurisdiction <span className="text-[#E8A72E]">*</span>
               </label>
-              <span className={cn('text-xs font-medium', isDark ? 'text-[#E8C37A]' : 'text-[#0C2D48]/80')}>
+              <span
+                className={cn(
+                  'text-xs font-medium',
+                  isDark ? 'text-[#E8C37A]' : 'text-[#0C2D48]/80'
+                )}
+              >
                 {JURISDICTION_DETAILS[jurisdiction].tag}
               </span>
             </div>
@@ -428,7 +456,7 @@ export function KlayLeadForm({
                   : 'bg-[#0C2D48]/[0.05] border border-[#0C2D48]/12'
               )}
             >
-              {(['Free Zone', 'Mainland DED', 'DIFC / ADGM'] as JurisdictionOption[]).map((opt) => {
+              {JURISDICTION_OPTIONS.map((opt) => {
                 const isSelected = jurisdiction === opt;
                 return (
                   <button
@@ -462,13 +490,19 @@ export function KlayLeadForm({
             <div>
               <label
                 htmlFor={nameId}
-                className={cn('block text-xs font-bold uppercase tracking-wider mb-1', isDark ? 'text-white/90' : 'text-[#0C2D48]')}
+                className={cn(
+                  'block text-xs font-bold uppercase tracking-wider mb-1',
+                  isDark ? 'text-white/90' : 'text-[#0C2D48]'
+                )}
               >
                 Full Name <span className="text-[#E8A72E]">*</span>
               </label>
               <div className="relative">
                 <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
-                  <User className={cn('h-3.5 w-3.5', isDark ? 'text-white/40' : 'text-[#64748B]')} aria-hidden="true" />
+                  <User
+                    className={cn('h-3.5 w-3.5', isDark ? 'text-white/40' : 'text-[#64748B]')}
+                    aria-hidden="true"
+                  />
                 </div>
                 <input
                   id={nameId}
@@ -493,13 +527,19 @@ export function KlayLeadForm({
             <div>
               <label
                 htmlFor={emailId}
-                className={cn('block text-xs font-bold uppercase tracking-wider mb-1', isDark ? 'text-white/90' : 'text-[#0C2D48]')}
+                className={cn(
+                  'block text-xs font-bold uppercase tracking-wider mb-1',
+                  isDark ? 'text-white/90' : 'text-[#0C2D48]'
+                )}
               >
                 Business Email <span className="text-[#E8A72E]">*</span>
               </label>
               <div className="relative">
                 <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
-                  <Mail className={cn('h-3.5 w-3.5', isDark ? 'text-white/40' : 'text-[#64748B]')} aria-hidden="true" />
+                  <Mail
+                    className={cn('h-3.5 w-3.5', isDark ? 'text-white/40' : 'text-[#64748B]')}
+                    aria-hidden="true"
+                  />
                 </div>
                 <input
                   id={emailId}
@@ -525,7 +565,10 @@ export function KlayLeadForm({
           <div>
             <label
               htmlFor={phoneId}
-              className={cn('block text-xs font-bold uppercase tracking-wider mb-1', isDark ? 'text-white/90' : 'text-[#0C2D48]')}
+              className={cn(
+                'block text-xs font-bold uppercase tracking-wider mb-1',
+                isDark ? 'text-white/90' : 'text-[#0C2D48]'
+              )}
             >
               Phone / WhatsApp <span className="text-[#E8A72E]">*</span>
             </label>
@@ -546,14 +589,21 @@ export function KlayLeadForm({
                 )}
               >
                 {COUNTRY_DIAL_CODES.map((item) => (
-                  <option key={item.code} value={item.code} className="bg-[#071E33] text-white py-1">
+                  <option
+                    key={item.code}
+                    value={item.code}
+                    className="bg-[#071E33] text-white py-1"
+                  >
                     {item.code} {item.label.split(' ')[0]}
                   </option>
                 ))}
               </select>
               <div className="relative flex-1">
                 <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-2.5">
-                  <Phone className={cn('h-3.5 w-3.5', isDark ? 'text-white/40' : 'text-[#64748B]')} aria-hidden="true" />
+                  <Phone
+                    className={cn('h-3.5 w-3.5', isDark ? 'text-white/40' : 'text-[#64748B]')}
+                    aria-hidden="true"
+                  />
                 </div>
                 <input
                   id={phoneId}
@@ -581,7 +631,11 @@ export function KlayLeadForm({
             <div>
               <label
                 htmlFor={activityId}
-                className={cn('block text-xs font-bold uppercase tracking-wider mb-1', isDark ? 'text-white/90' : 'text-[#0C2D48]')}>
+                className={cn(
+                  'block text-xs font-bold uppercase tracking-wider mb-1',
+                  isDark ? 'text-white/90' : 'text-[#0C2D48]'
+                )}
+              >
                 Commercial Activity
               </label>
               <select
@@ -608,7 +662,11 @@ export function KlayLeadForm({
             <div>
               <label
                 htmlFor={timelineId}
-                className={cn('block text-xs font-bold uppercase tracking-wider mb-1', isDark ? 'text-white/90' : 'text-[#0C2D48]')}>
+                className={cn(
+                  'block text-xs font-bold uppercase tracking-wider mb-1',
+                  isDark ? 'text-white/90' : 'text-[#0C2D48]'
+                )}
+              >
                 Estimated Timeline
               </label>
               <select
@@ -636,8 +694,13 @@ export function KlayLeadForm({
           <div>
             <label
               htmlFor={notesId}
-              className={cn('block text-xs font-bold uppercase tracking-wider mb-1', isDark ? 'text-white/90' : 'text-[#0C2D48]')}>
-              Requirements / Notes <span className="font-normal text-xs normal-case opacity-70">(Optional)</span>
+              className={cn(
+                'block text-xs font-bold uppercase tracking-wider mb-1',
+                isDark ? 'text-white/90' : 'text-[#0C2D48]'
+              )}
+            >
+              Requirements / Notes{' '}
+              <span className="font-normal text-xs normal-case opacity-70">(Optional)</span>
             </label>
             <textarea
               id={notesId}
@@ -674,7 +737,10 @@ export function KlayLeadForm({
             ) : (
               <>
                 <span>Request Sovereign Legal Consultation</span>
-                <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" aria-hidden="true" />
+                <ArrowRight
+                  className="h-4 w-4 transition-transform group-hover:translate-x-1"
+                  aria-hidden="true"
+                />
               </>
             )}
           </button>
@@ -692,9 +758,13 @@ export function KlayLeadForm({
               <Lock className="h-3 w-3" aria-hidden="true" />
               Backed by Klay Legal
             </span>
-            <span aria-hidden="true" className="opacity-40">·</span>
+            <span aria-hidden="true" className="opacity-40">
+              ·
+            </span>
             <span>Attorney-Client Privilege</span>
-            <span aria-hidden="true" className="opacity-40">·</span>
+            <span aria-hidden="true" className="opacity-40">
+              ·
+            </span>
             <span>2-Hour Response</span>
           </div>
         </form>

@@ -15,9 +15,17 @@ console.log('🧪 Starting UAE Company Formation Cost Calculator & Pipeline Test
   });
 
   assert.equal(result.totalAed, 12500, 'Base Meydan licence must equal 12,500 AED');
-  assert.equal(result.totalUsd, Math.round((12500 / USD_PEG_RATE) * 100) / 100, 'USD peg conversion must be accurate');
+  assert.equal(
+    result.totalUsd,
+    Math.round((12500 / USD_PEG_RATE) * 100) / 100,
+    'USD peg conversion must be accurate'
+  );
   assert.equal(result.breakdown.length, 2, 'Should have base licence and flexi-desk line items');
-  assert.equal(result.goldenVisaEligible, false, 'Standard consulting with 0 visas is not golden visa eligible');
+  assert.equal(
+    result.goldenVisaEligible,
+    false,
+    'Standard consulting with 0 visas is not golden visa eligible'
+  );
   console.log('  ✓ Meydan Free Zone baseline calculation passed');
 }
 
@@ -33,7 +41,11 @@ console.log('🧪 Starting UAE Company Formation Cost Calculator & Pipeline Test
   });
 
   // Expected: 11,900 + 2,000 + 7,500 + 3,500 + 4,000 + 1,500 + 2,500 = 32,900 AED
-  assert.equal(result.totalAed, 32900, 'IFZA total with commercial + visas + desk + add-ons must equal 32,900 AED');
+  assert.equal(
+    result.totalAed,
+    32900,
+    'IFZA total with commercial + visas + desk + add-ons must equal 32,900 AED'
+  );
   console.log('  ✓ IFZA multi-visa and commercial activity calculation passed');
 }
 
@@ -50,6 +62,11 @@ console.log('🧪 Starting UAE Company Formation Cost Calculator & Pipeline Test
 
   // Expected: 9,500 + 3,500 = 13,000 AED
   assert.equal(result.totalAed, 13000, 'RAK ICC Offshore must ignore visas and charge 13,000 AED');
+  assert.equal(
+    result.goldenVisaEligible,
+    false,
+    'Offshore setups must never be Golden Visa eligible under UAE ICP rules'
+  );
   console.log('  ✓ RAK ICC Offshore visa exclusion passed');
 }
 
@@ -65,7 +82,11 @@ console.log('🧪 Starting UAE Company Formation Cost Calculator & Pipeline Test
   });
 
   // Expected: 18,500 + 5,000 + 24,000 + 4,200 + 6,000 = 57,700 AED
-  assert.equal(result.totalAed, 57700, 'Dubai Mainland with physical premises must equal 57,700 AED');
+  assert.equal(
+    result.totalAed,
+    57700,
+    'Dubai Mainland with physical premises must equal 57,700 AED'
+  );
   console.log('  ✓ Dubai Mainland industrial and premises calculation passed');
 }
 
@@ -79,9 +100,21 @@ console.log('🧪 Starting UAE Company Formation Cost Calculator & Pipeline Test
     return cleanDigits;
   }
 
-  assert.equal(formatWhatsApp('+971 050 123 4567'), '971501234567', 'Must strip leading trunk 0 after 971');
-  assert.equal(formatWhatsApp('+971 50 123 4567'), '971501234567', 'Must preserve valid UAE international format');
-  assert.equal(formatWhatsApp('+44 7911 123456'), '447911123456', 'Must preserve international numbers');
+  assert.equal(
+    formatWhatsApp('+971 050 123 4567'),
+    '971501234567',
+    'Must strip leading trunk 0 after 971'
+  );
+  assert.equal(
+    formatWhatsApp('+971 50 123 4567'),
+    '971501234567',
+    'Must preserve valid UAE international format'
+  );
+  assert.equal(
+    formatWhatsApp('+44 7911 123456'),
+    '447911123456',
+    'Must preserve international numbers'
+  );
   console.log('  ✓ Phone trunk zero normalization passed');
 }
 
