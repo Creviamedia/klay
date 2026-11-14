@@ -1,12 +1,5 @@
 import React, { useState } from 'react';
-import {
-  ArrowRight,
-  ArrowUpRight,
-  Building2,
-  Globe2,
-  Layers3,
-  CheckCircle2,
-} from 'lucide-react';
+import { ArrowUpRight } from 'lucide-react';
 import { Image } from '@/components/ui/image';
 import { Link } from '@/components/ui/link';
 import { CornerCrosshairs } from '@/components/ui/CornerCrosshairs';

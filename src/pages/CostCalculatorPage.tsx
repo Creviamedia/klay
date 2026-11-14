@@ -1,5 +1,9 @@
 import React from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { CostCalculator } from '@/components/calculator/CostCalculator';
+import { VariantB_ProgressiveWizard } from '@/components/calculator/variants/VariantB_ProgressiveWizard';
+import { VariantC_FinancialSliders } from '@/components/calculator/variants/VariantC_FinancialSliders';
+import { PrototypeSwitcher } from '@/components/calculator/PrototypeSwitcher';
 import { CornerCrosshairs } from '@/components/ui/CornerCrosshairs';
 import { EquitifyButton } from '@/components/ui/EquitifyButton';
 import { NumberedAccordion, type AccordionItem } from '@/components/ui/NumberedAccordion';
@@ -40,8 +44,15 @@ const CALCULATOR_FAQS: AccordionItem[] = [
 ];
 
 export default function CostCalculatorPage() {
+  const [searchParams] = useSearchParams();
+  const variantParam = searchParams.get('variant')?.toUpperCase();
+  const activeVariant = variantParam && ['A', 'B', 'C'].includes(variantParam) ? variantParam : 'C';
+
   return (
     <div className="flex flex-col w-full bg-[#FBFBFB] text-[#0C2D48] pb-24 md:pb-28">
+      {/* Interactive Prototype Variant Switcher (available when ?variant= is present) */}
+      {searchParams.has('variant') && <PrototypeSwitcher current={activeVariant} />}
+
       {/* =========================================================================
           HERO & CALCULATOR SECTION: Porcelain Light Executive Canvas
           ========================================================================= */}
@@ -62,10 +73,16 @@ export default function CostCalculatorPage() {
             </p>
           </div>
 
-          {/* Interactive Calculator Shell (One-Fold Friendly) */}
+          {/* Interactive Calculator Shell (Dynamic Variant A / B / C) */}
           <div className="w-full max-w-6xl mx-auto relative corner-crosshair-wrap" id="calculator">
             <CornerCrosshairs color="text-[#0C2D48]/30" size={12} />
-            <CostCalculator />
+            {activeVariant === 'B' ? (
+              <VariantB_ProgressiveWizard />
+            ) : activeVariant === 'C' ? (
+              <VariantC_FinancialSliders />
+            ) : (
+              <CostCalculator />
+            )}
           </div>
         </div>
       </section>

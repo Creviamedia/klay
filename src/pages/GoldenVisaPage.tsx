@@ -1,4 +1,5 @@
 import { AnimatePresence, motion } from 'framer-motion';
+import { useSearchParams } from 'react-router-dom';
 import {
   BriefcaseBusiness,
   Building2,
@@ -21,6 +22,16 @@ import { NumberedAccordion } from '@/components/ui/NumberedAccordion';
 import { AtmosphericBanner } from '@/components/ui/AtmosphericBanner';
 import { Link } from '@/components/ui/link';
 import { ROUTES } from '@/lib/routes';
+import { PrototypeSwitcher, type VariantOption } from '@/components/calculator/PrototypeSwitcher';
+import { VariantA_Dossier } from '@/components/golden-visa/variants/VariantA_Dossier';
+import { VariantB_Matrix } from '@/components/golden-visa/variants/VariantB_Matrix';
+import { VariantC_Quiz } from '@/components/golden-visa/variants/VariantC_Quiz';
+
+const GOLDEN_VISA_VARIANTS: VariantOption[] = [
+  { key: 'A', name: 'VIP Gold Dossier', description: 'Luxury Sovereign Pass & Category Privilege Cards' },
+  { key: 'B', name: 'Statutory Matrix', description: 'Side-by-Side 5-Pathway Comparative Matrix' },
+  { key: 'C', name: '30-Sec Quiz Qualifier', description: 'Interactive Qualification Decision Engine' },
+];
 
 const eligibilityCategories = [
   {
@@ -333,6 +344,10 @@ function ResponsiveGoldenVisaTicket() {
 }
 
 export default function GoldenVisaPage() {
+  const [searchParams] = useSearchParams();
+  const variantParam = searchParams.get('variant')?.toUpperCase();
+  const activeVariant = variantParam && ['A', 'B', 'C'].includes(variantParam) ? variantParam : 'C';
+
   const [selectedCategory, setSelectedCategory] = useState(eligibilityCategories[0].id);
   const [isPaused, setIsPaused] = useState(false);
   const [selectedRequirements, setSelectedRequirements] = useState(requirementGroups[0].id);
@@ -356,6 +371,11 @@ export default function GoldenVisaPage() {
 
   return (
     <div className="golden-visa-page relative bg-[#FBFBFB] text-[#0C2D48]">
+      {/* Floating Interactive Prototype Switcher for Option 2 (available when ?variant= is present) */}
+      {searchParams.has('variant') && (
+        <PrototypeSwitcher current={activeVariant} variants={GOLDEN_VISA_VARIANTS} label="GOLDEN VISA" />
+      )}
+
       {/* 1. OBSIDIAN HERO */}
       <section className="relative isolate overflow-hidden bg-[#05131F] pb-20 pt-32 text-white">
         {/* Atmospheric horizon glow */}
@@ -489,125 +509,29 @@ export default function GoldenVisaPage() {
         </div>
       </section>
 
-      {/* 4. WHO CAN APPLY — 6 CATEGORIES WITH TABS (PORCELAIN) */}
-      <section className="bg-[#FBFBFB] py-20 lg:py-28">
+      {/* 4. WHO CAN APPLY — DYNAMIC PROTOTYPE VARIANTS A / B / C */}
+      <section className="bg-[#FBFBFB] py-20 lg:py-28" id="qualification-explorer">
         <div className="mx-auto max-w-[1440px] px-6 lg:px-12">
           <div className="mb-14 max-w-3xl">
             <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[#22C55E]">
-              Eligibility Framework
+              Eligibility Framework · 2026 Sovereign Regulations
             </p>
             <h2 className="mt-3 font-heading text-3xl font-light tracking-tight text-[#0C2D48] sm:text-4xl lg:text-5xl">
               Who Can Apply for <span className="font-semibold">Golden Visa UAE?</span>
             </h2>
             <p className="mt-4 text-lg text-[#0C2D48]/70">
-              Eligibility is not one-size-fits-all. Select a category below to view specific qualification parameters and documentation blueprints:
+              Federal law establishes 5 primary long-term residency pathways. Explore specific qualification criteria, statutory thresholds, and required documentation blueprints:
             </p>
           </div>
 
-          <div className="grid gap-8 lg:grid-cols-[0.8fr_1.2fr]">
-            {/* Category selection column with auto-cycle indicator */}
-            <div
-              className="space-y-2"
-              onMouseEnter={() => setIsPaused(true)}
-              onMouseLeave={() => setIsPaused(false)}
-            >
-              {eligibilityCategories.map((category) => {
-                const Icon = category.icon;
-                const isActive = selectedCategory === category.id;
-                return (
-                  <button
-                    key={category.id}
-                    type="button"
-                    onClick={() => {
-                      setSelectedCategory(category.id);
-                      setIsPaused(true);
-                    }}
-                    className={`group relative flex w-full items-center justify-between overflow-hidden border p-5 text-left transition-all ${
-                      isActive
-                        ? 'border-[#0C2D48] bg-[#0C2D48] text-white shadow-md'
-                        : 'border-[#0C2D48]/10 bg-white text-[#0C2D48] hover:border-[#0C2D48]/30'
-                    }`}
-                  >
-                    {isActive && !isPaused && (
-                      <motion.div
-                        className="absolute bottom-0 left-0 top-0 w-1 bg-[#22C55E]"
-                        initial={{ scaleY: 0 }}
-                        animate={{ scaleY: 1 }}
-                        transition={{ duration: 4.2, ease: 'linear' }}
-                      />
-                    )}
-                    <div className="flex items-center gap-4">
-                      <div
-                        className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-none border ${
-                          isActive
-                            ? 'border-[#22C55E] bg-[#22C55E]/15 text-[#22C55E]'
-                            : 'border-[#0C2D48]/10 bg-[#0C2D48]/5 text-[#0C2D48]'
-                        }`}
-                      >
-                        <Icon className="h-5 w-5" />
-                      </div>
-                      <div>
-                        <p className={`text-xs font-semibold uppercase tracking-[0.16em] ${isActive ? 'text-[#22C55E]' : 'text-[#0C2D48]/60'}`}>
-                          {category.label}
-                        </p>
-                        <p className="font-medium text-base leading-tight mt-0.5">{category.title}</p>
-                      </div>
-                    </div>
-                  </button>
-                );
-              })}
-            </div>
-
-            {/* Category details pane */}
-            <div className="relative border border-[#0C2D48]/10 bg-white p-8 lg:p-12 shadow-sm">
-              <CornerCrosshairs />
-              <AnimatePresence mode="wait">
-                <motion.div
-                  key={activeCategory.id}
-                  initial={{ opacity: 0, y: 12 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -12 }}
-                  transition={{ duration: 0.25 }}
-                >
-                  <span className="text-xs font-semibold uppercase tracking-[0.2em] text-[#22C55E]">
-                    {activeCategory.label}
-                  </span>
-                  <h3 className="mt-2 font-heading text-2xl font-semibold text-[#0C2D48] sm:text-3xl">
-                    {activeCategory.title}
-                  </h3>
-                  <p className="mt-4 text-base leading-relaxed text-[#0C2D48]/75">
-                    {activeCategory.description}
-                  </p>
-
-                  <div className="mt-8">
-                    <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[#0C2D48]/50">
-                      Standard Qualification Parameters
-                    </p>
-                    <ul className="mt-4 space-y-3">
-                      {activeCategory.points.map((pt) => (
-                        <li key={pt} className="flex items-start gap-3 border-b border-[#0C2D48]/5 pb-3 text-base text-[#0C2D48]">
-                          <span className="mt-1 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-[#22C55E]/15 text-[#22C55E]">
-                            <Check className="h-3 w-3" strokeWidth={3} />
-                          </span>
-                          <span>{pt}</span>
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-
-                  <div className="mt-8 border-l-2 border-[#E8A72E] bg-[#E8A72E]/5 p-4 text-sm text-[#0C2D48]">
-                    <span className="font-semibold text-[#0C2D48]">Crucial Legal Note:</span> Eligibility alone does not guarantee approval. Proper corporate structuring, AML clearance, and documentation sequencing are mandatory.
-                  </div>
-
-                  <div className="mt-8">
-                    <EquitifyButton href={ROUTES.contact} variant="green" size="md">
-                      START {activeCategory.title.toUpperCase()} ASSESSMENT
-                    </EquitifyButton>
-                  </div>
-                </motion.div>
-              </AnimatePresence>
-            </div>
-          </div>
+          {/* Dynamic Variant Render */}
+          {activeVariant === 'B' ? (
+            <VariantB_Matrix />
+          ) : activeVariant === 'C' ? (
+            <VariantC_Quiz />
+          ) : (
+            <VariantA_Dossier />
+          )}
         </div>
       </section>
 

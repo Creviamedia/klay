@@ -2,7 +2,6 @@ import { Component, lazy, Suspense, useEffect, useRef, type ErrorInfo, type Reac
 import { BrowserRouter, Route, Routes, useLocation } from 'react-router-dom';
 import { NotFoundPage } from '@/pages/NotFoundPage';
 import { Footer } from '@/components/layout/Footer';
-import { Header } from '@/components/layout/Header';
 import { SiteBackground } from '@/components/layout/SiteBackground';
 import { ROUTES } from '@/lib/routes';
 

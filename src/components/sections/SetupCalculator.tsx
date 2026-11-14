@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowRight, Check, Send, Sparkles, Building2, Shield, Landmark } from 'lucide-react';
+import { ArrowRight, Check, Building2, Shield, Landmark } from 'lucide-react';
 import { ROUTES } from '@/lib/routes';
 
 interface JurisdictionPreset {
