@@ -84,7 +84,7 @@ export function VariantC_FinancialSliders() {
   };
 
   const isOffshore = jurisdiction === 'offshore-rak';
-  const isGoldenVisaEligible = investorVisas >= 2 || calculation.totalAed >= 35000;
+  const isGoldenVisaEligible = !isOffshore && (investorVisas >= 2 || calculation.totalAed >= 35000);
 
   const handleLeadSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -126,7 +126,6 @@ export function VariantC_FinancialSliders() {
 
   return (
     <div className="w-full max-w-6xl mx-auto rounded-3xl bg-white border border-[#0C2D48]/12 shadow-[0_24px_60px_rgba(12,45,72,0.08)] overflow-hidden text-[#0C2D48] font-sans">
-      
       {/* ================= HEADER BAR WITH CURRENCY & GOLDEN VISA BADGE ================= */}
       <div className="bg-[#FAFBFD] border-b border-[#0C2D48]/10 px-6 sm:px-8 py-5 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div className="flex items-center gap-3">
@@ -156,7 +155,9 @@ export function VariantC_FinancialSliders() {
             type="button"
             onClick={() => setCurrency('AED')}
             className={`px-3.5 py-1.5 font-mono text-xs font-semibold rounded-lg transition-all ${
-              currency === 'AED' ? 'bg-[#0C2D48] text-white shadow-sm' : 'text-[#0C2D48]/60 hover:text-[#0C2D48]'
+              currency === 'AED'
+                ? 'bg-[#0C2D48] text-white shadow-sm'
+                : 'text-[#0C2D48]/60 hover:text-[#0C2D48]'
             }`}
           >
             AED
@@ -165,7 +166,9 @@ export function VariantC_FinancialSliders() {
             type="button"
             onClick={() => setCurrency('USD')}
             className={`px-3.5 py-1.5 font-mono text-xs font-semibold rounded-lg transition-all ${
-              currency === 'USD' ? 'bg-[#0C2D48] text-white shadow-sm' : 'text-[#0C2D48]/60 hover:text-[#0C2D48]'
+              currency === 'USD'
+                ? 'bg-[#0C2D48] text-white shadow-sm'
+                : 'text-[#0C2D48]/60 hover:text-[#0C2D48]'
             }`}
           >
             USD
@@ -175,10 +178,8 @@ export function VariantC_FinancialSliders() {
 
       {/* ================= 2-COLUMN LAYOUT: SLIDER WORKBENCH & VISUAL MATRIX ================= */}
       <div className="grid grid-cols-1 lg:grid-cols-12 divide-y lg:divide-y-0 lg:divide-x divide-[#0C2D48]/10">
-        
         {/* LEFT COLUMN: INTERACTIVE SLIDERS & CONTROLS (7 Cols) */}
         <div className="lg:col-span-7 p-6 sm:p-8 space-y-7">
-          
           {/* Jurisdiction Select */}
           <div>
             <label className="text-xs font-mono uppercase tracking-wider text-[#0C2D48]/70 font-semibold block mb-2.5">
@@ -199,8 +200,12 @@ export function VariantC_FinancialSliders() {
                         : 'border-[#0C2D48]/10 bg-white hover:border-[#0C2D48]/25'
                     }`}
                   >
-                    <span className="font-semibold text-xs text-[#0C2D48] block truncate">{jur.name}</span>
-                    <span className="text-[10px] font-mono text-[#0C2D48]/50 block mt-0.5">{jur.category}</span>
+                    <span className="font-semibold text-xs text-[#0C2D48] block truncate">
+                      {jur.name}
+                    </span>
+                    <span className="text-[10px] font-mono text-[#0C2D48]/50 block mt-0.5">
+                      {jur.category}
+                    </span>
                   </button>
                 );
               })}
@@ -229,7 +234,9 @@ export function VariantC_FinancialSliders() {
                   >
                     <span className="font-semibold text-xs text-[#0C2D48] block">{act.name}</span>
                     <span className="text-[10px] font-mono text-[#0C2D48]/50 block mt-0.5">
-                      {act.extraFeeAed === 0 ? 'Standard Tariff' : `+AED ${act.extraFeeAed.toLocaleString()}`}
+                      {act.extraFeeAed === 0
+                        ? 'Standard Tariff'
+                        : `+AED ${act.extraFeeAed.toLocaleString()}`}
                     </span>
                   </button>
                 );
@@ -252,8 +259,12 @@ export function VariantC_FinancialSliders() {
             <div className="space-y-2">
               <div className="flex items-center justify-between">
                 <div>
-                  <span className="text-sm font-semibold text-[#0C2D48] block">Shareholder / Investor Visas</span>
-                  <span className="text-xs text-[#0C2D48]/60">Partner residence with UAE status card</span>
+                  <span className="text-sm font-semibold text-[#0C2D48] block">
+                    Shareholder / Investor Visas
+                  </span>
+                  <span className="text-xs text-[#0C2D48]/60">
+                    Partner residence with UAE status card
+                  </span>
                 </div>
                 <div className="px-3 py-1 rounded-lg bg-[#0C2D48] text-white font-mono text-xs font-bold shadow-sm">
                   {investorVisas} {investorVisas === 1 ? 'Visa' : 'Visas'}
@@ -281,8 +292,12 @@ export function VariantC_FinancialSliders() {
             <div className="space-y-2 pt-3 border-t border-[#0C2D48]/10">
               <div className="flex items-center justify-between">
                 <div>
-                  <span className="text-sm font-semibold text-[#0C2D48] block">Employee &amp; Staff Visas</span>
-                  <span className="text-xs text-[#0C2D48]/60">Operational hires, managers, and staff</span>
+                  <span className="text-sm font-semibold text-[#0C2D48] block">
+                    Employee &amp; Staff Visas
+                  </span>
+                  <span className="text-xs text-[#0C2D48]/60">
+                    Operational hires, managers, and staff
+                  </span>
                 </div>
                 <div className="px-3 py-1 rounded-lg bg-[#0C2D48] text-white font-mono text-xs font-bold shadow-sm">
                   {employeeVisas} {employeeVisas === 1 ? 'Visa' : 'Visas'}
@@ -328,7 +343,9 @@ export function VariantC_FinancialSliders() {
                         : 'border-[#0C2D48]/10 bg-white hover:border-[#0C2D48]/25'
                     }`}
                   >
-                    <span className="font-semibold text-xs text-[#0C2D48] block truncate">{off.name}</span>
+                    <span className="font-semibold text-xs text-[#0C2D48] block truncate">
+                      {off.name}
+                    </span>
                     <span className="text-[10px] font-mono text-[#0C2D48]/60 block mt-0.5">
                       {off.costAed === 0 ? 'Included' : `+AED ${off.costAed.toLocaleString()}`}
                     </span>
@@ -350,7 +367,9 @@ export function VariantC_FinancialSliders() {
                   <label
                     key={addonKey}
                     className={`p-3 rounded-xl border flex items-center justify-between cursor-pointer text-xs transition-all ${
-                      isChecked ? 'border-[#22C55E] bg-[#22C55E]/5 font-semibold' : 'border-[#0C2D48]/10 bg-white'
+                      isChecked
+                        ? 'border-[#22C55E] bg-[#22C55E]/5 font-semibold'
+                        : 'border-[#0C2D48]/10 bg-white'
                     }`}
                   >
                     <span className="truncate pr-2">{addon.name}</span>
@@ -374,7 +393,6 @@ export function VariantC_FinancialSliders() {
 
         {/* RIGHT COLUMN: VISUAL BREAKDOWN MATRIX & SUMMARY (5 Cols) */}
         <div className="lg:col-span-5 p-6 sm:p-8 bg-[#FAFBFD] flex flex-col justify-between space-y-6">
-          
           <div className="space-y-6">
             {/* Top Total Box */}
             <div className="p-6 rounded-2xl bg-white border border-[#0C2D48]/12 shadow-sm">
@@ -428,32 +446,48 @@ export function VariantC_FinancialSliders() {
                 <div className="flex items-start gap-2">
                   <span className="w-2.5 h-2.5 rounded-sm bg-[#16A34A] mt-1 shrink-0" />
                   <div>
-                    <span className="text-[#0C2D48]/60 text-[11px] block">Licensing ({categoryTotals.licensing.pct}%)</span>
-                    <span className="font-mono font-bold text-[#0C2D48]">{formatAmount(categoryTotals.licensing.aed)}</span>
+                    <span className="text-[#0C2D48]/60 text-[11px] block">
+                      Licensing ({categoryTotals.licensing.pct}%)
+                    </span>
+                    <span className="font-mono font-bold text-[#0C2D48]">
+                      {formatAmount(categoryTotals.licensing.aed)}
+                    </span>
                   </div>
                 </div>
 
                 <div className="flex items-start gap-2">
                   <span className="w-2.5 h-2.5 rounded-sm bg-[#0C2D48] mt-1 shrink-0" />
                   <div>
-                    <span className="text-[#0C2D48]/60 text-[11px] block">Visas ({categoryTotals.visas.pct}%)</span>
-                    <span className="font-mono font-bold text-[#0C2D48]">{formatAmount(categoryTotals.visas.aed)}</span>
+                    <span className="text-[#0C2D48]/60 text-[11px] block">
+                      Visas ({categoryTotals.visas.pct}%)
+                    </span>
+                    <span className="font-mono font-bold text-[#0C2D48]">
+                      {formatAmount(categoryTotals.visas.aed)}
+                    </span>
                   </div>
                 </div>
 
                 <div className="flex items-start gap-2">
                   <span className="w-2.5 h-2.5 rounded-sm bg-[#0284C7] mt-1 shrink-0" />
                   <div>
-                    <span className="text-[#0C2D48]/60 text-[11px] block">Premises ({categoryTotals.premises.pct}%)</span>
-                    <span className="font-mono font-bold text-[#0C2D48]">{formatAmount(categoryTotals.premises.aed)}</span>
+                    <span className="text-[#0C2D48]/60 text-[11px] block">
+                      Premises ({categoryTotals.premises.pct}%)
+                    </span>
+                    <span className="font-mono font-bold text-[#0C2D48]">
+                      {formatAmount(categoryTotals.premises.aed)}
+                    </span>
                   </div>
                 </div>
 
                 <div className="flex items-start gap-2">
                   <span className="w-2.5 h-2.5 rounded-sm bg-[#D97706] mt-1 shrink-0" />
                   <div>
-                    <span className="text-[#0C2D48]/60 text-[11px] block">Advisory ({categoryTotals.advisory.pct}%)</span>
-                    <span className="font-mono font-bold text-[#0C2D48]">{formatAmount(categoryTotals.advisory.aed)}</span>
+                    <span className="text-[#0C2D48]/60 text-[11px] block">
+                      Advisory ({categoryTotals.advisory.pct}%)
+                    </span>
+                    <span className="font-mono font-bold text-[#0C2D48]">
+                      {formatAmount(categoryTotals.advisory.aed)}
+                    </span>
                   </div>
                 </div>
               </div>
@@ -466,7 +500,9 @@ export function VariantC_FinancialSliders() {
                   <span className="w-8 h-8 rounded-full bg-[#22C55E] text-white mx-auto flex items-center justify-center mb-1">
                     <Check className="w-4 h-4" />
                   </span>
-                  <h4 className="font-heading font-semibold text-sm text-[#0C2D48]">Model Exported</h4>
+                  <h4 className="font-heading font-semibold text-sm text-[#0C2D48]">
+                    Model Exported
+                  </h4>
                   <p className="text-[11px] font-mono text-[#16A34A] mt-0.5">{submitSuccess}</p>
                 </div>
               ) : (

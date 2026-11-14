@@ -4,7 +4,8 @@
  * Fixed peg: 1 USD = 3.6725 AED.
  */
 
-export type JurisdictionId = 'freezone-meydan' | 'freezone-ifza' | 'freezone-dmcc' | 'mainland-dubai' | 'offshore-rak';
+export type JurisdictionId =
+  'freezone-meydan' | 'freezone-ifza' | 'freezone-dmcc' | 'mainland-dubai' | 'offshore-rak';
 
 export type ActivityTypeId = 'consulting' | 'commercial' | 'ecommerce' | 'industrial';
 
@@ -43,22 +44,26 @@ export interface CalculationResult {
   summaryText: string;
 }
 
-export const JURISDICTIONS: Record<JurisdictionId, {
-  id: JurisdictionId;
-  name: string;
-  category: 'Free Zone' | 'Mainland' | 'Offshore';
-  description: string;
-  baseLicenceAed: number;
-  visaCostAed: number;
-  turnaroundDays: string;
-  popularFor: string;
-  maxVisasFlexi: number;
-}> = {
+export const JURISDICTIONS: Record<
+  JurisdictionId,
+  {
+    id: JurisdictionId;
+    name: string;
+    category: 'Free Zone' | 'Mainland' | 'Offshore';
+    description: string;
+    baseLicenceAed: number;
+    visaCostAed: number;
+    turnaroundDays: string;
+    popularFor: string;
+    maxVisasFlexi: number;
+  }
+> = {
   'freezone-meydan': {
     id: 'freezone-meydan',
     name: 'Meydan Free Zone (Dubai)',
     category: 'Free Zone',
-    description: 'Central Dubai location near Downtown; 100% foreign ownership, ideal for tech, consulting, and e-commerce.',
+    description:
+      'Central Dubai location near Downtown; 100% foreign ownership, ideal for tech, consulting, and e-commerce.',
     baseLicenceAed: 12500,
     visaCostAed: 3750,
     turnaroundDays: '3–5 business days',
@@ -69,7 +74,8 @@ export const JURISDICTIONS: Record<JurisdictionId, {
     id: 'freezone-ifza',
     name: 'IFZA Dubai',
     category: 'Free Zone',
-    description: 'Cost-effective, flexible multi-activity licensing with streamlined digital onboarding.',
+    description:
+      'Cost-effective, flexible multi-activity licensing with streamlined digital onboarding.',
     baseLicenceAed: 11900,
     visaCostAed: 3500,
     turnaroundDays: '4–6 business days',
@@ -80,7 +86,8 @@ export const JURISDICTIONS: Record<JurisdictionId, {
     id: 'freezone-dmcc',
     name: 'DMCC (Dubai Multi Commodities Centre)',
     category: 'Free Zone',
-    description: 'Premier global trade hub located in JLT. Ideal for commodities, crypto, gold, and large trading houses.',
+    description:
+      'Premier global trade hub located in JLT. Ideal for commodities, crypto, gold, and large trading houses.',
     baseLicenceAed: 28500,
     visaCostAed: 4500,
     turnaroundDays: '7–10 business days',
@@ -91,7 +98,8 @@ export const JURISDICTIONS: Record<JurisdictionId, {
     id: 'mainland-dubai',
     name: 'Dubai Mainland (DET / DED)',
     category: 'Mainland',
-    description: 'Direct trade across the entire UAE market & government contracts. Requires Ejari virtual or physical office.',
+    description:
+      'Direct trade across the entire UAE market & government contracts. Requires Ejari virtual or physical office.',
     baseLicenceAed: 18500,
     visaCostAed: 4200,
     turnaroundDays: '5–8 business days',
@@ -102,7 +110,8 @@ export const JURISDICTIONS: Record<JurisdictionId, {
     id: 'offshore-rak',
     name: 'RAK ICC Offshore',
     category: 'Offshore',
-    description: 'Non-resident entity for international asset protection, global holding structures, and IP rights. No local visas.',
+    description:
+      'Non-resident entity for international asset protection, global holding structures, and IP rights. No local visas.',
     baseLicenceAed: 9500,
     visaCostAed: 0,
     turnaroundDays: '3–4 business days',
@@ -111,7 +120,10 @@ export const JURISDICTIONS: Record<JurisdictionId, {
   },
 };
 
-export const ACTIVITIES: Record<ActivityTypeId, { id: ActivityTypeId; name: string; extraFeeAed: number; description: string }> = {
+export const ACTIVITIES: Record<
+  ActivityTypeId,
+  { id: ActivityTypeId; name: string; extraFeeAed: number; description: string }
+> = {
   consulting: {
     id: 'consulting',
     name: 'Consulting & Professional Services',
@@ -138,24 +150,30 @@ export const ACTIVITIES: Record<ActivityTypeId, { id: ActivityTypeId; name: stri
   },
 };
 
-export const OFFICE_SPACES: Record<OfficeTypeId, { id: OfficeTypeId; name: string; costAed: number; description: string }> = {
+export const OFFICE_SPACES: Record<
+  OfficeTypeId,
+  { id: OfficeTypeId; name: string; costAed: number; description: string }
+> = {
   'flexi-desk': {
     id: 'flexi-desk',
     name: 'Virtual Flexi-Desk / Smart Desk',
     costAed: 0, // usually bundled in base licence
-    description: 'Compliant registered address and shared flexi-desk usage included with licensing.',
+    description:
+      'Compliant registered address and shared flexi-desk usage included with licensing.',
   },
   'dedicated-desk': {
     id: 'dedicated-desk',
     name: 'Dedicated Co-Working Desk',
     costAed: 7500,
-    description: 'Assigned fixed desk in an executive co-working centre with higher visa eligibility.',
+    description:
+      'Assigned fixed desk in an executive co-working centre with higher visa eligibility.',
   },
   'physical-office': {
     id: 'physical-office',
     name: 'Private Physical Office (Annual Est.)',
     costAed: 24000,
-    description: 'Private locked office space with custom Ejari / tenancy lease required for larger teams.',
+    description:
+      'Private locked office space with custom Ejari / tenancy lease required for larger teams.',
   },
 };
 
@@ -170,19 +188,22 @@ export const ADDON_SERVICES = {
     id: 'bankAccount',
     name: 'Corporate Bank Account Opening Advisory',
     costAed: 2500,
-    description: 'Pre-screening of KYC dossiers, business plan alignment, and introductions to tier-1 UAE banks.',
+    description:
+      'Pre-screening of KYC dossiers, business plan alignment, and introductions to tier-1 UAE banks.',
   },
   amlCompliance: {
     id: 'amlCompliance',
     name: 'AML / CFT & GoAML Compliance Setup',
     costAed: 2000,
-    description: 'Anti-money laundering registration and compliance manual drafting where applicable.',
+    description:
+      'Anti-money laundering registration and compliance manual drafting where applicable.',
   },
   uaeWill: {
     id: 'uaeWill',
     name: 'UAE Will & Succession Planning',
     costAed: 3500,
-    description: 'DIFC or Abu Dhabi Judicial Department will registration advisory to protect company shares.',
+    description:
+      'DIFC or Abu Dhabi Judicial Department will registration advisory to protect company shares.',
   },
 };
 
@@ -312,8 +333,9 @@ export function calculateSetupCost(options: SetupOptions): CalculationResult {
   const totalAed = breakdown.reduce((sum, item) => sum + item.amountAed, 0);
   const totalUsd = Math.round((totalAed / USD_PEG_RATE) * 100) / 100;
 
-  // 10-year UAE Golden Visa qualification check (business investors with share capital >= AED 2M)
-  const goldenVisaEligible = totalAed >= 50000 || options.investorVisas >= 2;
+  // 10-year UAE Golden Visa qualification check (business investors in Free Zone or Mainland with >= 2 investor visas or high-capital setup; Offshore entities cannot sponsor UAE residency visas)
+  const goldenVisaEligible =
+    options.jurisdiction !== 'offshore-rak' && (totalAed >= 50000 || options.investorVisas >= 2);
 
   const summaryText = `Your calculated estimate for a ${act.name} company in ${jur.name} with ${options.investorVisas} investor visa(s) and ${options.employeeVisas} employee visa(s) is AED ${totalAed.toLocaleString()} (approx. $${Math.round(totalUsd).toLocaleString()} USD).`;
 

@@ -182,6 +182,8 @@ const routeAliases: Record<string, string> = {
   '/blog': ROUTES.blog,
   '/contact': ROUTES.contact,
   '/golden-visa': ROUTES.goldenVisa,
+  '/golden-visa-dubai': ROUTES.goldenVisa,
+  '/cost-calculator': ROUTES.costCalculator,
   '/privacy': ROUTES.privacy,
   '/terms': ROUTES.terms,
 };
