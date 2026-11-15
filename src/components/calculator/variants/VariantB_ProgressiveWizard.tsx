@@ -1,6 +1,7 @@
 import React, { useState, useMemo } from 'react';
 import {
   calculateSetupCost,
+  formatCurrency,
   JURISDICTIONS,
   ACTIVITIES,
   OFFICE_SPACES,
@@ -9,6 +10,7 @@ import {
   type ActivityTypeId,
   type OfficeTypeId,
   type SetupOptions,
+  type CurrencyCode,
 } from '@/lib/calculator-engine';
 import {
   Check,
@@ -25,7 +27,7 @@ import { submitIntakeDossier } from '@/lib/intake-conduit';
 
 export function VariantB_ProgressiveWizard() {
   const [step, setStep] = useState<number>(1);
-  const [currency, setCurrency] = useState<'AED' | 'USD'>('AED');
+  const [currency, setCurrency] = useState<CurrencyCode>('AED');
 
   // Setup form states
   const [jurisdiction, setJurisdiction] = useState<JurisdictionId>('freezone-meydan');
@@ -61,11 +63,7 @@ export function VariantB_ProgressiveWizard() {
   );
 
   const calculation = useMemo(() => calculateSetupCost(currentOptions), [currentOptions]);
-
-  const displayTotal =
-    currency === 'AED'
-      ? `AED ${calculation.totalAed.toLocaleString()}`
-      : `$${Math.round(calculation.totalUsd).toLocaleString()} USD`;
+  const displayTotal = formatCurrency(calculation.totalAed, currency);
 
   const isOffshore = jurisdiction === 'offshore-rak';
 
@@ -527,9 +525,7 @@ export function VariantB_ProgressiveWizard() {
                       )}
                     </div>
                     <span className="font-semibold text-right">
-                      {currency === 'AED'
-                        ? `AED ${item.amountAed.toLocaleString()}`
-                        : `$${Math.round(item.amountAed / 3.6725).toLocaleString()}`}
+                      {currency === 'AED' ? item.formattedAed : item.formattedUsd}
                     </span>
                   </div>
                 ))}

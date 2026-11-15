@@ -11,6 +11,8 @@ export type ActivityTypeId = 'consulting' | 'commercial' | 'ecommerce' | 'indust
 
 export type OfficeTypeId = 'flexi-desk' | 'dedicated-desk' | 'physical-office';
 
+export type CurrencyCode = 'AED' | 'USD';
+
 export interface SetupOptions {
   jurisdiction: JurisdictionId;
   activityType: ActivityTypeId;
@@ -25,11 +27,29 @@ export interface SetupOptions {
   };
 }
 
+export interface CategoryAllocation {
+  aed: number;
+  usd: number;
+  pct: number;
+  formattedAed: string;
+  formattedUsd: string;
+}
+
+export interface BudgetAllocationMatrix {
+  licensing: CategoryAllocation;
+  visas: CategoryAllocation;
+  premises: CategoryAllocation;
+  advisory: CategoryAllocation;
+}
+
 export interface CostLineItem {
   id: string;
   label: string;
   category: 'Licence & Authority' | 'Visas & Immigration' | 'Premises' | 'Advisory & Compliance';
   amountAed: number;
+  amountUsd: number;
+  formattedAed: string;
+  formattedUsd: string;
   isMandatory: boolean;
   note?: string;
 }
@@ -37,11 +57,87 @@ export interface CostLineItem {
 export interface CalculationResult {
   totalAed: number;
   totalUsd: number;
+  formattedTotalAed: string;
+  formattedTotalUsd: string;
   jurisdictionName: string;
+  jurisdictionCategory: 'Free Zone' | 'Mainland' | 'Offshore';
   breakdown: CostLineItem[];
   turnaroundDays: string;
   goldenVisaEligible: boolean;
   summaryText: string;
+  allocations: BudgetAllocationMatrix;
+  categoryTotals: BudgetAllocationMatrix;
+}
+
+export type LedgerSummary = CalculationResult;
+
+export const USD_PEG_RATE = 3.6725;
+
+export function formatAed(amount: number): string {
+  return `AED ${Math.round(amount).toLocaleString()}`;
+}
+
+export function formatUsd(amountAed: number): string {
+  return `$${Math.round(amountAed / USD_PEG_RATE).toLocaleString()} USD`;
+}
+
+export function formatCurrency(amountAed: number, currency: CurrencyCode): string {
+  return currency === 'AED' ? formatAed(amountAed) : formatUsd(amountAed);
+}
+
+export function createLineItem(
+  id: string,
+  label: string,
+  category: 'Licence & Authority' | 'Visas & Immigration' | 'Premises' | 'Advisory & Compliance',
+  amountAed: number,
+  isMandatory: boolean,
+  note?: string
+): CostLineItem {
+  const amountUsd = Math.round((amountAed / USD_PEG_RATE) * 100) / 100;
+  return {
+    id,
+    label,
+    category,
+    amountAed,
+    amountUsd,
+    formattedAed: formatAed(amountAed),
+    formattedUsd: formatUsd(amountAed),
+    isMandatory,
+    note,
+  };
+}
+
+export function computeBudgetAllocations(
+  breakdown: CostLineItem[],
+  totalAed: number
+): BudgetAllocationMatrix {
+  let licensing = 0;
+  let visas = 0;
+  let premises = 0;
+  let advisory = 0;
+
+  for (const item of breakdown) {
+    if (item.category === 'Licence & Authority') licensing += item.amountAed;
+    else if (item.category === 'Visas & Immigration') visas += item.amountAed;
+    else if (item.category === 'Premises') premises += item.amountAed;
+    else if (item.category === 'Advisory & Compliance') advisory += item.amountAed;
+  }
+
+  const safeTotal = totalAed > 0 ? totalAed : 1;
+  const buildAlloc = (aed: number): CategoryAllocation => ({
+    aed,
+    usd: Math.round((aed / USD_PEG_RATE) * 100) / 100,
+    pct: Math.round((aed / safeTotal) * 100),
+    formattedAed: formatAed(aed),
+    formattedUsd: formatUsd(aed),
+  });
+
+  return {
+    licensing: buildAlloc(licensing),
+    visas: buildAlloc(visas),
+    premises: buildAlloc(premises),
+    advisory: buildAlloc(advisory),
+  };
 }
 
 export const JURISDICTIONS: Record<
@@ -207,8 +303,6 @@ export const ADDON_SERVICES = {
   },
 };
 
-export const USD_PEG_RATE = 3.6725;
-
 export function calculateSetupCost(options: SetupOptions): CalculationResult {
   const jur = JURISDICTIONS[options.jurisdiction];
   const act = ACTIVITIES[options.activityType];
@@ -217,135 +311,254 @@ export function calculateSetupCost(options: SetupOptions): CalculationResult {
   const breakdown: CostLineItem[] = [];
 
   // 1. Base Licence & Registration
-  breakdown.push({
-    id: 'base-licence',
-    label: `${jur.name} — Trade Licence & Registration`,
-    category: 'Licence & Authority',
-    amountAed: jur.baseLicenceAed,
-    isMandatory: true,
-    note: 'Includes initial name approval, company registration, and authority charter',
-  });
+  breakdown.push(
+    createLineItem(
+      'base-licence',
+      `${jur.name} — Trade Licence & Registration`,
+      'Licence & Authority',
+      jur.baseLicenceAed,
+      true,
+      'Includes initial name approval, company registration, and authority charter'
+    )
+  );
 
   // 2. Activity surcharges if any
   if (act.extraFeeAed > 0) {
-    breakdown.push({
-      id: 'activity-surcharge',
-      label: `Activity Classification: ${act.name}`,
-      category: 'Licence & Authority',
-      amountAed: act.extraFeeAed,
-      isMandatory: true,
-      note: 'Specific authority fee for regulated commercial/industrial activity',
-    });
+    breakdown.push(
+      createLineItem(
+        'activity-surcharge',
+        `Activity Classification: ${act.name}`,
+        'Licence & Authority',
+        act.extraFeeAed,
+        true,
+        'Specific authority fee for regulated commercial/industrial activity'
+      )
+    );
   }
 
   // 3. Office Premises
   if (office.costAed > 0) {
-    breakdown.push({
-      id: 'office-space',
-      label: `Premises: ${office.name}`,
-      category: 'Premises',
-      amountAed: office.costAed,
-      isMandatory: false,
-      note: office.description,
-    });
+    breakdown.push(
+      createLineItem(
+        'office-space',
+        `Premises: ${office.name}`,
+        'Premises',
+        office.costAed,
+        false,
+        office.description
+      )
+    );
   } else {
-    breakdown.push({
-      id: 'office-flexi',
-      label: 'Registered Flexi-Desk / Address',
-      category: 'Premises',
-      amountAed: 0,
-      isMandatory: true,
-      note: 'Compliant registered address included in baseline licence',
-    });
+    breakdown.push(
+      createLineItem(
+        'office-flexi',
+        'Registered Flexi-Desk / Address',
+        'Premises',
+        0,
+        true,
+        'Compliant registered address included in baseline licence'
+      )
+    );
   }
 
   // 4. Investor Visas (Not applicable for offshore)
   if (jur.id !== 'offshore-rak' && options.investorVisas > 0) {
     const investorTotal = options.investorVisas * jur.visaCostAed;
-    breakdown.push({
-      id: 'investor-visas',
-      label: `Investor / Partner Visa (${options.investorVisas}x)`,
-      category: 'Visas & Immigration',
-      amountAed: investorTotal,
-      isMandatory: false,
-      note: `Includes entry permit, medical test, Emirates ID registration & 2-year residency stamping`,
-    });
+    breakdown.push(
+      createLineItem(
+        'investor-visas',
+        `Investor / Partner Visa (${options.investorVisas}x)`,
+        'Visas & Immigration',
+        investorTotal,
+        false,
+        'Includes entry permit, medical test, Emirates ID registration & 2-year residency stamping'
+      )
+    );
   }
 
   // 5. Employee Visas
   if (jur.id !== 'offshore-rak' && options.employeeVisas > 0) {
     const employeeTotal = options.employeeVisas * (jur.visaCostAed + 500); // slight surcharge for labor/establishment
-    breakdown.push({
-      id: 'employee-visas',
-      label: `Employee Residence Visas (${options.employeeVisas}x)`,
-      category: 'Visas & Immigration',
-      amountAed: employeeTotal,
-      isMandatory: false,
-      note: `Includes MOHRE/Authority quota, entry permit, medical & Emirates ID processing`,
-    });
+    breakdown.push(
+      createLineItem(
+        'employee-visas',
+        `Employee Residence Visas (${options.employeeVisas}x)`,
+        'Visas & Immigration',
+        employeeTotal,
+        false,
+        'Includes MOHRE/Authority quota, entry permit, medical & Emirates ID processing'
+      )
+    );
   }
 
   // 6. Add-Ons
   if (options.addOns.corporateTax) {
-    breakdown.push({
-      id: 'addon-tax',
-      label: ADDON_SERVICES.corporateTax.name,
-      category: 'Advisory & Compliance',
-      amountAed: ADDON_SERVICES.corporateTax.costAed,
-      isMandatory: false,
-      note: ADDON_SERVICES.corporateTax.description,
-    });
+    breakdown.push(
+      createLineItem(
+        'addon-tax',
+        ADDON_SERVICES.corporateTax.name,
+        'Advisory & Compliance',
+        ADDON_SERVICES.corporateTax.costAed,
+        false,
+        ADDON_SERVICES.corporateTax.description
+      )
+    );
   }
 
   if (options.addOns.bankAccount) {
-    breakdown.push({
-      id: 'addon-bank',
-      label: ADDON_SERVICES.bankAccount.name,
-      category: 'Advisory & Compliance',
-      amountAed: ADDON_SERVICES.bankAccount.costAed,
-      isMandatory: false,
-      note: ADDON_SERVICES.bankAccount.description,
-    });
+    breakdown.push(
+      createLineItem(
+        'addon-bank',
+        ADDON_SERVICES.bankAccount.name,
+        'Advisory & Compliance',
+        ADDON_SERVICES.bankAccount.costAed,
+        false,
+        ADDON_SERVICES.bankAccount.description
+      )
+    );
   }
 
   if (options.addOns.amlCompliance) {
-    breakdown.push({
-      id: 'addon-aml',
-      label: ADDON_SERVICES.amlCompliance.name,
-      category: 'Advisory & Compliance',
-      amountAed: ADDON_SERVICES.amlCompliance.costAed,
-      isMandatory: false,
-      note: ADDON_SERVICES.amlCompliance.description,
-    });
+    breakdown.push(
+      createLineItem(
+        'addon-aml',
+        ADDON_SERVICES.amlCompliance.name,
+        'Advisory & Compliance',
+        ADDON_SERVICES.amlCompliance.costAed,
+        false,
+        ADDON_SERVICES.amlCompliance.description
+      )
+    );
   }
 
   if (options.addOns.uaeWill) {
-    breakdown.push({
-      id: 'addon-will',
-      label: ADDON_SERVICES.uaeWill.name,
-      category: 'Advisory & Compliance',
-      amountAed: ADDON_SERVICES.uaeWill.costAed,
-      isMandatory: false,
-      note: ADDON_SERVICES.uaeWill.description,
-    });
+    breakdown.push(
+      createLineItem(
+        'addon-will',
+        ADDON_SERVICES.uaeWill.name,
+        'Advisory & Compliance',
+        ADDON_SERVICES.uaeWill.costAed,
+        false,
+        ADDON_SERVICES.uaeWill.description
+      )
+    );
   }
 
   const totalAed = breakdown.reduce((sum, item) => sum + item.amountAed, 0);
   const totalUsd = Math.round((totalAed / USD_PEG_RATE) * 100) / 100;
+  const formattedTotalAed = formatAed(totalAed);
+  const formattedTotalUsd = formatUsd(totalAed);
 
   // 10-year UAE Golden Visa qualification check (business investors in Free Zone or Mainland with >= 2 investor visas or high-capital setup; Offshore entities cannot sponsor UAE residency visas)
   const goldenVisaEligible =
     options.jurisdiction !== 'offshore-rak' && (totalAed >= 50000 || options.investorVisas >= 2);
 
-  const summaryText = `Your calculated estimate for a ${act.name} company in ${jur.name} with ${options.investorVisas} investor visa(s) and ${options.employeeVisas} employee visa(s) is AED ${totalAed.toLocaleString()} (approx. $${Math.round(totalUsd).toLocaleString()} USD).`;
+  const allocations = computeBudgetAllocations(breakdown, totalAed);
+
+  const summaryText = `Your calculated estimate for a ${act.name} company in ${jur.name} with ${options.investorVisas} investor visa(s) and ${options.employeeVisas} employee visa(s) is ${formattedTotalAed} (approx. ${formattedTotalUsd}).`;
 
   return {
     totalAed,
     totalUsd,
+    formattedTotalAed,
+    formattedTotalUsd,
     jurisdictionName: jur.name,
+    jurisdictionCategory: jur.category,
     breakdown,
     turnaroundDays: jur.turnaroundDays,
     goldenVisaEligible,
     summaryText,
+    allocations,
+    categoryTotals: allocations,
+  };
+}
+
+// =========================================================================
+// EXECUTIVE INSTANT SETUP PRESETS & ENGINE (Pure Statutory Model)
+// =========================================================================
+
+export type InstantPresetId = 'freezone' | 'mainland' | 'offshore';
+
+export interface InstantPreset {
+  id: InstantPresetId;
+  name: string;
+  subtitle: string;
+  basePriceAed: number;
+  badge: string;
+  turnaroundDays: string;
+}
+
+export const INSTANT_SETUP_PRESETS: Record<InstantPresetId, InstantPreset> = {
+  freezone: {
+    id: 'freezone',
+    name: 'Free Zone',
+    subtitle: 'Meydan / IFZA / DMCC',
+    basePriceAed: 12500,
+    badge: '100% Tax Exemption',
+    turnaroundDays: '3–5 business days',
+  },
+  mainland: {
+    id: 'mainland',
+    name: 'Dubai Mainland',
+    subtitle: 'DED Commercial LLC',
+    basePriceAed: 18500,
+    badge: 'Local UAE Market',
+    turnaroundDays: '5–8 business days',
+  },
+  offshore: {
+    id: 'offshore',
+    name: 'Offshore Holding',
+    subtitle: 'RAK ICC / JAFZA',
+    basePriceAed: 24000,
+    badge: 'Asset Protection',
+    turnaroundDays: '3–4 business days',
+  },
+};
+
+export interface InstantSetupOptions {
+  preset: InstantPresetId;
+  visas: number;
+  officeType: 'flexi' | 'physical';
+}
+
+export interface InstantSetupResult {
+  preset: InstantPreset;
+  visas: number;
+  officeType: 'flexi' | 'physical';
+  basePriceAed: number;
+  visaPriceAed: number;
+  officePriceAed: number;
+  totalAed: number;
+  totalUsd: number;
+  formattedTotalAed: string;
+  formattedTotalUsd: string;
+  formattedBasePrice: string;
+  formattedVisaPrice: string;
+  formattedOfficePrice: string;
+}
+
+export function calculateInstantSetup(options: InstantSetupOptions): InstantSetupResult {
+  const preset = INSTANT_SETUP_PRESETS[options.preset] || INSTANT_SETUP_PRESETS.freezone;
+  const isOffshore = preset.id === 'offshore';
+  // Statutory rule: Offshore companies cannot sponsor UAE residency visas under ICP regulations
+  const visaPriceAed = isOffshore ? 0 : Math.max(0, options.visas) * 3750;
+  const officePriceAed = options.officeType === 'physical' ? 12000 : 0;
+  const totalAed = preset.basePriceAed + visaPriceAed + officePriceAed;
+  const totalUsd = Math.round((totalAed / USD_PEG_RATE) * 100) / 100;
+
+  return {
+    preset,
+    visas: isOffshore ? 0 : options.visas,
+    officeType: options.officeType,
+    basePriceAed: preset.basePriceAed,
+    visaPriceAed,
+    officePriceAed,
+    totalAed,
+    totalUsd,
+    formattedTotalAed: formatAed(totalAed),
+    formattedTotalUsd: formatUsd(totalAed),
+    formattedBasePrice: formatAed(preset.basePriceAed),
+    formattedVisaPrice: formatAed(visaPriceAed),
+    formattedOfficePrice: formatAed(officePriceAed),
   };
 }

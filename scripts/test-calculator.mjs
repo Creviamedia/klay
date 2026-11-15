@@ -1,5 +1,14 @@
 import assert from 'node:assert/strict';
-import { calculateSetupCost, JURISDICTIONS, USD_PEG_RATE } from '../src/lib/calculator-engine.ts';
+import {
+  calculateSetupCost,
+  calculateInstantSetup,
+  formatCurrency,
+  formatAed,
+  formatUsd,
+  JURISDICTIONS,
+  INSTANT_SETUP_PRESETS,
+  USD_PEG_RATE,
+} from '../src/lib/calculator-engine.ts';
 
 console.log('🧪 Starting UAE Company Formation Cost Calculator & Pipeline Tests...');
 
@@ -118,4 +127,70 @@ console.log('🧪 Starting UAE Company Formation Cost Calculator & Pipeline Test
   console.log('  ✓ Phone trunk zero normalization passed');
 }
 
-console.log('🎉 ALL 5 TEST SUITES PASSED CLEANLY (100% assertions verified)!');
+// 6. Currency Formatting & Peg Consistency Test
+{
+  assert.equal(formatAed(12500), 'AED 12,500');
+  assert.equal(formatUsd(36725), '$10,000 USD');
+  assert.equal(formatCurrency(18500, 'AED'), 'AED 18,500');
+  assert.equal(
+    formatCurrency(18500, 'USD'),
+    `$${Math.round(18500 / USD_PEG_RATE).toLocaleString()} USD`
+  );
+  console.log('  ✓ Currency formatting and USD peg consistency passed');
+}
+
+// 7. Budget Allocation Matrix & Category Totals Test
+{
+  const result = calculateSetupCost({
+    jurisdiction: 'freezone-meydan',
+    activityType: 'commercial', // 2000
+    investorVisas: 2, // 2 * 3750 = 7500
+    employeeVisas: 1, // 4250
+    officeType: 'dedicated-desk', // 7500
+    addOns: { corporateTax: true, bankAccount: true, amlCompliance: false, uaeWill: false }, // 1500 + 2500
+  });
+
+  // Licensing: 12500 + 2000 = 14500
+  // Visas: 7500 + 4250 = 11750
+  // Premises: 7500
+  // Advisory: 4000
+  // Total: 37750
+  assert.equal(result.totalAed, 37750);
+  assert.equal(result.allocations.licensing.aed, 14500);
+  assert.equal(result.allocations.visas.aed, 11750);
+  assert.equal(result.allocations.premises.aed, 7500);
+  assert.equal(result.allocations.advisory.aed, 4000);
+
+  // Check percentages sum roughly to 100%
+  const totalPct =
+    result.allocations.licensing.pct +
+    result.allocations.visas.pct +
+    result.allocations.premises.pct +
+    result.allocations.advisory.pct;
+  assert.ok(totalPct >= 99 && totalPct <= 101, 'Normalized allocation percentages must sum ~100%');
+
+  // Verify line item formatted properties
+  for (const item of result.breakdown) {
+    assert.ok(item.formattedAed.startsWith('AED '), 'Line item must have pre-formatted AED string');
+    assert.ok(item.formattedUsd.startsWith('$'), 'Line item must have pre-formatted USD string');
+  }
+  console.log('  ✓ Budget allocation matrix and line item formatting passed');
+}
+
+// 8. Instant Setup Engine & Offshore Visa Restriction Test
+{
+  const fz = calculateInstantSetup({ preset: 'freezone', visas: 2, officeType: 'flexi' });
+  assert.equal(fz.totalAed, 12500 + 2 * 3750); // 20000
+  assert.equal(fz.formattedTotalAed, 'AED 20,000');
+
+  const mainland = calculateInstantSetup({ preset: 'mainland', visas: 1, officeType: 'physical' });
+  assert.equal(mainland.totalAed, 18500 + 3750 + 12000); // 34250
+
+  // Offshore statutory rule: visas must be 0 AED regardless of input
+  const offshore = calculateInstantSetup({ preset: 'offshore', visas: 3, officeType: 'flexi' });
+  assert.equal(offshore.visaPriceAed, 0, 'Offshore entities must never have visa surcharges');
+  assert.equal(offshore.totalAed, 24000);
+  console.log('  ✓ Instant setup calculations and offshore statutory restrictions passed');
+}
+
+console.log('🎉 ALL 8 TEST SUITES PASSED CLEANLY (100% assertions verified)!');

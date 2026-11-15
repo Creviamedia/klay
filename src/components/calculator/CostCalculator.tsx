@@ -1,6 +1,7 @@
 import React, { useState, useMemo } from 'react';
 import {
   calculateSetupCost,
+  formatCurrency,
   JURISDICTIONS,
   ACTIVITIES,
   OFFICE_SPACES,
@@ -9,6 +10,7 @@ import {
   type ActivityTypeId,
   type OfficeTypeId,
   type SetupOptions,
+  type CurrencyCode,
 } from '@/lib/calculator-engine';
 import { Check, ArrowRight } from 'lucide-react';
 import { submitIntakeDossier } from '@/lib/intake-conduit';
@@ -27,14 +29,14 @@ export function CostCalculator() {
     uaeWill: false,
   });
 
-  const [currency, setCurrency] = useState<'AED' | 'USD'>('AED');
+  const [currency, setCurrency] = useState<CurrencyCode>('AED');
   const [leadName, setLeadName] = useState('');
   const [leadEmail, setLeadEmail] = useState('');
   const [leadPhone, setLeadPhone] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitSuccess, setSubmitSuccess] = useState<string | null>(null);
 
-  // Compute live calculation
+  // Compute live calculation via unified ledger engine
   const currentOptions: SetupOptions = useMemo(
     () => ({
       jurisdiction,
@@ -48,11 +50,7 @@ export function CostCalculator() {
   );
 
   const calculation = useMemo(() => calculateSetupCost(currentOptions), [currentOptions]);
-
-  const displayTotal =
-    currency === 'AED'
-      ? `AED ${calculation.totalAed.toLocaleString()}`
-      : `$${Math.round(calculation.totalUsd).toLocaleString()} USD`;
+  const displayTotal = formatCurrency(calculation.totalAed, currency);
 
   const handleLeadSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -386,7 +384,7 @@ export function CostCalculator() {
                   >
                     <span className="text-[#0C2D48]/75 truncate max-w-[200px]">{item.label}</span>
                     <span className="font-mono font-medium text-[#0C2D48]">
-                      AED {item.amountAed.toLocaleString()}
+                      {currency === 'AED' ? item.formattedAed : item.formattedUsd}
                     </span>
                   </div>
                 ))}
