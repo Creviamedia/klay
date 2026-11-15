@@ -66,8 +66,18 @@ const serviceSeo: Record<string, { title: string; description: string; keyword: 
 const defaultImage = `${SITE_ORIGIN}/images/og-default.jpg`;
 
 const MONTHS: Record<string, string> = {
-  jan: '01', feb: '02', mar: '03', apr: '04', may: '05', jun: '06',
-  jul: '07', aug: '08', sep: '09', oct: '10', nov: '11', dec: '12',
+  jan: '01',
+  feb: '02',
+  mar: '03',
+  apr: '04',
+  may: '05',
+  jun: '06',
+  jul: '07',
+  aug: '08',
+  sep: '09',
+  oct: '10',
+  nov: '11',
+  dec: '12',
 };
 
 /** '7 Nov 2026' -> '2026-11-07' (timezone-independent). */
@@ -117,7 +127,7 @@ function fromRecord(
     type?: 'website' | 'article';
     openGraphTitle?: string;
     noindex?: boolean;
-  },
+  }
 ): PageSeo {
   return {
     title: metadata.title,
@@ -137,12 +147,29 @@ function fromRecord(
 
 export function getPageSeo(pathname: string): PageSeo {
   const path = normalizedPath(pathname);
-  const staticMetadata = (pageSeo as Record<string, {
-    title: string;
-    description: string;
-    keyword?: string;
-    openGraphTitle?: string;
-  }>)[path];
+  if (path.startsWith('/admin')) {
+    return {
+      title: 'Klay Admin Portal | Klay Consultants',
+      description: 'Executive Management Portal - Authorized Access Only',
+      keyword: '',
+      canonical: canonicalFor(path),
+      image: defaultImage,
+      type: 'website',
+      noindex: true,
+    };
+  }
+
+  const staticMetadata = (
+    pageSeo as Record<
+      string,
+      {
+        title: string;
+        description: string;
+        keyword?: string;
+        openGraphTitle?: string;
+      }
+    >
+  )[path];
   if (staticMetadata) return fromRecord(path, staticMetadata);
 
   const blogPage = findBlogPage(path);
@@ -168,11 +195,14 @@ export function getPageSeo(pathname: string): PageSeo {
 
   const service = findService(path);
   if (service) {
-    return fromRecord(path, serviceSeo[service.slug] ?? {
-      title: `${service.title} in the UAE | Klay Consultants`,
-      description: `${service.short} Get practical guidance from Klay Consultants in Dubai.`,
-      keyword: service.title,
-    });
+    return fromRecord(
+      path,
+      serviceSeo[service.slug] ?? {
+        title: `${service.title} in the UAE | Klay Consultants`,
+        description: `${service.short} Get practical guidance from Klay Consultants in Dubai.`,
+        keyword: service.title,
+      }
+    );
   }
 
   return {
@@ -192,7 +222,11 @@ const staticRoutes: PublicSeoRoute[] = [
   { path: ROUTES.services, source: 'page', lastmodSource: 'src/pages/ServicesPage.tsx' },
   { path: ROUTES.businessSetup, source: 'page', lastmodSource: 'src/pages/BusinessSetupPage.tsx' },
   { path: ROUTES.blog, source: 'page', lastmodSource: 'src/content/blog/posts.ts' },
-  { path: ROUTES.costCalculator, source: 'page', lastmodSource: 'src/pages/CostCalculatorPage.tsx' },
+  {
+    path: ROUTES.costCalculator,
+    source: 'page',
+    lastmodSource: 'src/pages/CostCalculatorPage.tsx',
+  },
   { path: ROUTES.contact, source: 'page', lastmodSource: 'src/pages/ContactPage.tsx' },
   { path: ROUTES.goldenVisa, source: 'page', lastmodSource: 'src/pages/GoldenVisaPage.tsx' },
   { path: ROUTES.privacy, source: 'page', lastmodSource: 'src/pages/PrivacyPage.tsx' },
@@ -222,9 +256,9 @@ export function getPublicSeoRoutes(): PublicSeoRoute[] {
   ];
 }
 
-/** Routes rendered to static HTML at build time. */
+/** Routes rendered to static HTML at build time. /admin routes are strictly excluded. */
 export function getPrerenderRoutes(): PublicSeoRoute[] {
-  return getPublicSeoRoutes();
+  return getPublicSeoRoutes().filter((route) => !route.path.startsWith('/admin'));
 }
 
 function organizationSchema() {
@@ -287,7 +321,9 @@ export function getStructuredData(pathname: string, articleDetails?: BlogArticle
     const crumbs = [{ name: 'Home', item: `${SITE_ORIGIN}/` }];
     if (article || blogPage) crumbs.push({ name: 'Blog', item: `${SITE_ORIGIN}${ROUTES.blog}` });
     else if (service) crumbs.push({ name: 'Services', item: `${SITE_ORIGIN}${ROUTES.services}` });
-    const currentName = blogPage ? `Page ${blogPage}` : article?.title ?? seo.title.split('|')[0].trim();
+    const currentName = blogPage
+      ? `Page ${blogPage}`
+      : (article?.title ?? seo.title.split('|')[0].trim());
     crumbs.push({ name: currentName, item: seo.canonical });
     graph.push({
       '@type': 'BreadcrumbList',
@@ -345,7 +381,12 @@ export function applyPageSeo(pathname: string): void {
   const seo = getPageSeo(pathname);
   document.title = seo.title;
 
-  const setMeta = (selector: string, attribute: 'name' | 'property', key: string, content: string) => {
+  const setMeta = (
+    selector: string,
+    attribute: 'name' | 'property',
+    key: string,
+    content: string
+  ) => {
     let element = document.head.querySelector<HTMLMetaElement>(selector);
     if (!element) {
       element = document.createElement('meta');

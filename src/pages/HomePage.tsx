@@ -11,10 +11,8 @@ import { StatCounter } from '@/components/ui/StatCounter';
 import { DivisionCard } from '@/components/ui/DivisionCard';
 import { PropertySetupCard } from '@/components/ui/PropertySetupCard';
 import { SetupCalculator } from '@/components/sections/SetupCalculator';
-import {
-  HOMEPAGE_SETUP_FACTORS,
-  IMAGES,
-} from '@/lib/data';
+import { ExecutiveEditorialSpotlight } from '@/components/sections/ExecutiveEditorialSpotlight';
+import { HOMEPAGE_SETUP_FACTORS, IMAGES } from '@/lib/data';
 import { ROUTES } from '@/lib/routes';
 
 const HOMEPAGE_FAQS: AccordionItem[] = [
@@ -54,25 +52,31 @@ const STRATEGY_WORKFLOW_STEPS = [
   {
     number: '01',
     title: 'We Underwrite',
-    description: 'We assess your trade scope, regional contracts, and ultimate banking profile to select the optimal jurisdiction with zero nominee exposure.',
-    details: 'Initial government name approval, activity classification, and tax residency qualification.',
+    description:
+      'We assess your trade scope, regional contracts, and ultimate banking profile to select the optimal jurisdiction with zero nominee exposure.',
+    details:
+      'Initial government name approval, activity classification, and tax residency qualification.',
   },
   {
     number: '02',
     title: 'You Choose',
-    description: 'Review pre-vetted corporate structures across Dubai Mainland (DED) or premier Free Zones (DIFC, ADGM, DMCC, Meydan) tailored to your capital.',
+    description:
+      'Review pre-vetted corporate structures across Dubai Mainland (DED) or premier Free Zones (DIFC, ADGM, DMCC, Meydan) tailored to your capital.',
     details: 'Transparent government fee schedules with zero hidden agency surcharges.',
   },
   {
     number: '03',
     title: 'We Incorporate',
-    description: 'Our accredited legal counsel drafts Articles, notarises the digital MOA, and secures the official trade license with sovereign pre-approval.',
-    details: 'Establishment card issuance, corporate quota allocation, and Chamber of Commerce registration.',
+    description:
+      'Our accredited legal counsel drafts Articles, notarises the digital MOA, and secures the official trade license with sovereign pre-approval.',
+    details:
+      'Establishment card issuance, corporate quota allocation, and Chamber of Commerce registration.',
   },
   {
     number: '04',
     title: 'You Own',
-    description: 'Gain 100% sovereign ownership of an active UAE company with VIP investor residency visas and pre-cleared tier-1 corporate banking.',
+    description:
+      'Gain 100% sovereign ownership of an active UAE company with VIP investor residency visas and pre-cleared tier-1 corporate banking.',
     details: 'Multi-currency facilities activated in days with dedicated relationship managers.',
   },
 ];
@@ -150,7 +154,9 @@ export default function Home() {
               <span className="block sm:inline text-white">Scale With Confidence.</span>
             </h2>
             <p className="mt-5 text-base sm:text-lg text-white/70 font-normal leading-relaxed max-w-2xl">
-              At Klay Consultants, every entity is legally structured, underwritten, and pre-cleared for corporate banking before filing. Our institutional model ensures you own 100% of your venture from day one.
+              At Klay Consultants, every entity is legally structured, underwritten, and pre-cleared
+              for corporate banking before filing. Our institutional model ensures you own 100% of
+              your venture from day one.
             </p>
           </div>
 
@@ -199,7 +205,9 @@ export default function Home() {
                 <span className="block sm:inline font-medium">Our Standards Don't.</span>
               </h2>
               <p className="mt-5 text-base sm:text-lg text-[#0C2D48]/75 font-normal leading-relaxed">
-                Every incorporation behind these figures was structured under rigorous legal standards: zero local nominee risk, verified banking dossiers, and sovereign title protection.
+                Every incorporation behind these figures was structured under rigorous legal
+                standards: zero local nominee risk, verified banking dossiers, and sovereign title
+                protection.
               </p>
             </div>
             <div>
@@ -249,7 +257,8 @@ export default function Home() {
               <span className="text-white">One Institutional Roof.</span>
             </h2>
             <p className="mt-6 text-base sm:text-lg text-white/70 font-normal leading-relaxed max-w-2xl">
-              We eliminate disconnected service fragmentation. Your licensing, corporate banking, residency visas, and succession planning are unified under one point of contact.
+              We eliminate disconnected service fragmentation. Your licensing, corporate banking,
+              residency visas, and succession planning are unified under one point of contact.
             </p>
           </div>
 
@@ -265,7 +274,11 @@ export default function Home() {
               index="02 // RESIDENCY"
               title="Golden Visa Advisory"
               description="10-year sovereign UAE residency advisory for investors, founders, executives, and high-net-worth families."
-              features={['10-Year Self-Sponsored', 'VIP Medical Concierge', 'Family Visa Inclusions']}
+              features={[
+                '10-Year Self-Sponsored',
+                'VIP Medical Concierge',
+                'Family Visa Inclusions',
+              ]}
               to="/golden-visa/"
             />
             <DivisionCard
@@ -301,7 +314,8 @@ export default function Home() {
                 Jurisdictions Structured.
               </h2>
               <p className="mt-6 text-base sm:text-lg text-[#0C2D48]/75 font-normal leading-relaxed">
-                Explore active commercial platforms and sovereign entities structured across premier UAE financial centres.
+                Explore active commercial platforms and sovereign entities structured across premier
+                UAE financial centres.
               </p>
             </div>
             <div>
@@ -348,7 +362,8 @@ export default function Home() {
               <span className="text-white">We Now Build for You.</span>
             </h2>
             <p className="text-base sm:text-lg text-white/70 max-w-2xl mx-auto mb-10 leading-relaxed font-normal">
-              Direct government liaison, zero nominee risk, and institutional corporate structuring. Speak with our Senior Advisory Partners to architect your UAE presence.
+              Direct government liaison, zero nominee risk, and institutional corporate structuring.
+              Speak with our Senior Advisory Partners to architect your UAE presence.
             </p>
             <div className="flex justify-center">
               <EquitifyButton to={ROUTES.contact} variant="green" size="lg">
@@ -362,7 +377,10 @@ export default function Home() {
       {/* =========================================================================
           SECTION 8: Instant Cost Estimation Engine
           ========================================================================= */}
-      <section id="cost-estimate" className="py-20 lg:py-28 bg-[#FBFBFB] text-[#0C2D48] border-b border-[#0C2D48]/10">
+      <section
+        id="cost-estimate"
+        className="py-20 lg:py-28 bg-[#FBFBFB] text-[#0C2D48] border-b border-[#0C2D48]/10"
+      >
         <div className="mx-auto max-w-7xl px-6 lg:px-8">
           <div className="grid items-start gap-8 lg:grid-cols-[0.9fr_1.1fr] lg:gap-12">
             <div className="relative border border-[#0C2D48]/10 bg-white p-8 sm:p-10 shadow-sm corner-crosshair-wrap">
@@ -374,18 +392,26 @@ export default function Home() {
                 Transparent UAE Formation Tariffs
               </h2>
               <p className="text-sm sm:text-base text-[#0C2D48]/75 leading-relaxed mb-8">
-                Your investment is determined by jurisdiction, activity category, visa allocation, and premises requirements. Calculate statutory fees with full transparency.
+                Your investment is determined by jurisdiction, activity category, visa allocation,
+                and premises requirements. Calculate statutory fees with full transparency.
               </p>
 
               <div className="space-y-4 border-t border-[#0C2D48]/10 pt-6">
                 {HOMEPAGE_SETUP_FACTORS.map(({ title, text }, idx) => (
-                  <div key={title} className="flex items-baseline gap-4 py-1.5 border-b border-[#0C2D48]/5 last:border-b-0">
+                  <div
+                    key={title}
+                    className="flex items-baseline gap-4 py-1.5 border-b border-[#0C2D48]/5 last:border-b-0"
+                  >
                     <span className="font-mono text-xs text-[#0C2D48]/40 shrink-0">
                       0{idx + 1} //
                     </span>
                     <div>
-                      <span className="text-sm font-semibold text-[#0C2D48] block mb-0.5">{title}</span>
-                      <span className="text-xs text-[#0C2D48]/65 leading-relaxed block">{text}</span>
+                      <span className="text-sm font-semibold text-[#0C2D48] block mb-0.5">
+                        {title}
+                      </span>
+                      <span className="text-xs text-[#0C2D48]/65 leading-relaxed block">
+                        {text}
+                      </span>
                     </div>
                   </div>
                 ))}
@@ -397,6 +423,11 @@ export default function Home() {
           </div>
         </div>
       </section>
+
+      {/* =========================================================================
+          SECTION 8.5: Executive Briefings & Statutory Intelligence Spotlight
+          ========================================================================= */}
+      <ExecutiveEditorialSpotlight />
 
       {/* =========================================================================
           SECTION 9: Numbered FAQ Accordion (Equitify Format)
