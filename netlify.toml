@@ -6,6 +6,9 @@ command = "npm run build"
 publish = "dist"
 functions = "netlify/functions"
 
+[functions]
+included_files = ["data/**"]
+
 # API Serverless Functions
 [[redirects]]
 from = "/api/admin/*"
