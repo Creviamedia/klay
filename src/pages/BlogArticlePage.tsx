@@ -1,4 +1,4 @@
-import React, { lazy, Suspense, type ComponentType } from 'react';
+import React, { lazy, Suspense, type ComponentType, useState, useEffect } from 'react';
 import { Navigate, useLocation, useParams } from 'react-router-dom';
 import { LongFormArticleContent } from '@/components/blog/LongFormArticleContent';
 import { MarkdownArticleContent } from '@/components/blog/MarkdownArticleContent';
@@ -45,6 +45,47 @@ function trimSlash(path: string) {
   return path.replace(/\/+$/, '') || '/';
 }
 
+function getLocalDynamicArticle(
+  slug: string
+): { post: BlogPostSummary; article: BlogArticle } | null {
+  if (typeof window === 'undefined') return null;
+  try {
+    const raw = localStorage.getItem('klay_published_blogs');
+    if (!raw) return null;
+    const list = JSON.parse(raw);
+    if (!Array.isArray(list)) return null;
+    const found = list.find((b: any) => b && b.slug === slug);
+    if (!found) return null;
+
+    const post: BlogPostSummary = {
+      slug: found.slug,
+      title: found.title,
+      excerpt: found.excerpt || '',
+      date: found.date || new Date().toISOString().split('T')[0],
+      category: found.pillar || 'Company Setup & Strategy',
+      image: found.coverImage || found.cover_image || '/images/blog/dubai-executive-at-sunset.webp',
+      imageAlt: found.title,
+      metaTitle: found.title,
+      metaDescription: found.excerpt || '',
+      focusKeyword: found.pillar || '',
+    };
+
+    const article: BlogArticle = {
+      details: {
+        tags: [post.category],
+      },
+      body: {
+        kind: 'markdown',
+        markdown: found.content || found.excerpt || '',
+      },
+    };
+
+    return { post, article };
+  } catch {
+    return null;
+  }
+}
+
 export default function BlogArticlePage() {
   const { slug = '' } = useParams<{ slug: string }>();
   const { pathname } = useLocation();
@@ -52,19 +93,100 @@ export default function BlogArticlePage() {
   const redirectTarget = BLOG_REDIRECTS[slug];
   if (redirectTarget) return <Navigate to={getBlogArticleRoute(redirectTarget)} replace />;
 
-  const post = getBlogPost(slug);
-  const ArticleView = post ? getArticleView(post.slug) : undefined;
-  if (!post || !ArticleView) return <NotFoundPage />;
+  const staticPost = getBlogPost(slug);
+  const staticArticleView = staticPost ? getArticleView(staticPost.slug) : undefined;
 
-  const canonicalPath = getBlogArticleRoute(post.slug);
-  if (trimSlash(pathname) !== trimSlash(canonicalPath))
-    return <Navigate to={canonicalPath} replace />;
+  const [dynamicData, setDynamicData] = useState(() => getLocalDynamicArticle(slug));
+  const [isCheckingRemote, setIsCheckingRemote] = useState(!staticPost && !dynamicData);
 
-  return (
-    <Suspense fallback={<ArticleLayout post={post} />}>
-      <ArticleView post={post} />
-    </Suspense>
-  );
+  useEffect(() => {
+    // If not found statically or locally, try fetching from admin blogs API
+    if (!staticPost && !dynamicData) {
+      let isMounted = true;
+      async function fetchRemote() {
+        try {
+          const token =
+            localStorage.getItem('klay_admin_token') || sessionStorage.getItem('klay_admin_token');
+          const headers: Record<string, string> = { Accept: 'application/json' };
+          if (token) headers['Authorization'] = `Bearer ${token}`;
+
+          const res = await fetch('/api/admin/blogs', { headers, credentials: 'include' });
+          if (res.ok) {
+            const data = await res.json();
+            if (Array.isArray(data.blogs)) {
+              const match = data.blogs.find((b: any) => b && b.slug === slug);
+              if (match && isMounted) {
+                const post: BlogPostSummary = {
+                  slug: match.slug,
+                  title: match.title,
+                  excerpt: match.excerpt || '',
+                  date: match.date || new Date().toISOString().split('T')[0],
+                  category: match.pillar || 'Company Setup & Strategy',
+                  image:
+                    match.coverImage ||
+                    match.cover_image ||
+                    '/images/blog/dubai-executive-at-sunset.webp',
+                  imageAlt: match.title,
+                  metaTitle: match.title,
+                  metaDescription: match.excerpt || '',
+                  focusKeyword: match.pillar || '',
+                };
+                const article: BlogArticle = {
+                  details: {
+                    tags: [post.category],
+                  },
+                  body: {
+                    kind: 'markdown',
+                    markdown: match.content || match.excerpt || '',
+                  },
+                };
+                setDynamicData({ post, article });
+              }
+            }
+          }
+        } catch {
+          // ignore
+        } finally {
+          if (isMounted) setIsCheckingRemote(false);
+        }
+      }
+      fetchRemote();
+      return () => {
+        isMounted = false;
+      };
+    }
+  }, [slug, staticPost, dynamicData]);
+
+  if (staticPost && staticArticleView) {
+    const canonicalPath = getBlogArticleRoute(staticPost.slug);
+    if (trimSlash(pathname) !== trimSlash(canonicalPath))
+      return <Navigate to={canonicalPath} replace />;
+
+    const ArticleView = staticArticleView;
+    return (
+      <Suspense fallback={<ArticleLayout post={staticPost} />}>
+        <ArticleView post={staticPost} />
+      </Suspense>
+    );
+  }
+
+  if (dynamicData) {
+    const canonicalPath = getBlogArticleRoute(dynamicData.post.slug);
+    if (trimSlash(pathname) !== trimSlash(canonicalPath))
+      return <Navigate to={canonicalPath} replace />;
+
+    return <ArticleLayout post={dynamicData.post} article={dynamicData.article} />;
+  }
+
+  if (isCheckingRemote) {
+    return (
+      <div className="min-h-screen bg-[#FAFBFD] flex items-center justify-center text-[#0C2D48]/60 font-mono text-xs">
+        Loading publication briefing...
+      </div>
+    );
+  }
+
+  return <NotFoundPage />;
 }
 
 function ArticleLayout({ post, article }: { post: BlogPostSummary; article?: BlogArticle }) {

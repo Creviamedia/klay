@@ -7,7 +7,7 @@ import {
   type ErrorInfo,
   type ReactNode,
 } from 'react';
-import { BrowserRouter, Route, Routes, useLocation } from 'react-router-dom';
+import { BrowserRouter, Navigate, Route, Routes, useLocation } from 'react-router-dom';
 import { NotFoundPage } from '@/pages/NotFoundPage';
 import { Footer } from '@/components/layout/Footer';
 import { SiteBackground } from '@/components/layout/SiteBackground';
@@ -32,6 +32,13 @@ const PrivacyPage = lazy(() => import('@/pages/PrivacyPage'));
 const ServiceDetailPage = lazy(() => import('@/pages/ServiceDetailPage'));
 const ServicesPage = lazy(() => import('@/pages/ServicesPage'));
 const TermsPage = lazy(() => import('@/pages/TermsPage'));
+
+// Admin Management Portal (M4 Sovereign Dashboard)
+const AdminLayout = lazy(() => import('@/components/admin/AdminLayout'));
+const AdminLoginPage = lazy(() => import('@/pages/admin/AdminLoginPage'));
+const AdminLeadsPage = lazy(() => import('@/pages/admin/AdminLeadsPage'));
+const AdminBlogsPage = lazy(() => import('@/pages/admin/AdminBlogsPage'));
+
 // Not needed for first paint; loaded separately so its animation library stays out of the main bundle.
 const FloatingContactWidget = lazy(() =>
   import('@/components/layout/FloatingContactWidget').then((module) => ({
@@ -158,6 +165,7 @@ function ScrollToTop() {
 export function SiteRoutes() {
   const { pathname } = useLocation();
   const normalizedPathname = pathname.replace(/\/+$/, '');
+  const isAdminRoute = pathname.startsWith('/admin');
   const isBusinessSetupPage =
     normalizedPathname === ROUTES.businessSetup.replace(/\/+$/, '') ||
     normalizedPathname === '/business-setup';
@@ -169,20 +177,42 @@ export function SiteRoutes() {
     <>
       <PageMetadata />
       <ScrollToTop />
-      {!isBusinessSetupPage && !isCostCalculatorPage && <SiteBackground />}
+      {!isAdminRoute && !isBusinessSetupPage && !isCostCalculatorPage && <SiteBackground />}
       {/* Keyboard users can jump past the header links; hidden until it receives focus. */}
-      <a
-        href="#main-content"
-        className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[100] focus:rounded-lg focus:bg-white focus:px-4 focus:py-2 focus:text-sm focus:font-semibold focus:text-black focus:shadow-lg focus:outline focus:outline-2 focus:outline-offset-2 focus:outline-[#0C2D48]"
-      >
-        Skip to main content
-      </a>
+      {!isAdminRoute && (
+        <a
+          href="#main-content"
+          className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[100] focus:rounded-lg focus:bg-white focus:px-4 focus:py-2 focus:text-sm focus:font-semibold focus:text-black focus:shadow-lg focus:outline focus:outline-2 focus:outline-offset-2 focus:outline-[#0C2D48]"
+        >
+          Skip to main content
+        </a>
+      )}
       {/* Top Header removed in favor of unified sovereign bottom FloatingDock */}
       <main id="main-content" tabIndex={-1} className="flex-1 focus:outline-none">
         <ChunkErrorBoundary key={pathname}>
           <Suspense fallback={null}>
             <ChunkLoadSuccess />
             <Routes>
+              {/* Sovereign Admin Portal Routes - Mounted BEFORE /:slug */}
+              <Route path="/admin/login" element={<AdminLoginPage />} />
+              <Route path="/admin" element={<Navigate to="/admin/leads" replace />} />
+              <Route
+                path="/admin/leads"
+                element={
+                  <AdminLayout>
+                    <AdminLeadsPage />
+                  </AdminLayout>
+                }
+              />
+              <Route
+                path="/admin/blogs"
+                element={
+                  <AdminLayout>
+                    <AdminBlogsPage />
+                  </AdminLayout>
+                }
+              />
+
               <Route path={ROUTES.home} element={<HomePage />} />
               <Route path={ROUTES.about} element={<AboutPage />} />
               <Route path={ROUTES.blog} element={<BlogPage />} />
@@ -206,13 +236,17 @@ export function SiteRoutes() {
           </Suspense>
         </ChunkErrorBoundary>
       </main>
-      <ChunkErrorBoundary fallback={null}>
-        <Suspense fallback={null}>
-          <FloatingContactWidget />
-          <FloatingDock />
-        </Suspense>
-      </ChunkErrorBoundary>
-      <Footer flushTop={isContactPage} />
+      {!isAdminRoute && (
+        <>
+          <ChunkErrorBoundary fallback={null}>
+            <Suspense fallback={null}>
+              <FloatingContactWidget />
+              <FloatingDock />
+            </Suspense>
+          </ChunkErrorBoundary>
+          <Footer flushTop={isContactPage} />
+        </>
+      )}
     </>
   );
 }

@@ -84,6 +84,7 @@ function sendNotFound(_request, response, next) {
 }
 
 app.disable('x-powered-by');
+app.set('trust proxy', 1);
 
 app.use((_request, response, next) => {
   for (const [name, value] of Object.entries(SECURITY_HEADERS)) response.setHeader(name, value);
@@ -179,8 +180,90 @@ app.post('/api/leads', async (request, response) => {
   return response.status(result.statusCode).json(result.body);
 });
 
+const {
+  resolveClientIp,
+  requireAdminAuth,
+  handleAdminLogin,
+  handleAdminLogout,
+  handleGetLeads,
+  handlePatchLead,
+  handleGetBlogs,
+  handlePostBlog,
+  handleDeleteBlog,
+} = require('./netlify/functions/admin-core.cjs');
+
+// Admin Authentication & Session routes
+app.post('/api/admin/login', async (request, response) => {
+  const clientIp = resolveClientIp(request);
+  const result = await handleAdminLogin(request.body, clientIp);
+  for (const [key, value] of Object.entries(result.headers || {})) {
+    response.setHeader(key, value);
+  }
+  return response.status(result.statusCode).json(result.body);
+});
+
+app.post('/api/admin/logout', (request, response) => {
+  const result = handleAdminLogout();
+  for (const [key, value] of Object.entries(result.headers || {})) {
+    response.setHeader(key, value);
+  }
+  return response.status(result.statusCode).json(result.body);
+});
+
+// Admin Authorization Middleware
+function requireAdmin(request, response, next) {
+  const auth = requireAdminAuth(request);
+  if (!auth.authenticated) {
+    return response.status(auth.status || 401).json({ error: auth.error || 'Unauthorized' });
+  }
+  request.adminUser = auth.user;
+  next();
+}
+
+// Protected Admin API Endpoints
+app.get('/api/admin/leads', requireAdmin, (request, response) => {
+  const result = handleGetLeads(request.query);
+  return response.status(result.statusCode).json(result.body);
+});
+
+app.patch('/api/admin/leads/:id', requireAdmin, (request, response) => {
+  const result = handlePatchLead(request.params.id, request.body);
+  return response.status(result.statusCode).json(result.body);
+});
+
+app.get('/api/admin/blogs', requireAdmin, (request, response) => {
+  const result = handleGetBlogs();
+  return response.status(result.statusCode).json(result.body);
+});
+
+app.post('/api/admin/blogs', requireAdmin, (request, response) => {
+  const result = handlePostBlog(request.body);
+  return response.status(result.statusCode).json(result.body);
+});
+
+app.delete('/api/admin/blogs/:slug', requireAdmin, (request, response) => {
+  const result = handleDeleteBlog(request.params.slug);
+  return response.status(result.statusCode).json(result.body);
+});
+
 app.use('/api', (_request, response) => {
   response.status(404).json({ error: 'Not found' });
+});
+
+// SPA fallback for /admin* routes so direct browser hits or refreshes do not 404
+app.get(/^\/admin(\/.*)?$/, (_request, response, next) => {
+  const indexPath = path.join(distPath, 'index.html');
+  if (hasBuild && fs.existsSync(indexPath)) {
+    return response.sendFile(indexPath, { headers: { 'Cache-Control': CACHE_HTML } }, (error) => {
+      if (error) next(error);
+    });
+  }
+  return response
+    .status(200)
+    .type('text/html')
+    .send(
+      '<!DOCTYPE html><html><head><meta charset="utf-8"><title>Klay Admin Portal</title></head><body><div id="root">Admin Portal Loading...</div></body></html>'
+    );
 });
 
 if (hasBuild) {

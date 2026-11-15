@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { Navigate, useParams } from 'react-router-dom';
 import { BlogPagination } from '@/components/blog/BlogPagination';
 import { BlogCard } from '@/components/ui/blog-card';
@@ -8,21 +8,128 @@ import { BlogSearchBar } from '@/components/blog/BlogSearchBar';
 import { EditorialHeroLead } from '@/components/blog/EditorialHeroLead';
 import {
   getAllArticles,
-  getCategoryPillars,
-  searchArticles,
-  getFeaturedArticles,
+  CATEGORY_PILLARS,
+  normalizeCategory,
+  type CategoryPillar,
 } from '@/lib/blog-engine';
+import type { BlogPostSummary } from '@/content/blog/types';
 import { BLOG_POSTS_PER_PAGE, ROUTES } from '@/lib/routes';
 import { NotFoundPage } from '@/pages/NotFoundPage';
 import { BookOpen, Sparkles } from 'lucide-react';
 
-const allArticles = getAllArticles();
-const categoryPillars = getCategoryPillars();
-const leadArticle = getFeaturedArticles(1)[0] || allArticles[0];
-const pageCount = Math.max(1, Math.ceil(allArticles.length / BLOG_POSTS_PER_PAGE));
+const baselineArticles = getAllArticles();
+
+function getCachedDynamicArticles(): BlogPostSummary[] {
+  if (typeof window === 'undefined') return [];
+  try {
+    const raw = localStorage.getItem('klay_published_blogs');
+    if (!raw) return [];
+    const list = JSON.parse(raw);
+    if (!Array.isArray(list)) return [];
+    return list
+      .filter((b: any) => b && (b.status === 'published' || !b.status))
+      .map((b: any) => ({
+        slug: b.slug,
+        title: b.title,
+        excerpt: b.excerpt || '',
+        date: b.date || new Date().toISOString().split('T')[0],
+        category: b.pillar || 'Company Setup & Strategy',
+        image: b.coverImage || b.cover_image || '/images/blog/dubai-executive-at-sunset.webp',
+        imageAlt: b.title,
+        metaTitle: b.title,
+        metaDescription: b.excerpt || '',
+        focusKeyword: b.pillar || '',
+      }));
+  } catch {
+    return [];
+  }
+}
 
 export default function BlogPage() {
   const { page: pageParam } = useParams<{ page?: string }>();
+  const [dynamicArticles, setDynamicArticles] =
+    useState<BlogPostSummary[]>(getCachedDynamicArticles);
+
+  useEffect(() => {
+    let isMounted = true;
+    async function loadRemoteBlogs() {
+      try {
+        const token =
+          localStorage.getItem('klay_admin_token') || sessionStorage.getItem('klay_admin_token');
+        const headers: Record<string, string> = { Accept: 'application/json' };
+        if (token) headers['Authorization'] = `Bearer ${token}`;
+
+        const res = await fetch('/api/admin/blogs', {
+          headers,
+          credentials: 'include',
+        });
+        if (res.ok) {
+          const data = await res.json();
+          if (Array.isArray(data.blogs) && isMounted) {
+            const published = data.blogs
+              .filter((b: any) => b && (b.status === 'published' || !b.status))
+              .map((b: any) => ({
+                slug: b.slug,
+                title: b.title,
+                excerpt: b.excerpt || '',
+                date: b.date || new Date().toISOString().split('T')[0],
+                category: b.pillar || 'Company Setup & Strategy',
+                image:
+                  b.coverImage || b.cover_image || '/images/blog/dubai-executive-at-sunset.webp',
+                imageAlt: b.title,
+                metaTitle: b.title,
+                metaDescription: b.excerpt || '',
+                focusKeyword: b.pillar || '',
+              }));
+            setDynamicArticles(published);
+            try {
+              localStorage.setItem('klay_published_blogs', JSON.stringify(data.blogs));
+            } catch {
+              // Ignore
+            }
+          }
+        }
+      } catch {
+        // Fallback to baseline + cached
+      }
+    }
+    loadRemoteBlogs();
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+
+  // Merge dynamic articles on top of baseline (deduplicate by slug)
+  const allArticles = useMemo(() => {
+    const map = new Map<string, BlogPostSummary>();
+    baselineArticles.forEach((a) => map.set(a.slug, a));
+    dynamicArticles.forEach((a) => map.set(a.slug, a));
+
+    return Array.from(map.values()).sort(
+      (a, b) => (Date.parse(b.date) || 0) - (Date.parse(a.date) || 0)
+    );
+  }, [dynamicArticles]);
+
+  const categoryPillars: CategoryPillar[] = useMemo(() => {
+    const counts: Record<string, number> = {};
+    CATEGORY_PILLARS.forEach((p) => {
+      counts[p] = 0;
+    });
+    counts['All Insights'] = allArticles.length;
+    allArticles.forEach((a) => {
+      const pillar = normalizeCategory(a.category, a.title, a.slug);
+      if (counts[pillar] !== undefined) counts[pillar]++;
+    });
+    return CATEGORY_PILLARS.map((name) => ({
+      id: name.toLowerCase().replace(/[^a-z0-9]+/g, '-'),
+      name,
+      count: counts[name] || 0,
+    }));
+  }, [allArticles]);
+
+  const leadArticle = allArticles[0];
+  const pageCount = Math.max(1, Math.ceil(allArticles.length / BLOG_POSTS_PER_PAGE));
+
   let currentPage = 1;
 
   if (pageParam !== undefined) {
@@ -38,8 +145,22 @@ export default function BlogPage() {
 
   // Live filtered articles
   const filteredArticles = useMemo(() => {
-    return searchArticles(searchQuery, selectedCategory);
-  }, [searchQuery, selectedCategory]);
+    const trimmed = searchQuery.trim().toLowerCase();
+    let base = allArticles;
+    if (selectedCategory && selectedCategory !== 'All Insights') {
+      base = allArticles.filter(
+        (a) => normalizeCategory(a.category, a.title, a.slug) === selectedCategory
+      );
+    }
+    if (!trimmed) return base;
+    return base.filter((article) => {
+      const titleMatch = article.title.toLowerCase().includes(trimmed);
+      const excerptMatch = article.excerpt.toLowerCase().includes(trimmed);
+      const keywordMatch = article.focusKeyword?.toLowerCase().includes(trimmed);
+      const categoryMatch = article.category.toLowerCase().includes(trimmed);
+      return titleMatch || excerptMatch || keywordMatch || categoryMatch;
+    });
+  }, [allArticles, searchQuery, selectedCategory]);
 
   const isFiltering = searchQuery.trim().length > 0 || selectedCategory !== 'All Insights';
 
@@ -99,7 +220,7 @@ export default function BlogPage() {
               />
               <div className="text-xs font-mono text-[#0C2D48]/60 flex items-center gap-2 shrink-0">
                 <BookOpen className="w-4 h-4 text-[#16A34A]" />
-                <span>101 Published Briefings Verified</span>
+                <span>{allArticles.length} Published Briefings Verified</span>
               </div>
             </div>
 
