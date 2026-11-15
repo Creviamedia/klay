@@ -18,7 +18,25 @@
 
 const fs = require('node:fs');
 const path = require('node:path');
-const { createClient } = require('@libsql/client');
+function safeCreateLibsqlClient(config) {
+  if (!config || !config.url) return null;
+  const url = String(config.url).trim();
+  if (url.startsWith('libsql:') || url.startsWith('https:') || url.startsWith('http:')) {
+    try {
+      const { createClient } = require('@libsql/client/web');
+      return createClient(config);
+    } catch (err) {
+      console.warn('[Turso] Web client initialization failed:', err.message);
+    }
+  }
+  try {
+    const { createClient } = require('@libsql/client');
+    return createClient(config);
+  } catch (err) {
+    console.warn('[Turso] Native libsql driver unavailable, using fallback:', err.message);
+    return null;
+  }
+}
 
 // Sliding window rate limiter (max 20 requests per 15 min per external IP)
 const submissionRateMap = new Map();
@@ -149,7 +167,7 @@ function getTursoClient(customOptions = {}) {
   const authToken = process.env.TURSO_AUTH_TOKEN;
 
   if (cloudUrl && cloudUrl.trim().length > 0) {
-    cachedTursoClient = createClient({
+    cachedTursoClient = safeCreateLibsqlClient({
       url: cloudUrl.trim(),
       authToken: authToken ? authToken.trim() : undefined,
     });
@@ -167,11 +185,11 @@ function getTursoClient(customOptions = {}) {
       }
     }
     const localDbPath = path.join(dataDir, 'klay.db');
-    cachedTursoClient = createClient({ url: `file:${localDbPath}` });
+    cachedTursoClient = safeCreateLibsqlClient({ url: `file:${localDbPath}` });
     return cachedTursoClient;
   } catch {
     const tempDbPath = path.join('/tmp', 'klay.db');
-    cachedTursoClient = createClient({ url: `file:${tempDbPath}` });
+    cachedTursoClient = safeCreateLibsqlClient({ url: `file:${tempDbPath}` });
     return cachedTursoClient;
   }
 }

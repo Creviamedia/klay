@@ -19,7 +19,25 @@ const crypto = require('node:crypto');
 const fs = require('node:fs');
 const path = require('node:path');
 const bcrypt = require('bcryptjs');
-const { createClient } = require('@libsql/client');
+function safeCreateLibsqlClient(config) {
+  if (!config || !config.url) return null;
+  const url = String(config.url).trim();
+  if (url.startsWith('libsql:') || url.startsWith('https:') || url.startsWith('http:')) {
+    try {
+      const { createClient } = require('@libsql/client/web');
+      return createClient(config);
+    } catch (err) {
+      console.warn('[Turso] Web client initialization failed:', err.message);
+    }
+  }
+  try {
+    const { createClient } = require('@libsql/client');
+    return createClient(config);
+  } catch (err) {
+    console.warn('[Turso] Native libsql driver unavailable, using fallback:', err.message);
+    return null;
+  }
+}
 
 const SALT_ROUNDS = 10;
 const DEFAULT_DEV_SECRET = 'klay-executive-admin-secret-dev-2026';
@@ -321,7 +339,7 @@ function getTursoClient(options = {}) {
   const authToken = process.env.TURSO_AUTH_TOKEN;
 
   if (cloudUrl && cloudUrl.trim().length > 0) {
-    cachedAdminTursoClient = createClient({
+    cachedAdminTursoClient = safeCreateLibsqlClient({
       url: cloudUrl.trim(),
       authToken: authToken ? authToken.trim() : undefined,
     });
@@ -338,11 +356,11 @@ function getTursoClient(options = {}) {
       }
     }
     const localDbPath = path.join(dataDir, 'klay.db');
-    cachedAdminTursoClient = createClient({ url: `file:${localDbPath}` });
+    cachedAdminTursoClient = safeCreateLibsqlClient({ url: `file:${localDbPath}` });
     return cachedAdminTursoClient;
   } catch {
     const tempDbPath = path.join('/tmp', 'klay.db');
-    cachedAdminTursoClient = createClient({ url: `file:${tempDbPath}` });
+    cachedAdminTursoClient = safeCreateLibsqlClient({ url: `file:${tempDbPath}` });
     return cachedAdminTursoClient;
   }
 }
