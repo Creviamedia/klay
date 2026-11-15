@@ -12,6 +12,7 @@ import { NotFoundPage } from '@/pages/NotFoundPage';
 import { Footer } from '@/components/layout/Footer';
 import { SiteBackground } from '@/components/layout/SiteBackground';
 import { ROUTES } from '@/lib/routes';
+import { captureException } from '@/lib/sentry';
 
 declare global {
   interface Window {
@@ -60,6 +61,7 @@ class ChunkErrorBoundary extends Component<
 
   componentDidCatch(error: Error, info: ErrorInfo) {
     console.error('Page section failed to load', error, info.componentStack);
+    captureException(error, { componentStack: info.componentStack });
     if (this.props.fallback !== undefined) return;
     let reloaded = false;
     try {

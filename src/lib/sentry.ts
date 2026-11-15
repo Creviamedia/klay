@@ -36,6 +36,7 @@ export function initSentry(): void {
     ],
     // Tracing sample rate: 100% in staging/development, 20% in production
     tracesSampleRate: environment === 'production' ? 0.2 : 1.0,
+    tracePropagationTargets: ['localhost', /^\//],
     // Session Replay sample rate
     replaysSessionSampleRate: 0.1,
     replaysOnErrorSampleRate: 1.0,
@@ -47,7 +48,7 @@ export function initSentry(): void {
  */
 export function captureException(error: unknown, context?: Record<string, unknown>): void {
   console.error('[App Error Captured]', error, context);
-  if (typeof window !== 'undefined' && import.meta.env.VITE_SENTRY_DSN) {
+  if (typeof window !== 'undefined' && env.VITE_SENTRY_DSN) {
     Sentry.captureException(error, { extra: context });
   }
 }
