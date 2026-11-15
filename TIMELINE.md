@@ -30,14 +30,15 @@ gantt
 
 ## Detailed Milestone Checklist
 
-| Milestone | Status | Description | Rollback Point |
-| :--- | :---: | :--- | :--- |
-| **M1: Baseline Stabilization** | ✅ Complete | Fixed AboutPage H1 error, video prop leakage, cleaned root JSON files. | `klay-v0.1-baseline` |
-| **M2: Staging & Calculator Ready** | ✅ Complete | Replaced Fillout iframe with native Cost Calculator, integrated Magnetic Dock, added .env configs, CI/CD, and docs. | `klay-v0.2-staging-ready` |
-| **M3: Equitify Architecture & Staging Polish** | ✅ Complete | Executive single-fold light calculator, Business Setup video hero & persistent dock, instant gold ticket shader, and 5-group eligibility cycler. | Branch: `staging` (`8ccc544`) |
-| **M4: Dual Netlify Deployment (Staging & UAT)** | ✅ Complete | Deployed `https://klay-consulting-staging.netlify.app` (new) and `https://klay-consulting-uat.netlify.app` (preserved last night build). | `klay-consulting-staging` / `klay-consulting-uat` |
-| **M4.5: Interactive Prototypes & Logic Simulator** | ✅ Complete | Locked in Cost Calculator Variant C (Sliders/Matrix), Golden Visa Variant C (Quiz), and Option 3 standalone sovereign pricing simulator (`/pricing-engine-demo.html`). | Commit `HEAD` on `staging` |
-| **M5: Production Cutover** | ⏳ Pending | Automated deploy to Hostinger `public_html` via GitHub Actions SFTP after client sign-off. | Tag: `v2.0.0-prod` |
+| Milestone                                          |   Status    | Description                                                                                                                                                            | Rollback Point                                    |
+| :------------------------------------------------- | :---------: | :--------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :------------------------------------------------ |
+| **M1: Baseline Stabilization**                     | ✅ Complete | Fixed AboutPage H1 error, video prop leakage, cleaned root JSON files.                                                                                                 | `klay-v0.1-baseline`                              |
+| **M2: Staging & Calculator Ready**                 | ✅ Complete | Replaced Fillout iframe with native Cost Calculator, integrated Magnetic Dock, added .env configs, CI/CD, and docs.                                                    | `klay-v0.2-staging-ready`                         |
+| **M3: Equitify Architecture & Staging Polish**     | ✅ Complete | Executive single-fold light calculator, Business Setup video hero & persistent dock, instant gold ticket shader, and 5-group eligibility cycler.                       | Branch: `staging` (`8ccc544`)                     |
+| **M4: Dual Netlify Deployment (Staging & UAT)**    | ✅ Complete | Deployed `https://klay-consulting-staging.netlify.app` (new) and `https://klay-consulting-uat.netlify.app` (preserved last night build).                               | `klay-consulting-staging` / `klay-consulting-uat` |
+| **M4.5: Interactive Prototypes & Logic Simulator** | ✅ Complete | Locked in Cost Calculator Variant C (Sliders/Matrix), Golden Visa Variant C (Quiz), and Option 3 standalone sovereign pricing simulator (`/pricing-engine-demo.html`). | Commit `HEAD` on `staging`                        |
+| **M4.6: UAT Defect Remediation & Quality Gate**    | ✅ Complete | DEF-01 to DEF-06 resolved, Playwright Chromium E2E + pipeline tests verified, Husky pre-commit installed, UAT & Staging live.                                          | Tag: `v2.3.0-uat`                                 |
+| **M5: Production Cutover**                         | ⏳ Pending  | Automated deploy to Hostinger `public_html` via GitHub Actions SFTP after client sign-off.                                                                             | Tag: `v2.0.0-prod`                                |
 
 ---
 
