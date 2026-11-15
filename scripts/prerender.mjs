@@ -10,7 +10,9 @@ import { createServer } from 'vite';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 // DIST_DIR lets a build be checked in another folder without touching the served dist/.
-const distDir = process.env.DIST_DIR ? path.resolve(root, process.env.DIST_DIR) : path.join(root, 'dist');
+const distDir = process.env.DIST_DIR
+  ? path.resolve(root, process.env.DIST_DIR)
+  : path.join(root, 'dist');
 const vite = await createServer({
   configFile: path.join(root, 'vite.config.ts'),
   server: { middlewareMode: true },
@@ -75,9 +77,13 @@ function renderMarkup(element) {
 /** Marks the page's LCP image as high priority (and never lazy) when the component did not already. */
 function prioritizeImage(markup, src) {
   const attribute = `src="${escapeHtml(src)}"`;
-  const tag = markup.match(new RegExp(`<img\\b(?=[^>]*${attribute.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})[^>]*>`));
+  const tag = markup.match(
+    new RegExp(`<img\\b(?=[^>]*${attribute.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})[^>]*>`)
+  );
   if (!tag || /\bfetchpriority=/i.test(tag[0])) return markup;
-  const prioritized = tag[0].replace(/\sloading="lazy"/i, ' loading="eager"').replace('<img', '<img fetchpriority="high"');
+  const prioritized = tag[0]
+    .replace(/\sloading="lazy"/i, ' loading="eager"')
+    .replace('<img', '<img fetchpriority="high"');
   return markup.replace(tag[0], () => prioritized);
 }
 
@@ -119,77 +125,159 @@ ul{display:flex;flex-wrap:wrap;gap:.5rem 1.5rem;list-style:none;padding:0;margin
 
 try {
   const { SiteApp } = await vite.ssrLoadModule('/src/App.tsx');
-  const { getPageSeo, getPrerenderRoutes, getStructuredData, SITE_ORIGIN } = await vite.ssrLoadModule('/src/lib/seo.ts');
+  const { getPageSeo, getPrerenderRoutes, getStructuredData, SITE_ORIGIN } =
+    await vite.ssrLoadModule('/src/lib/seo.ts');
   const { loadBlogArticle } = await vite.ssrLoadModule('/src/content/blog/index.ts');
   const routes = getPrerenderRoutes();
   const baseHtml = await fs.readFile(path.join(distDir, 'index.html'), 'utf8');
   if (baseHtml.includes('data-prerendered="true"')) {
-    throw new Error(`${path.join(distDir, 'index.html')} is already prerendered; run "vite build" before prerendering.`);
+    throw new Error(
+      `${path.join(distDir, 'index.html')} is already prerendered; run "vite build" before prerendering.`
+    );
   }
 
   for (const route of routes) {
     const seo = getPageSeo(route.path);
     let markup = await renderMarkup(
-      React.createElement(StaticRouter, { location: route.path }, React.createElement(SiteApp)),
+      React.createElement(StaticRouter, { location: route.path }, React.createElement(SiteApp))
     );
-    const priorityImage = route.path.replace(/\/+$/, '') === '/services'
-      ? '/images/site/services-dubai-sunset.webp'
-      : seo.image.replace(SITE_ORIGIN, '');
+    const priorityImage =
+      route.path.replace(/\/+$/, '') === '/services'
+        ? '/images/site/services-dubai-sunset.webp'
+        : seo.image.replace(SITE_ORIGIN, '');
     markup = prioritizeImage(markup, priorityImage);
 
-    const articleSlug = route.source === 'article' ? route.path.replace(/\/+$/, '').split('/').pop() : undefined;
+    const articleSlug =
+      route.source === 'article' ? route.path.replace(/\/+$/, '').split('/').pop() : undefined;
     const article = articleSlug ? await loadBlogArticle(articleSlug) : undefined;
-    if (articleSlug && !article) throw new Error(`${route.path}: article module src/content/blog/articles/${articleSlug}.ts is missing`);
-    const jsonLd = JSON.stringify(getStructuredData(route.path, article?.details)).replace(/</g, '\\u003c');
+    if (articleSlug && !article)
+      throw new Error(
+        `${route.path}: article module src/content/blog/articles/${articleSlug}.ts is missing`
+      );
+    const jsonLd = JSON.stringify(getStructuredData(route.path, article?.details)).replace(
+      /</g,
+      '\\u003c'
+    );
 
-    let html = replaceOnce(baseHtml, /<title>[\s\S]*?<\/title>/i, `<title>${escapeHtml(seo.title)}</title>`, '<title>');
+    let html = replaceOnce(
+      baseHtml,
+      /<title>[\s\S]*?<\/title>/i,
+      `<title>${escapeHtml(seo.title)}</title>`,
+      '<title>'
+    );
     html = replaceOnce(
       html,
       /<link\s+rel="canonical"[^>]*>/i,
       `<link rel="canonical" href="${escapeHtml(seo.canonical)}" />`,
-      'link rel="canonical"',
+      'link rel="canonical"'
     );
-    html = replaceMeta(html, 'name="description"', `<meta name="description" content="${escapeHtml(seo.description)}" />`);
-    html = replaceMeta(html, 'name="robots"', `<meta name="robots" content="${seo.noindex ? 'noindex,follow' : 'index,follow'}" />`);
-    html = replaceMeta(html, 'name="keywords"', `<meta name="keywords" content="${escapeHtml(seo.keyword)}" />`);
-    html = replaceMeta(html, 'property="og:type"', `<meta property="og:type" content="${seo.type}" />`);
+    html = replaceMeta(
+      html,
+      'name="description"',
+      `<meta name="description" content="${escapeHtml(seo.description)}" />`
+    );
+    html = replaceMeta(
+      html,
+      'name="robots"',
+      `<meta name="robots" content="${seo.noindex ? 'noindex,follow' : 'index,follow'}" />`
+    );
+    html = replaceMeta(
+      html,
+      'name="keywords"',
+      `<meta name="keywords" content="${escapeHtml(seo.keyword)}" />`
+    );
+    html = replaceMeta(
+      html,
+      'property="og:type"',
+      `<meta property="og:type" content="${seo.type}" />`
+    );
     html = replaceMeta(
       html,
       'property="og:title"',
-      `<meta property="og:title" content="${escapeHtml(seo.openGraphTitle ?? seo.title)}" />`,
+      `<meta property="og:title" content="${escapeHtml(seo.openGraphTitle ?? seo.title)}" />`
     );
-    html = replaceMeta(html, 'property="og:description"', `<meta property="og:description" content="${escapeHtml(seo.description)}" />`);
-    html = replaceMeta(html, 'property="og:url"', `<meta property="og:url" content="${escapeHtml(seo.canonical)}" />`);
-    html = replaceMeta(html, 'property="og:image"', `<meta property="og:image" content="${escapeHtml(seo.image)}" />`);
-    html = replaceMeta(html, 'name="twitter:card"', '<meta name="twitter:card" content="summary_large_image" />');
-    html = replaceMeta(html, 'name="twitter:title"', `<meta name="twitter:title" content="${escapeHtml(seo.title)}" />`);
-    html = replaceMeta(html, 'name="twitter:description"', `<meta name="twitter:description" content="${escapeHtml(seo.description)}" />`);
-    html = replaceMeta(html, 'name="twitter:image"', `<meta name="twitter:image" content="${escapeHtml(seo.image)}" />`);
+    html = replaceMeta(
+      html,
+      'property="og:description"',
+      `<meta property="og:description" content="${escapeHtml(seo.description)}" />`
+    );
+    html = replaceMeta(
+      html,
+      'property="og:url"',
+      `<meta property="og:url" content="${escapeHtml(seo.canonical)}" />`
+    );
+    html = replaceMeta(
+      html,
+      'property="og:image"',
+      `<meta property="og:image" content="${escapeHtml(seo.image)}" />`
+    );
+    html = replaceMeta(
+      html,
+      'name="twitter:card"',
+      '<meta name="twitter:card" content="summary_large_image" />'
+    );
+    html = replaceMeta(
+      html,
+      'name="twitter:title"',
+      `<meta name="twitter:title" content="${escapeHtml(seo.title)}" />`
+    );
+    html = replaceMeta(
+      html,
+      'name="twitter:description"',
+      `<meta name="twitter:description" content="${escapeHtml(seo.description)}" />`
+    );
+    html = replaceMeta(
+      html,
+      'name="twitter:image"',
+      `<meta name="twitter:image" content="${escapeHtml(seo.image)}" />`
+    );
     html = replaceOnce(
       html,
       /<script id="seo-jsonld" type="application\/ld\+json">[\s\S]*?<\/script>/i,
       `<script id="seo-jsonld" type="application/ld+json">${jsonLd}</script>`,
-      'script#seo-jsonld',
+      'script#seo-jsonld'
     );
     html = replaceOnce(
       html,
       '<div id="root" data-prerendered="false"></div>',
       `<div id="root" data-prerendered="true">${markup}</div>`,
-      'div#root',
+      'div#root'
     );
 
-    const outputPath = route.path === '/'
-      ? path.join(distDir, 'index.html')
-      : path.join(distDir, route.path.slice(1), 'index.html');
+    const outputPath =
+      route.path === '/'
+        ? path.join(distDir, 'index.html')
+        : path.join(distDir, route.path.slice(1), 'index.html');
     await fs.mkdir(path.dirname(outputPath), { recursive: true });
     await fs.writeFile(outputPath, html);
   }
 
   await fs.writeFile(path.join(distDir, '404.html'), NOT_FOUND_HTML);
+
+  // SPA fallback entrypoints for non-prerendered admin portal routes
+  const adminRoutes = ['/admin', '/admin/login', '/admin/leads', '/admin/blogs'];
+  let adminHtml = replaceMeta(
+    baseHtml,
+    'name="robots"',
+    '<meta name="robots" content="noindex,nofollow" />'
+  );
+  adminHtml = replaceOnce(
+    adminHtml,
+    /<title>[\s\S]*?<\/title>/i,
+    '<title>Klay Admin Portal</title>',
+    '<title>'
+  );
+  for (const adminRoute of adminRoutes) {
+    const adminPath = path.join(distDir, adminRoute.slice(1), 'index.html');
+    await fs.mkdir(path.dirname(adminPath), { recursive: true });
+    await fs.writeFile(adminPath, adminHtml);
+  }
   // Apache/LiteSpeed (Hostinger): root .htaccess (normally copied from public/ by Vite) and per-folder cache files.
   const { writeDistHtaccess } = createRequire(import.meta.url)('./seo.cjs');
   const htaccessFiles = writeDistHtaccess(distDir);
-  console.log(`Prerendered ${routes.length} public routes, a noindex 404 page and ${htaccessFiles.join(', ')}.`);
+  console.log(
+    `Prerendered ${routes.length} public routes, a noindex 404 page and ${htaccessFiles.join(', ')}.`
+  );
 } finally {
   await vite.close();
 }
