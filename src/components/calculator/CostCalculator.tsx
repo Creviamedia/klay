@@ -11,6 +11,7 @@ import {
   type SetupOptions,
 } from '@/lib/calculator-engine';
 import { Check, ArrowRight } from 'lucide-react';
+import { submitIntakeDossier } from '@/lib/intake-conduit';
 
 export function CostCalculator() {
   // Calculator state
@@ -58,7 +59,7 @@ export function CostCalculator() {
     if (!leadName || !leadEmail || !leadPhone) return;
 
     setIsSubmitting(true);
-    const leadPayload = {
+    const result = await submitIntakeDossier({
       name: leadName,
       email: leadEmail,
       phone: leadPhone,
@@ -67,32 +68,14 @@ export function CostCalculator() {
       estimateUsd: calculation.totalUsd,
       options: currentOptions,
       breakdown: calculation.breakdown,
-      submittedAt: new Date().toISOString(),
-    };
+    });
 
-    try {
-      const endpoint = import.meta.env?.VITE_LEAD_API_ENDPOINT || '/api/leads';
-      const res = await fetch(endpoint, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(leadPayload),
-      });
-      if (res.ok) {
-        const data = await res.json();
-        setSubmitSuccess(data.leadId || 'CONFIRMED-' + Math.floor(100000 + Math.random() * 900000));
-      } else {
-        setSubmitSuccess('KLAY-' + Math.floor(100000 + Math.random() * 900000));
-      }
-    } catch {
-      setSubmitSuccess('KLAY-' + Math.floor(100000 + Math.random() * 900000));
-    } finally {
-      setIsSubmitting(false);
-    }
+    setSubmitSuccess(result.referenceNumber);
+    setIsSubmitting(false);
   };
 
   return (
     <div className="w-full max-w-6xl mx-auto rounded-2xl bg-white border border-[#0C2D48]/12 shadow-[0_20px_50px_rgba(12,45,72,0.06)] overflow-hidden text-[#0C2D48] font-sans">
-      
       {/* =========================================================================
           TOP EXECUTIVE HEADER BAR
           ========================================================================= */}
@@ -140,15 +123,15 @@ export function CostCalculator() {
           TWO-COLUMN EXECUTIVE WORKSPACE (ONE-FOLD FRIENDLY)
           ========================================================================= */}
       <div className="grid grid-cols-1 lg:grid-cols-12 divide-y lg:divide-y-0 lg:divide-x divide-[#0C2D48]/10">
-        
         {/* Left Column: Form Controls (7 cols) */}
         <div className="lg:col-span-7 p-6 sm:p-8 space-y-7">
-          
           {/* Step 1: Select Jurisdiction */}
           <div>
             <div className="flex items-center justify-between mb-3">
               <label className="text-xs font-mono uppercase tracking-wider text-[#0C2D48]/70 font-semibold flex items-center gap-2">
-                <span className="h-5 w-5 rounded bg-[#0C2D48] text-white flex items-center justify-center text-[10px]">1</span>
+                <span className="h-5 w-5 rounded bg-[#0C2D48] text-white flex items-center justify-center text-[10px]">
+                  1
+                </span>
                 <span>Select Jurisdiction</span>
               </label>
               <span className="text-[11px] font-mono text-[#16A34A] bg-[#22C55E]/10 px-2 py-0.5 rounded">
@@ -198,7 +181,9 @@ export function CostCalculator() {
           {/* Step 2: Activity Category */}
           <div>
             <label className="text-xs font-mono uppercase tracking-wider text-[#0C2D48]/70 font-semibold flex items-center gap-2 mb-3">
-              <span className="h-5 w-5 rounded bg-[#0C2D48] text-white flex items-center justify-center text-[10px]">2</span>
+              <span className="h-5 w-5 rounded bg-[#0C2D48] text-white flex items-center justify-center text-[10px]">
+                2
+              </span>
               <span>Primary Commercial Activity</span>
             </label>
 
@@ -217,8 +202,12 @@ export function CostCalculator() {
                     }`}
                   >
                     <div className="text-xs font-semibold leading-tight">{act.name}</div>
-                    <div className={`text-[10px] font-mono mt-1 ${isSelected ? 'text-[#22C55E]' : 'text-[#0C2D48]/60'}`}>
-                      {act.extraFeeAed === 0 ? 'Included' : `+AED ${act.extraFeeAed.toLocaleString()}`}
+                    <div
+                      className={`text-[10px] font-mono mt-1 ${isSelected ? 'text-[#22C55E]' : 'text-[#0C2D48]/60'}`}
+                    >
+                      {act.extraFeeAed === 0
+                        ? 'Included'
+                        : `+AED ${act.extraFeeAed.toLocaleString()}`}
                     </div>
                   </button>
                 );
@@ -234,7 +223,7 @@ export function CostCalculator() {
                 <span>Residency Visas</span>
                 <span className="text-[10px] text-[#0C2D48]/50">+AED 3,750/ea</span>
               </div>
-              
+
               <div className="space-y-3">
                 <div className="flex items-center justify-between">
                   <span className="text-xs text-[#0C2D48] font-medium">Investor / Partner:</span>
@@ -245,7 +234,9 @@ export function CostCalculator() {
                         type="button"
                         onClick={() => setInvestorVisas(v)}
                         className={`w-7 h-7 rounded text-xs font-semibold ${
-                          investorVisas === v ? 'bg-[#0C2D48] text-white' : 'bg-white border border-[#0C2D48]/15 text-[#0C2D48]'
+                          investorVisas === v
+                            ? 'bg-[#0C2D48] text-white'
+                            : 'bg-white border border-[#0C2D48]/15 text-[#0C2D48]'
                         }`}
                       >
                         {v}
@@ -263,7 +254,9 @@ export function CostCalculator() {
                         type="button"
                         onClick={() => setEmployeeVisas(v)}
                         className={`w-7 h-7 rounded text-xs font-semibold ${
-                          employeeVisas === v ? 'bg-[#0C2D48] text-white' : 'bg-white border border-[#0C2D48]/15 text-[#0C2D48]'
+                          employeeVisas === v
+                            ? 'bg-[#0C2D48] text-white'
+                            : 'bg-white border border-[#0C2D48]/15 text-[#0C2D48]'
                         }`}
                       >
                         {v}
@@ -333,7 +326,9 @@ export function CostCalculator() {
                       {isChecked && <Check className="w-3.5 h-3.5 text-[#16A34A] shrink-0" />}
                     </div>
                     <div className="text-[10px] font-mono text-[#16A34A]">
-                      {addon.costAed === 0 ? 'Complimentary' : `+AED ${addon.costAed.toLocaleString()}`}
+                      {addon.costAed === 0
+                        ? 'Complimentary'
+                        : `+AED ${addon.costAed.toLocaleString()}`}
                     </div>
                   </button>
                 );
@@ -365,11 +360,15 @@ export function CostCalculator() {
                 </div>
                 <div className="flex justify-between">
                   <span className="text-white/60">Residency Visas:</span>
-                  <span>{investorVisas} Investor / {employeeVisas} Employee</span>
+                  <span>
+                    {investorVisas} Investor / {employeeVisas} Employee
+                  </span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-white/60">Premises:</span>
-                  <span>{officeType === 'flexi-desk' ? 'Flexi Desk (0 AED)' : 'Executive Office'}</span>
+                  <span>
+                    {officeType === 'flexi-desk' ? 'Flexi Desk (0 AED)' : 'Executive Office'}
+                  </span>
                 </div>
               </div>
             </div>
@@ -381,7 +380,10 @@ export function CostCalculator() {
               </div>
               <div className="space-y-2 max-h-48 overflow-y-auto pr-1">
                 {calculation.breakdown.map((item, idx) => (
-                  <div key={idx} className="flex justify-between text-xs py-1 border-b border-[#0C2D48]/5 last:border-b-0">
+                  <div
+                    key={idx}
+                    className="flex justify-between text-xs py-1 border-b border-[#0C2D48]/5 last:border-b-0"
+                  >
                     <span className="text-[#0C2D48]/75 truncate max-w-[200px]">{item.label}</span>
                     <span className="font-mono font-medium text-[#0C2D48]">
                       AED {item.amountAed.toLocaleString()}
@@ -443,11 +445,12 @@ export function CostCalculator() {
                 <div className="inline-flex p-2 rounded-full bg-[#22C55E] text-white">
                   <Check className="w-4 h-4 stroke-[3]" />
                 </div>
-                <div className="text-sm font-semibold text-[#16A34A]">
-                  Proposal Dispatched!
-                </div>
+                <div className="text-sm font-semibold text-[#16A34A]">Proposal Dispatched!</div>
                 <p className="text-xs text-[#0C2D48]/75 leading-relaxed">
-                  Your reference ID is <span className="font-mono font-bold text-[#0C2D48]">{submitSuccess}</span>. A senior corporate director has been notified and will deliver your verified regulatory dossier.
+                  Your reference ID is{' '}
+                  <span className="font-mono font-bold text-[#0C2D48]">{submitSuccess}</span>. A
+                  senior corporate director has been notified and will deliver your verified
+                  regulatory dossier.
                 </p>
                 <button
                   type="button"

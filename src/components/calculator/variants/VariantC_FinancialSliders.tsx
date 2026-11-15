@@ -11,6 +11,7 @@ import {
   type SetupOptions,
 } from '@/lib/calculator-engine';
 import { Check, ArrowRight, Sliders, Award, DollarSign, PieChart, ShieldCheck } from 'lucide-react';
+import { submitIntakeDossier } from '@/lib/intake-conduit';
 
 export function VariantC_FinancialSliders() {
   const [currency, setCurrency] = useState<'AED' | 'USD'>('AED');
@@ -91,7 +92,7 @@ export function VariantC_FinancialSliders() {
     if (!leadName || !leadEmail || !leadPhone) return;
 
     setIsSubmitting(true);
-    const leadPayload = {
+    const result = await submitIntakeDossier({
       name: leadName,
       email: leadEmail,
       phone: leadPhone,
@@ -101,27 +102,10 @@ export function VariantC_FinancialSliders() {
       options: currentOptions,
       breakdown: calculation.breakdown,
       variant: 'C-FinancialSliders',
-      submittedAt: new Date().toISOString(),
-    };
+    });
 
-    try {
-      const endpoint = import.meta.env?.VITE_LEAD_API_ENDPOINT || '/api/leads';
-      const res = await fetch(endpoint, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(leadPayload),
-      });
-      if (res.ok) {
-        const data = await res.json();
-        setSubmitSuccess(data.leadId || 'CONFIRMED-' + Math.floor(100000 + Math.random() * 900000));
-      } else {
-        setSubmitSuccess('KLAY-' + Math.floor(100000 + Math.random() * 900000));
-      }
-    } catch {
-      setSubmitSuccess('KLAY-' + Math.floor(100000 + Math.random() * 900000));
-    } finally {
-      setIsSubmitting(false);
-    }
+    setSubmitSuccess(result.referenceNumber);
+    setIsSubmitting(false);
   };
 
   return (

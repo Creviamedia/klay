@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ArrowRight, Check, Building2, Shield, Landmark } from 'lucide-react';
 import { ROUTES } from '@/lib/routes';
+import { submitIntakeDossier } from '@/lib/intake-conduit';
 
 interface JurisdictionPreset {
   id: string;
@@ -64,43 +65,27 @@ export function SetupCalculator() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!leadName.trim() || !leadEmail.trim() || !leadPhone.trim()) {
-      setErrorMessage('Please provide your name, email, and phone number.');
-      return;
-    }
-
     setIsSubmitting(true);
     setErrorMessage(null);
-    try {
-      const res = await fetch('/api/leads', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          name: leadName.trim(),
-          email: leadEmail.trim(),
-          phone: leadPhone.trim(),
-          jurisdiction: selectedJur.name,
-          visaCount: visas,
-          officeType: officeType === 'flexi' ? 'Flexi Desk' : 'Physical Lease',
-          notes: `Estimated First-Year Cost: AED ${grandTotal.toLocaleString()} (~$${usdTotal.toLocaleString()} USD)`,
-          source: 'executive_instant_calculator',
-          timestamp: new Date().toISOString(),
-        }),
-      });
-      const data = await res.json().catch(() => ({}));
-      if (res.ok && data.success) {
-        setConfirmedRef(data.leadId || data.referenceNumber || 'KLAY-CONFIRMED');
-        setIsSubmitted(true);
-      } else {
-        setErrorMessage(data.error || 'Failed to submit inquiry. Please try again.');
-      }
-    } catch {
-      setErrorMessage(
-        'Network connection error. Please try again or contact our advisory desk directly.'
-      );
-    } finally {
-      setIsSubmitting(false);
+
+    const result = await submitIntakeDossier({
+      name: leadName,
+      email: leadEmail,
+      phone: leadPhone,
+      jurisdiction: selectedJur.name,
+      visaCount: visas,
+      officeType: officeType === 'flexi' ? 'Flexi Desk' : 'Physical Lease',
+      notes: `Estimated First-Year Cost: AED ${grandTotal.toLocaleString()} (~$${usdTotal.toLocaleString()} USD)`,
+      source: 'executive_instant_calculator',
+    });
+
+    if (result.success) {
+      setConfirmedRef(result.referenceNumber);
+      setIsSubmitted(true);
+    } else {
+      setErrorMessage(result.error || 'Failed to submit inquiry. Please try again.');
     }
+    setIsSubmitting(false);
   };
 
   return (
