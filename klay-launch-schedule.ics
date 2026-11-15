@@ -1,0 +1,50 @@
+BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:-//Klay Consultants//Launch Schedule//EN
+CALSCALE:GREGORIAN
+METHOD:PUBLISH
+X-WR-CALNAME:Klay Production Launch Schedule
+X-WR-TIMEZONE:Asia/Dubai
+BEGIN:VEVENT
+UID:klay-briefing-20261116T060000Z@klayconsultants.com
+DTSTAMP:20261115T203000Z
+DTSTART:20261116T043000Z
+DTEND:20261116T051500Z
+SUMMARY:Klay Consultants: Morning Briefing & Turso/Telegram Credentials
+DESCRIPTION:Review staging status, add TURSO_DATABASE_URL/TURSO_AUTH_TOKEN and TELEGRAM_BOT_TOKEN to Netlify dashboard.
+STATUS:CONFIRMED
+BEGIN:VALARM
+TRIGGER:-PT15M
+ACTION:DISPLAY
+DESCRIPTION:Reminder: Klay Consultants Morning Briefing & Setup
+END:VALARM
+END:VEVENT
+BEGIN:VEVENT
+UID:klay-e2e-20261116T070000Z@klayconsultants.com
+DTSTAMP:20261115T203000Z
+DTSTART:20261116T051500Z
+DTEND:20261116T060000Z
+SUMMARY:Klay Consultants: End-to-End Live Verification & Smoke Testing
+DESCRIPTION:Submit live lead on staging, verify Telegram alert delivery and Admin Portal update.
+STATUS:CONFIRMED
+BEGIN:VALARM
+TRIGGER:-PT15M
+ACTION:DISPLAY
+DESCRIPTION:Reminder: Live Lead Verification
+END:VALARM
+END:VEVENT
+BEGIN:VEVENT
+UID:klay-deploy-20261116T080000Z@klayconsultants.com
+DTSTAMP:20261115T203000Z
+DTSTART:20261116T060000Z
+DTEND:20261116T064500Z
+SUMMARY:Klay Consultants: Merge PR #3 & Hostinger Production Go-Live
+DESCRIPTION:Merge PR #3 (staging -> main) on GitHub and execute Hostinger SFTP deployment.
+STATUS:CONFIRMED
+BEGIN:VALARM
+TRIGGER:-PT15M
+ACTION:DISPLAY
+DESCRIPTION:Reminder: Production Release Cutover
+END:VALARM
+END:VEVENT
+END:VCALENDAR
