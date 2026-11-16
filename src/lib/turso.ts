@@ -356,12 +356,10 @@ export async function seedInitialAdminUser(
 
   const username = process.env.ADMIN_INITIAL_USERNAME || process.env.ADMIN_USERNAME || 'admin';
   const initialPassword =
-    process.env.ADMIN_INITIAL_PASSWORD || process.env.ADMIN_PASSWORD || 'KlayAdmin2026!Dev';
+    process.env.ADMIN_INITIAL_PASSWORD || process.env.ADMIN_PASSWORD;
 
-  if (process.env.NODE_ENV === 'production' && !process.env.ADMIN_INITIAL_PASSWORD) {
-    throw new Error(
-      'FATAL: ADMIN_INITIAL_PASSWORD must be defined in production to bootstrap the initial administrator.'
-    );
+  if (!initialPassword || initialPassword === 'KlayAdmin2026!Dev') {
+    throw new Error('A unique ADMIN_INITIAL_PASSWORD is required to bootstrap the administrator.');
   }
 
   const passwordHash = await bcrypt.hash(initialPassword, 10);
