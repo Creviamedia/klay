@@ -506,6 +506,189 @@ await testAsync('6.1 processIntakeLead persists to disk and Turso concurrently',
   assert.ok(fileContent.includes(intakeRes.body.leadId));
 });
 
+await testAsync(
+  '6.2 persistLeadToTurso dynamically auto-migrates legacy table lacking budget column',
+  async () => {
+    // 1. Create dedicated isolated database with legacy schema (NO budget column)
+    const legacyDbPath = path.join(testDbDir, 'legacy-leads-test.db');
+    const legacyClient = createClient({ url: `file:${legacyDbPath}` });
+
+    await legacyClient.execute(`
+      CREATE TABLE leads (
+        id TEXT PRIMARY KEY NOT NULL,
+        reference_number TEXT NOT NULL,
+        timestamp TEXT NOT NULL,
+        name TEXT NOT NULL,
+        email TEXT NOT NULL,
+        phone TEXT NOT NULL,
+        jurisdiction TEXT NOT NULL DEFAULT 'UAE',
+        activity TEXT NOT NULL DEFAULT 'General',
+        timeline TEXT,
+        visa_count INTEGER,
+        notes TEXT,
+        source TEXT NOT NULL DEFAULT 'calculator',
+        platform TEXT NOT NULL DEFAULT 'node',
+        status TEXT NOT NULL DEFAULT 'New',
+        created_at TEXT NOT NULL DEFAULT (CURRENT_TIMESTAMP),
+        updated_at TEXT NOT NULL DEFAULT (CURRENT_TIMESTAMP)
+      );
+    `);
+
+    // Verify initial legacy schema state: budget column MUST NOT exist
+    const preCheck = await legacyClient.execute('PRAGMA table_info(leads)');
+    const preColumnNames = preCheck.rows.map((r) => r.name);
+    assert.strictEqual(
+      preColumnNames.includes('budget'),
+      false,
+      'Legacy table must NOT have budget column before auto-migration'
+    );
+
+    // 2. Invoke persistLeadToTurso with lead record containing budget qualifier
+    const legacyLead = {
+      id: 'KLAY-LEGACY-TEST-001',
+      referenceNumber: 'KLAY-LEGACY-TEST-001',
+      timestamp: new Date().toISOString(),
+      name: 'Legacy Migration Sovereign Lead',
+      email: 'legacy@sovereign.ae',
+      phone: '050 777 6655',
+      budget: 'AED 50k - 100k',
+      jurisdiction: 'DIFC',
+      activity: 'Asset Management',
+      timeline: 'Immediate',
+      status: 'New',
+    };
+
+    const persistResult = await leadIntakeCore.persistLeadToTurso(legacyLead, {
+      client: legacyClient,
+    });
+
+    // Assert that persistLeadToTurso returned true (auto-migration succeeded and inserted)
+    assert.strictEqual(
+      persistResult,
+      true,
+      'persistLeadToTurso must return true upon successful auto-migration on unmigrated table'
+    );
+
+    // 3. Assert via PRAGMA table_info(leads) that the budget column was dynamically added
+    const postCheck = await legacyClient.execute('PRAGMA table_info(leads)');
+    const postColumnNames = postCheck.rows.map((r) => r.name);
+    assert.strictEqual(
+      postColumnNames.includes('budget'),
+      true,
+      'PRAGMA table_info(leads) must verify budget column was dynamically added via ALTER TABLE'
+    );
+
+    // 4. Assert via SELECT budget FROM leads that data was persisted accurately
+    const selectRes = await legacyClient.execute({
+      sql: 'SELECT id, name, phone, budget, jurisdiction, status FROM leads WHERE id = ?',
+      args: ['KLAY-LEGACY-TEST-001'],
+    });
+
+    assert.strictEqual(selectRes.rows.length, 1, 'Persisted lead row must exist');
+    const stored = selectRes.rows[0];
+    assert.strictEqual(stored.id, 'KLAY-LEGACY-TEST-001');
+    assert.strictEqual(stored.name, 'Legacy Migration Sovereign Lead');
+    assert.strictEqual(stored.budget, 'AED 50k - 100k', 'budget column must contain exact value');
+    assert.strictEqual(stored.phone, '971507776655', 'phone must be normalized');
+    assert.strictEqual(stored.status, 'New');
+
+    legacyClient.close();
+  }
+);
+
+await testAsync(
+  '6.3 persistLeadToTurso handles sequential inserts and ON CONFLICT budget retention',
+  async () => {
+    const legacyDbPath = path.join(testDbDir, 'legacy-leads-test.db');
+    const legacyClient = createClient({ url: `file:${legacyDbPath}` });
+
+    // Subsequent lead insertion into the now-migrated table should succeed directly
+    const secondLead = {
+      id: 'KLAY-LEGACY-TEST-002',
+      referenceNumber: 'KLAY-LEGACY-TEST-002',
+      timestamp: new Date().toISOString(),
+      name: 'Second Lead After Migration',
+      email: 'second@sovereign.ae',
+      phone: '+971 52 333 4444',
+      budget: 'AED 100k+',
+      jurisdiction: 'ADGM',
+      status: 'New',
+    };
+
+    const secondResult = await leadIntakeCore.persistLeadToTurso(secondLead, {
+      client: legacyClient,
+    });
+    assert.strictEqual(secondResult, true, 'Subsequent insert on migrated table must return true');
+
+    const selectSecond = await legacyClient.execute({
+      sql: 'SELECT budget FROM leads WHERE id = ?',
+      args: ['KLAY-LEGACY-TEST-002'],
+    });
+    assert.strictEqual(selectSecond.rows[0].budget, 'AED 100k+');
+
+    // ON CONFLICT update preserves budget when updated with null budget
+    const updateLead = {
+      id: 'KLAY-LEGACY-TEST-002',
+      name: 'Second Lead After Migration',
+      email: 'second@sovereign.ae',
+      phone: '+971 52 333 4444',
+      budget: null,
+      status: 'Contacted',
+    };
+    const updateResult = await leadIntakeCore.persistLeadToTurso(updateLead, {
+      client: legacyClient,
+    });
+    assert.strictEqual(updateResult, true);
+
+    const selectUpdated = await legacyClient.execute({
+      sql: 'SELECT status, budget FROM leads WHERE id = ?',
+      args: ['KLAY-LEGACY-TEST-002'],
+    });
+    assert.strictEqual(selectUpdated.rows[0].status, 'Contacted');
+    assert.strictEqual(
+      selectUpdated.rows[0].budget,
+      'AED 100k+',
+      'COALESCE must preserve existing budget when updating with null'
+    );
+
+    legacyClient.close();
+  }
+);
+
+await testAsync(
+  '6.4 processIntakeLead end-to-end persists budget qualifier and returns 201',
+  async () => {
+    const endToEndLead = {
+      name: 'Dr. Aisha Al-Nuaimi',
+      email: 'aisha@healthtech.ae',
+      phone: '056 444 3322',
+      budget: 'AED 25k - 50k',
+      jurisdiction: 'Dubai Mainland',
+      activity: 'Healthcare Consulting',
+      timeline: '1 Month',
+      visaCount: 2,
+    };
+
+    const res = await leadIntakeCore.processIntakeLead(endToEndLead, {
+      dataDir: testDbDir,
+      tursoClient: seedClient,
+      platform: 'test-runner',
+    });
+
+    assert.strictEqual(res.statusCode, 201);
+    assert.ok(res.body.success);
+
+    // Verify stored lead in database contains budget
+    const checkRes = await seedClient.execute({
+      sql: 'SELECT budget, phone FROM leads WHERE id = ?',
+      args: [res.body.leadId],
+    });
+    assert.strictEqual(checkRes.rows.length, 1);
+    assert.strictEqual(checkRes.rows[0].budget, 'AED 25k - 50k');
+    assert.strictEqual(checkRes.rows[0].phone, '971564443322');
+  }
+);
+
 // ============================================================================
 // SUITE 7: TELEGRAM OUTBOUND ALERT PIPELINE
 // ============================================================================

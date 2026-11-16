@@ -199,10 +199,11 @@ function getTursoClient(customOptions = {}) {
  * Persist lead record into Turso database with UAE phone normalization.
  */
 async function persistLeadToTurso(leadRecord, options = {}) {
-  try {
-    const client = getTursoClient(options);
-    if (!client) return false;
+  // Elevate client to function scope so it is accessible in catch block
+  const client = getTursoClient(options);
+  if (!client) return false;
 
+  try {
     const rawPhone = leadRecord.phone || '';
     let phoneToStore = rawPhone.trim();
     const digitsOnly = phoneToStore.replace(/\D/g, '');
@@ -258,15 +259,40 @@ async function persistLeadToTurso(leadRecord, options = {}) {
 
     return true;
   } catch (err) {
-    if (err.message && err.message.includes('no such column: budget')) {
+    const errMsg = err && err.message ? String(err.message) : '';
+
+    // Matches any variation across libSQL, SQLite3, SQLite WASM, and Cloud Turso (INSERT, SELECT, Upsert)
+    const isMissingBudgetColumn =
+      /(?:(?:has\s+)?no\s+column\s+named:?|no\s+(?:such\s+)?column:?)\s*(?:[\w$]+\.)?['"`]?budget['"`]?/i.test(
+        errMsg
+      ) ||
+      (errMsg.toLowerCase().includes('budget') &&
+        (errMsg.includes('has no column') ||
+          errMsg.includes('no column named') ||
+          errMsg.includes('no such column')));
+
+    // Guard against infinite retry loops: at most ONE migration attempt and ONE retry
+    if (!options._migrationAttempted && isMissingBudgetColumn) {
       try {
         await client.execute('ALTER TABLE leads ADD COLUMN budget TEXT;');
-        return await persistLeadToTurso(leadRecord, options);
+        return await persistLeadToTurso(leadRecord, {
+          ...options,
+          _migrationAttempted: true,
+        });
       } catch (retryErr) {
-        console.warn('[Turso Auto-Migration Error]:', retryErr.message);
+        const retryMsg = retryErr && retryErr.message ? String(retryErr.message) : '';
+        // If column was concurrently added by a parallel serverless container, safe to retry insert
+        if (/duplicate column|already exists/i.test(retryMsg)) {
+          return await persistLeadToTurso(leadRecord, {
+            ...options,
+            _migrationAttempted: true,
+          });
+        }
+        console.warn('[Turso Auto-Migration Error]:', retryMsg);
       }
     }
-    console.warn('[Turso Lead Persistence Error]:', err.message);
+
+    console.warn('[Turso Lead Persistence Error]:', errMsg);
     return false;
   }
 }
