@@ -505,7 +505,7 @@ await testAsync(
 );
 
 await testAsync(
-  '5.4 Login returns 200 with session token and Set-Cookie on valid credentials',
+  '5.4 Login returns 200 with HttpOnly session cookie on valid credentials',
   async () => {
     const testIp = '198.51.100.22';
     adminCore.clearLoginRateLimit(testIp);
@@ -517,7 +517,7 @@ await testAsync(
 
     assert.strictEqual(res.statusCode, 200);
     assert.strictEqual(res.body.ok, true);
-    assert.strictEqual(typeof res.body.token, 'string');
+    assert.strictEqual(res.body.token, undefined, 'Session token must not be readable by browser JavaScript');
     assert.strictEqual(res.body.user.username, 'admin');
 
     const cookieHeader = res.headers['Set-Cookie'];
@@ -860,7 +860,7 @@ await testAsync(
     assert.strictEqual(res.statusCode, 200);
     const body = JSON.parse(res.body);
     assert.strictEqual(body.ok, true);
-    assert.ok(body.token);
+    assert.strictEqual(body.token, undefined, 'Session token must stay in the HttpOnly cookie');
     assert.ok(
       res.headers['Set-Cookie'] || (res.multiValueHeaders && res.multiValueHeaders['Set-Cookie'])
     );
