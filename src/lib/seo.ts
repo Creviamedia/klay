@@ -62,6 +62,30 @@ const serviceSeo: Record<string, { title: string; description: string; keyword: 
       'Get guidance preparing for a UAE corporate bank account application, including bank selection, company documents and KYC information.',
     keyword: 'UAE corporate bank account assistance',
   },
+  'meydan-free-zone': {
+    title: 'Meydan Free Zone Setup Dubai | 60-Min License | Klay',
+    description:
+      'Set up in Meydan Free Zone Dubai. Fast 60-minute Fawri license, 100% foreign ownership, prime Downtown location, flexi-desk and corporate bank account support.',
+    keyword: 'Meydan Free Zone Setup Dubai',
+  },
+  'ifza-free-zone': {
+    title: 'IFZA Free Zone Setup Dubai | Silicon Oasis Company Setup',
+    description:
+      'Incorporate in IFZA Dubai (Dubai Silicon Oasis). Multi-activity packages, zero visa to multi-visa allocations, 100% ownership and fast investor visa support.',
+    keyword: 'IFZA Free Zone Setup Dubai',
+  },
+  'dmcc-free-zone': {
+    title: 'DMCC Free Zone Setup Dubai | JLT Company Formation',
+    description:
+      'Form your company in DMCC Free Zone at JLT Dubai. Voted #1 global free zone. Comprehensive corporate setup, commodities, crypto and executive visa services.',
+    keyword: 'DMCC Free Zone Setup Dubai',
+  },
+  'difc-company-setup': {
+    title: 'DIFC Company Formation Dubai | Financial & FinTech Hub',
+    description:
+      'Incorporate in Dubai International Financial Centre (DIFC). English common-law jurisdiction, SPVs, Innovation licenses, venture structures and family offices.',
+    keyword: 'DIFC Company Formation Dubai',
+  },
 };
 
 const defaultImage = `${SITE_ORIGIN}/images/og-default.jpg`;
@@ -270,10 +294,13 @@ export function organizationSchema() {
     url: `${SITE_ORIGIN}/`,
     email: COMPANY.email,
     telephone: COMPANY.phone,
+    priceRange: 'AED 12,000 - AED 100,000',
     address: {
       '@type': 'PostalAddress',
       streetAddress: 'THE EXCHANGE TOWER - Office No.2522, Business Bay',
       addressLocality: 'Dubai',
+      addressRegion: 'Dubai',
+      postalCode: '00000',
       addressCountry: 'AE',
     },
     geo: {
@@ -281,11 +308,37 @@ export function organizationSchema() {
       latitude: '25.1872',
       longitude: '55.2678',
     },
+    openingHoursSpecification: [
+      {
+        '@type': 'OpeningHoursSpecification',
+        dayOfWeek: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'],
+        opens: '09:00',
+        closes: '18:00',
+      },
+    ],
+    areaServed: [
+      { '@type': 'AdministrativeArea', name: 'Dubai' },
+      { '@type': 'AdministrativeArea', name: 'Abu Dhabi' },
+      { '@type': 'AdministrativeArea', name: 'Sharjah' },
+      { '@type': 'Country', name: 'United Arab Emirates' },
+    ],
+    knowsAbout: [
+      'Dubai Free Zone Setup',
+      'Dubai Mainland DED License Formation',
+      'Meydan Free Zone License',
+      'IFZA Free Zone License',
+      'DMCC Business Setup',
+      'DIFC Corporate Structuring',
+      'UAE Corporate Tax & Accounting',
+      'UAE Golden Visa & Residency',
+    ],
     contactPoint: {
       '@type': 'ContactPoint',
       telephone: COMPANY.phone,
       email: COMPANY.email,
       contactType: 'customer service',
+      areaServed: 'AE',
+      availableLanguage: ['en', 'ar', 'ur', 'hi', 'fr', 'ru'],
     },
   };
 }
