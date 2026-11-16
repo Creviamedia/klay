@@ -101,7 +101,12 @@ export const PARTNER_LOGOS: PartnerLogo[] = [
         aria-label="DMCC Dubai Multi Commodities Centre Logo"
       >
         <g transform="translate(4, 6)">
-          <polygon points="14,0 28,14 14,28 0,14" fill="none" stroke="currentColor" strokeWidth="2.5" />
+          <polygon
+            points="14,0 28,14 14,28 0,14"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2.5"
+          />
           <polygon points="14,6 22,14 14,22 6,14" />
         </g>
         <text
@@ -264,10 +269,7 @@ export const PARTNER_LOGOS: PartnerLogo[] = [
         aria-label="Mashreq Bank Logo"
       >
         <g transform="translate(6, 6)">
-          <path
-            d="M 0 28 C 14 28 26 16 26 0 C 18 10 10 18 0 20 Z"
-            fill="currentColor"
-          />
+          <path d="M 0 28 C 14 28 26 16 26 0 C 18 10 10 18 0 20 Z" fill="currentColor" />
           <circle cx="18" cy="8" r="4" fill="currentColor" opacity="0.8" />
         </g>
         <text
@@ -309,7 +311,15 @@ export const PARTNER_LOGOS: PartnerLogo[] = [
           <path d="M 0 6 L 4 22 L 9 8 L 14 22 L 18 6 L 22 6 L 16 26 L 12 26 L 9 14 L 6 26 L 0 26 Z" />
           <circle cx="27" cy="4" r="2.5" />
           <rect x="25" y="9" width="4" height="17" rx="1" />
-          <ellipse cx="40" cy="17" rx="7" ry="8.5" fill="none" stroke="currentColor" strokeWidth="3.5" />
+          <ellipse
+            cx="40"
+            cy="17"
+            rx="7"
+            ry="8.5"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="3.5"
+          />
         </g>
         <text
           x="62"
@@ -352,6 +362,7 @@ export const PartnerMarquee: React.FC<PartnerMarqueeProps> = ({
   const trackRef = useRef<HTMLDivElement>(null);
   const [isPaused, setIsPaused] = useState(false);
   const [isDragging, setIsDragging] = useState(false);
+  const [isVisible, setIsVisible] = useState(true);
 
   // Offset tracking for seamless infinite loop and drag
   const offsetRef = useRef<number>(0);
@@ -360,6 +371,19 @@ export const PartnerMarquee: React.FC<PartnerMarqueeProps> = ({
   const startDragOffsetRef = useRef<number>(0);
   const singleSetWidthRef = useRef<number>(0);
   const animationFrameIdRef = useRef<number | null>(null);
+
+  // Halt RAF loop when offscreen to save mobile CPU/battery
+  useEffect(() => {
+    if (!containerRef.current || typeof IntersectionObserver === 'undefined') return;
+    const io = new IntersectionObserver(
+      ([entry]) => {
+        setIsVisible(entry.isIntersecting);
+      },
+      { threshold: 0.05 }
+    );
+    io.observe(containerRef.current);
+    return () => io.disconnect();
+  }, []);
 
   // Measure single track width
   const updateMetrics = useCallback(() => {
@@ -376,13 +400,16 @@ export const PartnerMarquee: React.FC<PartnerMarqueeProps> = ({
     return () => window.removeEventListener('resize', updateMetrics);
   }, [updateMetrics]);
 
-  // RequestAnimationFrame smooth tick loop
+  // RequestAnimationFrame smooth tick loop (only runs when on-screen)
   useEffect(() => {
     const prefersReducedMotion =
       typeof window !== 'undefined' &&
       window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-    if (prefersReducedMotion) return;
+    if (prefersReducedMotion || !isVisible) {
+      lastTimeRef.current = null;
+      return;
+    }
 
     const tick = (time: number) => {
       if (lastTimeRef.current !== null && !isPaused && !isDragging) {
