@@ -117,11 +117,17 @@ function PageMetadata() {
     let cancelled = false;
     const trackPageView = () => {
       if (cancelled) return;
-      window.gtag('event', 'page_view', {
-        page_title: document.title,
-        page_location: window.location.href,
-        page_path: `${pathname}${search}`,
-      });
+      if (typeof window !== 'undefined' && typeof window.gtag === 'function') {
+        try {
+          window.gtag('event', 'page_view', {
+            page_title: document.title,
+            page_location: window.location.href,
+            page_path: `${pathname}${search}`,
+          });
+        } catch {
+          // Ignore analytics dispatch failure in restrictive browser contexts
+        }
+      }
     };
     // A prerendered page already has the correct <head> (including article JSON-LD),
     // so metadata is only rewritten after client-side navigation. The SEO helper (and the

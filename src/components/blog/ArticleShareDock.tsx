@@ -12,7 +12,7 @@ export function ArticleShareDock({ title, url }: Props) {
 
   const handleCopy = () => {
     if (typeof navigator !== 'undefined' && navigator.clipboard) {
-      navigator.clipboard.writeText(currentUrl);
+      void navigator.clipboard.writeText(currentUrl).catch(() => {});
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
     }

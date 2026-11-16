@@ -40,6 +40,22 @@ export function initSentry(): void {
     // Session Replay sample rate
     replaysSessionSampleRate: 0.1,
     replaysOnErrorSampleRate: 1.0,
+    ignoreErrors: [
+      'TypeError: Illegal invocation',
+      /Illegal invocation/i,
+      'ResizeObserver loop completed with undelivered notifications',
+      'ResizeObserver loop limit exceeded',
+      'Non-Error promise rejection captured',
+      'NetworkError when attempting to fetch resource.',
+      /Loading chunk [0-9]+ failed/i,
+    ],
+    denyUrls: [
+      /extensions\//i,
+      /^chrome:\/\//i,
+      /^chrome-extension:\/\//i,
+      /^moz-extension:\/\//i,
+      /^safari-extension:\/\//i,
+    ],
   });
 }
 
