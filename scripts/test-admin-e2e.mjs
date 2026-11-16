@@ -273,9 +273,9 @@ try {
     await page.waitForURL('**/admin/leads', { timeout: 12000 });
     assert.ok(page.url().includes('/admin/leads'), `Expected /admin/leads, got: ${page.url()}`);
 
-    // Verify session token stored in browser localStorage
-    const storedToken = await page.evaluate(() => localStorage.getItem('klay_admin_token'));
-    assert.ok(storedToken, 'Authentication session token must be persisted in localStorage');
+    const sessionCookie = (await page.context().cookies(BASE_URL)).find((cookie) => cookie.name === 'klay_admin_session');
+    assert.ok(sessionCookie?.httpOnly, 'Authentication session must use an HttpOnly cookie');
+    assert.equal(await page.evaluate(() => localStorage.getItem('klay_admin_token')), null);
     passTest('1.3 Valid credentials authenticate and redirect to /admin/leads');
   } catch (err) {
     failTest('1.3 Valid credentials authenticate and redirect to /admin/leads', err);
@@ -749,13 +749,8 @@ try {
       `Expected /admin/login after logout, got: ${page.url()}`
     );
 
-    // Verify localStorage token removed
-    const tokenAfter = await page.evaluate(() => localStorage.getItem('klay_admin_token'));
-    assert.strictEqual(
-      tokenAfter,
-      null,
-      'Session token must be deleted from localStorage on logout'
-    );
+    const sessionAfter = (await page.context().cookies(BASE_URL)).find((cookie) => cookie.name === 'klay_admin_session');
+    assert.ok(!sessionAfter || !sessionAfter.value, 'Session cookie must be cleared on logout');
 
     passTest('5.1 Logout button invalidates session and redirects to /admin/login');
   } catch (err) {

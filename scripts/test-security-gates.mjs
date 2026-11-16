@@ -5,13 +5,17 @@ import { createRequire } from 'node:module';
 const require = createRequire(import.meta.url);
 const admin = require('../netlify/functions/admin-core.cjs');
 const gateway = require('../netlify/functions/admin.cjs');
+const intake = require('../netlify/functions/lead-intake-core.cjs');
+const leadGateway = require('../netlify/functions/leads.cjs');
 
 const previous = {
   secret: process.env.KLAY_ADMIN_SECRET,
   legacySecret: process.env.ADMIN_JWT_SECRET,
   hash: process.env.ADMIN_PASSWORD_HASH,
   legacyHash: process.env.KLAY_ADMIN_PASSWORD_HASH,
+  ntfy: process.env.NTFY_TOPIC_URL,
 };
+const originalFetch = global.fetch;
 
 try {
   delete process.env.KLAY_ADMIN_SECRET;
@@ -53,13 +57,31 @@ try {
   assert.equal(denied.headers['Access-Control-Allow-Origin'], undefined);
   assert.equal(denied.headers['Access-Control-Allow-Credentials'], undefined);
 
-  console.log('Security gates passed: explicit secret, revoked password, session rotation, origin policy.');
+  const sampleLead = { id: 'KLAY-TEST-123', name: 'Private Person', email: 'private@example.com', phone: '12345', notes: 'Private note' };
+  let notification;
+  global.fetch = async (_url, options) => { notification = JSON.parse(options.body); return { ok: true }; };
+  delete process.env.NTFY_TOPIC_URL;
+  await intake.sendPushNotification(sampleLead);
+  assert.equal(notification, undefined, 'No public notification should be sent by default');
+  process.env.NTFY_TOPIC_URL = 'https://ntfy.sh/private-test-topic';
+  await intake.sendPushNotification(sampleLead);
+  assert.equal(notification.message, 'Reference: KLAY-TEST-123');
+  assert.doesNotMatch(JSON.stringify(notification), /Private Person|private@example.com|12345|Private note/);
+
+  const oversized = await leadGateway.handler({ httpMethod: 'POST', body: 'x'.repeat(32769), headers: {} });
+  assert.equal(oversized.statusCode, 413);
+  const invalid = await intake.processIntakeLead({ name: 'a'.repeat(121) });
+  assert.equal(invalid.statusCode, 400);
+
+  console.log('Security gates passed: admin auth, origin policy, private alerts, input limits.');
 } finally {
+  global.fetch = originalFetch;
   for (const [env, value] of [
     ['KLAY_ADMIN_SECRET', previous.secret],
     ['ADMIN_JWT_SECRET', previous.legacySecret],
     ['ADMIN_PASSWORD_HASH', previous.hash],
     ['KLAY_ADMIN_PASSWORD_HASH', previous.legacyHash],
+    ['NTFY_TOPIC_URL', previous.ntfy],
   ]) {
     if (value === undefined) delete process.env[env];
     else process.env[env] = value;

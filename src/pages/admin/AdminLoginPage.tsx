@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useNavigate, useLocation, Link } from 'react-router-dom';
 import { Shield, Lock, User, Eye, EyeOff, Loader2, AlertCircle, ArrowLeft } from 'lucide-react';
 
@@ -12,6 +12,11 @@ export function AdminLoginPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [rateLimitInfo, setRateLimitInfo] = useState<string | null>(null);
+
+  useEffect(() => {
+    localStorage.removeItem('klay_admin_token');
+    sessionStorage.removeItem('klay_admin_token');
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -41,10 +46,6 @@ export function AdminLoginPage() {
       const data = await response.json().catch(() => ({}));
 
       if (response.status === 200 && data.ok) {
-        if (data.token) {
-          localStorage.setItem('klay_admin_token', data.token);
-          sessionStorage.setItem('klay_admin_token', data.token);
-        }
         if (data.user?.username) {
           localStorage.setItem('klay_admin_user', data.user.username);
         }

@@ -15,30 +15,20 @@ export function AdminLayout({ children }: AdminLayoutProps) {
 
   useEffect(() => {
     let isMounted = true;
+    localStorage.removeItem('klay_admin_token');
+    sessionStorage.removeItem('klay_admin_token');
 
     async function verifySession() {
-      const token =
-        localStorage.getItem('klay_admin_token') || sessionStorage.getItem('klay_admin_token');
-
-      const headers: Record<string, string> = {
-        Accept: 'application/json',
-      };
-      if (token) {
-        headers['Authorization'] = `Bearer ${token}`;
-      }
-
       try {
         const response = await fetch('/api/admin/leads?limit=1', {
           method: 'GET',
-          headers,
+          headers: { Accept: 'application/json' },
           credentials: 'include',
         });
 
         if (!isMounted) return;
 
-        if (response.status === 401 || response.status === 403) {
-          localStorage.removeItem('klay_admin_token');
-          sessionStorage.removeItem('klay_admin_token');
+        if (!response.ok) {
           navigate('/admin/login', { replace: true, state: { from: location.pathname } });
           return;
         }
@@ -49,13 +39,7 @@ export function AdminLayout({ children }: AdminLayoutProps) {
         setIsVerifying(false);
       } catch (err) {
         if (!isMounted) return;
-        // In local mock or network hiccup, check if we have stored token
-        if (token) {
-          setAdminUser({ username: 'admin' });
-          setIsVerifying(false);
-        } else {
-          navigate('/admin/login', { replace: true });
-        }
+        navigate('/admin/login', { replace: true });
       }
     }
 
@@ -75,9 +59,9 @@ export function AdminLayout({ children }: AdminLayoutProps) {
     } catch {
       // Ignore network errors on logout
     } finally {
+      localStorage.removeItem('klay_admin_user');
       localStorage.removeItem('klay_admin_token');
       sessionStorage.removeItem('klay_admin_token');
-      localStorage.removeItem('klay_admin_user');
       navigate('/admin/login', { replace: true });
     }
   };
