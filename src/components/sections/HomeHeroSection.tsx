@@ -20,11 +20,7 @@ export interface HomeHeroSectionProps {
   className?: string;
 }
 
-const DEFAULT_TICKER_WORDS = [
-  'Foreign Ownership',
-  'Tax Exemption',
-  'Asset Protection',
-];
+const DEFAULT_TICKER_WORDS = ['Foreign Ownership', 'Tax Exemption', 'Asset Protection'];
 
 /**
  * 100vh Full-Bleed Cinematic Hero Fold matching Equitify Asset architectural specifications,
@@ -41,8 +37,9 @@ export const HomeHeroSection: React.FC<HomeHeroSectionProps> = ({
   const videoRef = useRef<HTMLVideoElement>(null);
 
   useEffect(() => {
-    // Ensure 100% reliable programmatic autoplay on modern mobile/desktop browsers
-    if (videoRef.current) {
+    // Only attempt video playback on desktop / non-mobile devices to conserve mobile bandwidth and battery
+    const isMobile = typeof window !== 'undefined' && window.innerWidth < 768;
+    if (videoRef.current && !isMobile) {
       videoRef.current.defaultMuted = true;
       videoRef.current.muted = true;
       videoRef.current.play().catch(() => {
@@ -56,7 +53,7 @@ export const HomeHeroSection: React.FC<HomeHeroSectionProps> = ({
       aria-label="Hero capability showcase"
       className={`relative w-full h-screen min-h-[640px] max-h-[1080px] overflow-hidden bg-[#05131F] text-[#FBFBFB] flex flex-col justify-end border-b border-white/10 ${className}`}
     >
-      {/* 1. Cinematic Background Layer: Loop Video with Poster Image Fallback */}
+      {/* 1. Cinematic Background Layer: Loop Video on Desktop, High-Res WebP on Mobile */}
       <div className="absolute inset-0 pointer-events-none select-none z-0 overflow-hidden">
         <video
           ref={videoRef}
@@ -64,21 +61,22 @@ export const HomeHeroSection: React.FC<HomeHeroSectionProps> = ({
           loop
           muted
           playsInline
+          preload="none"
           poster={IMAGES.heroSkyline}
-          className="absolute inset-0 w-full h-full object-cover object-center pointer-events-none opacity-85"
+          className="hidden md:block absolute inset-0 w-full h-full object-cover object-center pointer-events-none opacity-85"
           aria-hidden="true"
         >
-          <source src="/videos/equitify-hero-bg.mp4" type="video/mp4" />
-          <source src="/videos/klay-dubai-loop.mp4" type="video/mp4" />
+          <source src="/videos/equitify-hero-bg.mp4" type="video/mp4" media="(min-width: 768px)" />
+          <source src="/videos/klay-dubai-loop.mp4" type="video/mp4" media="(min-width: 768px)" />
         </video>
-        {/* Preloaded static image fallback for SSR and instant initial paint */}
+        {/* Preloaded static image fallback for SSR, mobile devices, and instant initial paint */}
         <Image
           src={IMAGES.heroSkyline}
           alt="Dubai architectural waterfront and skyline"
           fill
           priority
           sizes="100vw"
-          className="object-cover opacity-20 filter saturate-50 pointer-events-none -z-10"
+          className="object-cover opacity-85 md:opacity-20 filter saturate-50 pointer-events-none -z-10"
         />
       </div>
 

@@ -5,13 +5,14 @@ import { COMPANY, NAV_LINKS } from '@/lib/data';
 import { Image } from '@/components/ui/image';
 import { Link } from '@/components/ui/link';
 import { LiquidNavbar, type LiquidNavItem } from '@/components/layout/LiquidNavbar';
+import { useMediaQuery } from '@/hooks/use-media-query';
 import { MobileMenu, type MobileMenuItem } from '@/components/layout/MobileMenu';
 import { EquitifyButton } from '@/components/ui/EquitifyButton';
 import { ROUTES } from '@/lib/routes';
 
-const DESKTOP_NAV_LINKS = NAV_LINKS
-  .filter((link) => link.href !== ROUTES.goldenVisa)
-  .map((link) => (link.href === ROUTES.contact ? { ...link, label: 'Contact Us' } : link));
+const DESKTOP_NAV_LINKS = NAV_LINKS.filter((link) => link.href !== ROUTES.goldenVisa).map((link) =>
+  link.href === ROUTES.contact ? { ...link, label: 'Contact Us' } : link
+);
 
 const SEARCH_LINKS = [
   { label: 'Home', href: ROUTES.home },
@@ -36,11 +37,12 @@ const DARK_HERO_PATHS = new Set(
     ROUTES.services,
     ROUTES.goldenVisa,
     ROUTES.costCalculator,
-  ].map(trimTrailingSlash),
+  ].map(trimTrailingSlash)
 );
 
 export function Header() {
   const headerRef = useRef<HTMLElement>(null);
+  const isDesktop = useMediaQuery('(min-width: 768px)', false);
   const [scrolled, setScrolled] = useState(false);
   const [pastHero, setPastHero] = useState(false);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
@@ -50,15 +52,21 @@ export function Header() {
   const navigate = useNavigate();
 
   const searchResults = useMemo(
-    () => SEARCH_LINKS.filter((item) => item.label.toLowerCase().includes(searchTerm.trim().toLowerCase())),
+    () =>
+      SEARCH_LINKS.filter((item) =>
+        item.label.toLowerCase().includes(searchTerm.trim().toLowerCase())
+      ),
     [searchTerm]
   );
   const activeIndex = useMemo(
-    () => DESKTOP_NAV_LINKS.findIndex((link) => {
-      const currentPath = pathname.replace(/\/+$/, '') || '/';
-      const linkPath = link.href.replace(/\/+$/, '') || '/';
-      return linkPath === '/' ? currentPath === '/' : currentPath === linkPath || currentPath.startsWith(`${linkPath}/`);
-    }),
+    () =>
+      DESKTOP_NAV_LINKS.findIndex((link) => {
+        const currentPath = pathname.replace(/\/+$/, '') || '/';
+        const linkPath = link.href.replace(/\/+$/, '') || '/';
+        return linkPath === '/'
+          ? currentPath === '/'
+          : currentPath === linkPath || currentPath.startsWith(`${linkPath}/`);
+      }),
     [pathname]
   );
   const liquidItems: LiquidNavItem[] = useMemo(
@@ -123,7 +131,11 @@ export function Header() {
       className="fixed inset-x-0 top-0 z-50 border-b border-white/20 bg-[rgba(255,255,255,0.12)] shadow-[0_10px_32px_rgba(8,31,53,0.08)] backdrop-blur-2xl"
     >
       <div className="relative mx-auto flex h-16 w-[calc(100%-28px)] max-w-[1440px] items-center justify-between gap-3 sm:w-[calc(100%-36px)] md:h-[72px] md:w-[calc(100%-48px)] xl:w-[calc(100%-64px)]">
-        <Link href="/" aria-label="Klay Consultants home" className="group flex shrink-0 items-center">
+        <Link
+          href="/"
+          aria-label="Klay Consultants home"
+          className="group flex shrink-0 items-center"
+        >
           <Image
             src="/klay-logo.png"
             alt="Klay Consultants"
@@ -135,16 +147,18 @@ export function Header() {
         </Link>
 
         <div className="absolute left-1/2 hidden -translate-x-1/2 items-center md:flex">
-          <LiquidNavbar
-            items={liquidItems}
-            active={activeIndex}
-            tone="dark"
-            compact={false}
-            className={`editorial-header-nav${scrolled ? ' editorial-header-nav--scrolled' : ''}${onDark ? ' editorial-header-nav--on-dark' : ''}`}
-            onChange={(_, item) => {
-              if (item.href) navigate(item.href);
-            }}
-          />
+          {isDesktop && (
+            <LiquidNavbar
+              items={liquidItems}
+              active={activeIndex}
+              tone="dark"
+              compact={false}
+              className={`editorial-header-nav${scrolled ? ' editorial-header-nav--scrolled' : ''}${onDark ? ' editorial-header-nav--on-dark' : ''}`}
+              onChange={(_, item) => {
+                if (item.href) navigate(item.href);
+              }}
+            />
+          )}
         </div>
 
         <div className="ml-auto flex shrink-0 items-center gap-1.5 sm:gap-2 md:gap-3">
@@ -182,7 +196,9 @@ export function Header() {
                   }
                 }}
               >
-                <label htmlFor="site-search" className="sr-only">Search pages</label>
+                <label htmlFor="site-search" className="sr-only">
+                  Search pages
+                </label>
                 <input
                   id="site-search"
                   type="search"
@@ -200,16 +216,18 @@ export function Header() {
                   className="h-11 w-full rounded-lg border border-blue-100 bg-blue-50/50 px-3 text-sm text-black outline-none placeholder:text-black focus:border-blue-300 focus:ring-2 focus:ring-blue-100"
                 />
                 <div className="mt-2 max-h-60 overflow-y-auto">
-                  {searchResults.length ? searchResults.map((item) => (
-                    <Link
-                      key={item.href}
-                      href={item.href}
-                      onClick={() => setIsSearchOpen(false)}
-                      className="block rounded-lg px-3 py-2.5 text-sm text-black transition-colors hover:bg-blue-50 hover:text-black"
-                    >
-                      {item.label}
-                    </Link>
-                  )) : (
+                  {searchResults.length ? (
+                    searchResults.map((item) => (
+                      <Link
+                        key={item.href}
+                        href={item.href}
+                        onClick={() => setIsSearchOpen(false)}
+                        className="block rounded-lg px-3 py-2.5 text-sm text-black transition-colors hover:bg-blue-50 hover:text-black"
+                      >
+                        {item.label}
+                      </Link>
+                    ))
+                  ) : (
                     <p className="px-3 py-3 text-sm text-black">No matching pages.</p>
                   )}
                 </div>
