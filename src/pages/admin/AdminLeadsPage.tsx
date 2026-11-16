@@ -70,7 +70,7 @@ export function AdminLeadsPage() {
 
   // Filters
   const [searchQuery, setSearchQuery] = useState('');
-  const [statusFilter, setStatusFilter] = useState('All');
+  const [statusFilter, setStatusFilter] = useState('Active');
   const [jurisdictionFilter, setJurisdictionFilter] = useState('All Jurisdictions');
   const [fromDate, setFromDate] = useState('');
   const [toDate, setToDate] = useState('');
@@ -222,8 +222,12 @@ export function AdminLeadsPage() {
         }
       }
 
-      // Status filter
-      if (statusFilter !== 'All' && lead.status !== statusFilter) {
+      // Status filter (defaults to 'Active' which excludes 'Archived')
+      if (statusFilter === 'Active') {
+        if ((lead.status || '').toLowerCase() === 'archived') {
+          return false;
+        }
+      } else if (statusFilter !== 'All' && lead.status !== statusFilter) {
         return false;
       }
 
@@ -317,7 +321,7 @@ export function AdminLeadsPage() {
 
   const clearFilters = () => {
     setSearchQuery('');
-    setStatusFilter('All');
+    setStatusFilter('Active');
     setJurisdictionFilter('All Jurisdictions');
     setFromDate('');
     setToDate('');
@@ -527,7 +531,8 @@ export function AdminLeadsPage() {
               onChange={(e) => setStatusFilter(e.target.value)}
               className="w-full px-3 py-2 bg-[#05131F] border border-white/10 rounded-xl text-xs font-mono text-white focus:outline-none focus:border-[#D4AF37] cursor-pointer"
             >
-              <option value="All">All Statuses</option>
+              <option value="Active">All Active</option>
+              <option value="All">All (Including Archived)</option>
               {STATUS_OPTIONS.map((st) => (
                 <option key={st} value={st}>
                   {st}
@@ -573,7 +578,7 @@ export function AdminLeadsPage() {
             />
 
             {(searchQuery ||
-              statusFilter !== 'All' ||
+              statusFilter !== 'Active' ||
               jurisdictionFilter !== 'All Jurisdictions' ||
               fromDate ||
               toDate) && (
