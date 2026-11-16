@@ -39,6 +39,7 @@ import * as http from 'node:http';
 import * as path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { chromium } from 'playwright-core';
+import bcrypt from 'bcryptjs';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -47,7 +48,8 @@ const projectRoot = path.resolve(__dirname, '..');
 const TEST_PORT = Number(process.env.TEST_PORT) || 3088;
 const BASE_URL = `http://127.0.0.1:${TEST_PORT}`;
 const ADMIN_USER = process.env.ADMIN_USERNAME || 'admin';
-const ADMIN_PASS = process.env.ADMIN_PASSWORD || 'KlayAdmin2026!Dev';
+const ADMIN_PASS = 'TestOnlyAdmin#297';
+const ADMIN_TEST_HASH = await bcrypt.hash(ADMIN_PASS, 10);
 
 console.log('======================================================================');
 console.log('👑  KLAY UNIFIED ADMIN & CONTENT PORTAL: PLAYWRIGHT E2E SUITE  👑');
@@ -169,6 +171,8 @@ try {
       ...process.env,
       PORT: String(TEST_PORT),
       NODE_ENV: 'development',
+      KLAY_ADMIN_SECRET: 'test-only-hmac-secret-for-e2e-suite',
+      ADMIN_PASSWORD_HASH: ADMIN_TEST_HASH,
     },
     stdio: ['ignore', 'pipe', 'pipe'],
   });
@@ -269,9 +273,9 @@ try {
     await page.waitForURL('**/admin/leads', { timeout: 12000 });
     assert.ok(page.url().includes('/admin/leads'), `Expected /admin/leads, got: ${page.url()}`);
 
-    // Verify session token stored in browser localStorage
-    const storedToken = await page.evaluate(() => localStorage.getItem('klay_admin_token'));
-    assert.ok(storedToken, 'Authentication session token must be persisted in localStorage');
+    const sessionCookie = (await page.context().cookies(BASE_URL)).find((cookie) => cookie.name === 'klay_admin_session');
+    assert.ok(sessionCookie?.httpOnly, 'Authentication session must use an HttpOnly cookie');
+    assert.equal(await page.evaluate(() => localStorage.getItem('klay_admin_token')), null);
     passTest('1.3 Valid credentials authenticate and redirect to /admin/leads');
   } catch (err) {
     failTest('1.3 Valid credentials authenticate and redirect to /admin/leads', err);
@@ -745,13 +749,8 @@ try {
       `Expected /admin/login after logout, got: ${page.url()}`
     );
 
-    // Verify localStorage token removed
-    const tokenAfter = await page.evaluate(() => localStorage.getItem('klay_admin_token'));
-    assert.strictEqual(
-      tokenAfter,
-      null,
-      'Session token must be deleted from localStorage on logout'
-    );
+    const sessionAfter = (await page.context().cookies(BASE_URL)).find((cookie) => cookie.name === 'klay_admin_session');
+    assert.ok(!sessionAfter || !sessionAfter.value, 'Session cookie must be cleared on logout');
 
     passTest('5.1 Logout button invalidates session and redirects to /admin/login');
   } catch (err) {

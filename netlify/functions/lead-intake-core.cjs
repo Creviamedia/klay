@@ -18,6 +18,7 @@
 
 const fs = require('node:fs');
 const path = require('node:path');
+const { randomInt } = require('node:crypto');
 function safeCreateLibsqlClient(config) {
   if (!config || !config.url) return null;
   const url = String(config.url).trim();
@@ -60,8 +61,8 @@ function generateSovereignReference() {
   const year = new Date().getFullYear();
   const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
   let randomPart = '';
-  for (let i = 0; i < 4; i++) {
-    randomPart += chars.charAt(Math.floor(Math.random() * chars.length));
+  for (let i = 0; i < 8; i++) {
+    randomPart += chars.charAt(randomInt(chars.length));
   }
   return `KLAY-${year}-${randomPart}`;
 }
@@ -452,44 +453,21 @@ async function forwardLeadToGoogleSheet(leadRecord) {
 }
 
 async function sendPushNotification(leadRecord) {
-  const ntfyTarget = (process.env.NTFY_TOPIC_URL || 'https://ntfy.sh/klay-leads-dubai').trim();
+  const ntfyTarget = (process.env.NTFY_TOPIC_URL || '').trim();
   if (!ntfyTarget) return;
-
-  let targetUrl = 'https://ntfy.sh';
-  let topic = 'klay-leads-dubai';
-
+  let targetUrl;
+  let topic;
   try {
-    if (ntfyTarget.startsWith('http://') || ntfyTarget.startsWith('https://')) {
-      const parsed = new URL(ntfyTarget);
-      const segments = parsed.pathname.split('/').filter(Boolean);
-      if (segments.length > 0) {
-        topic = segments[segments.length - 1];
-        targetUrl = parsed.origin;
-      } else {
-        targetUrl = parsed.origin;
-      }
-    } else {
-      topic = ntfyTarget;
-    }
+    const parsed = new URL(ntfyTarget);
+    if (parsed.protocol !== 'https:') return;
+    const segments = parsed.pathname.split('/').filter(Boolean);
+    if (segments.length !== 1 || parsed.username || parsed.password || parsed.search || parsed.hash)
+      return;
+    targetUrl = parsed.origin;
+    topic = segments[0];
   } catch {
-    // Fall back to default
+    return;
   }
-
-  const { waUrl, callUrl } = formatWhatsAppDetails(
-    leadRecord.phone,
-    leadRecord.name,
-    leadRecord.jurisdiction
-  );
-  const notesLine = leadRecord.notes ? `\n📝 Notes: ${leadRecord.notes}` : '';
-  const waDirectLine = waUrl ? `\n💬 WhatsApp: ${waUrl}` : '';
-  const callDirectLine = leadRecord.phone ? `\n📞 Call: ${leadRecord.phone}` : '';
-  const budgetLine = leadRecord.budget ? ` · 💰 ${leadRecord.budget}` : '';
-
-  const messageBody = `🏛️ ${leadRecord.jurisdiction || 'UAE'} · ${leadRecord.activity || 'General'}${budgetLine}\n✉️ ${leadRecord.email}${callDirectLine}${waDirectLine}${notesLine}`;
-
-  const actions = [];
-  if (waUrl) actions.push({ action: 'view', label: '💬 WhatsApp Lead', url: waUrl, clear: true });
-  if (callUrl) actions.push({ action: 'view', label: '📞 Call Lead', url: callUrl, clear: true });
 
   try {
     await fetch(targetUrl, {
@@ -497,12 +475,10 @@ async function sendPushNotification(leadRecord) {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         topic,
-        title: `🏛️ New Klay Lead: ${leadRecord.name}`,
+        title: 'New Klay lead',
         priority: 4,
-        tags: ['briefcase', 'dubai', 'whatsapp'],
-        message: messageBody,
-        click: waUrl || undefined,
-        actions: actions.length > 0 ? actions : undefined,
+        tags: ['briefcase'],
+        message: `Reference: ${leadRecord.id}`,
       }),
       signal: AbortSignal.timeout(8000),
     });
@@ -516,6 +492,9 @@ async function sendPushNotification(leadRecord) {
  * Handles rate limiting, validation, fallback contact parsing, persistence, and alerts.
  */
 async function processIntakeLead(rawBody = {}, context = {}) {
+  if (!rawBody || typeof rawBody !== 'object' || Array.isArray(rawBody)) {
+    return { statusCode: 400, body: { success: false, error: 'Invalid lead data' } };
+  }
   const clientIp = context.clientIp || 'unknown';
 
   if (isRateLimited(clientIp)) {
@@ -541,6 +520,39 @@ async function processIntakeLead(rawBody = {}, context = {}) {
     notes,
     source,
   } = rawBody;
+
+  const limits = {
+    name: 120,
+    email: 254,
+    phone: 32,
+    contact: 254,
+    budget: 80,
+    jurisdiction: 80,
+    activity: 120,
+    timeline: 80,
+    notes: 1000,
+    source: 80,
+  };
+  for (const [field, maxLength] of Object.entries(limits)) {
+    const value = rawBody[field];
+    if (
+      value !== undefined &&
+      value !== null &&
+      (typeof value !== 'string' || value.length > maxLength)
+    ) {
+      return { statusCode: 400, body: { success: false, error: `Invalid ${field}` } };
+    }
+  }
+  if (
+    visaCount !== undefined &&
+    visaCount !== null &&
+    !(
+      (typeof visaCount === 'number' || typeof visaCount === 'string') &&
+      String(visaCount).length <= 8
+    )
+  ) {
+    return { statusCode: 400, body: { success: false, error: 'Invalid visaCount' } };
+  }
 
   // Backward compatibility: If client sent single 'contact' field
   if (contact && (!email || !phone)) {

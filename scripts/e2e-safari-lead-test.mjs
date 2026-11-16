@@ -153,34 +153,8 @@ try {
   const csvContent = fs.readFileSync(path.join(projectRoot, 'data', 'google-sheet-crm.csv'), 'utf8');
   console.log(`   - Logged to google-sheet-crm.csv:  ${csvContent.includes(referenceId) ? '✅ VERIFIED' : '❌ MISMATCH'}`);
 
-  console.log('10. Polling ntfy.sh to verify WhatsApp & Call Action Buttons...');
-  const ntfyRes = await fetch('https://ntfy.sh/klay-leads-dubai/json?poll=1');
-  const ntfyText = await ntfyRes.text();
-  const ntfyLines = ntfyText.trim().split('\n').filter(Boolean);
-  let verifiedNotification = null;
-
-  for (let i = ntfyLines.length - 1; i >= 0; i--) {
-    try {
-      const obj = JSON.parse(ntfyLines[i]);
-      if (obj.actions && obj.actions.length > 0) {
-        verifiedNotification = obj;
-        break;
-      }
-    } catch {}
-  }
-
-  if (verifiedNotification) {
-    console.log(`   - ntfy Notification ID: ${verifiedNotification.id}`);
-    console.log(`   - Action buttons found: ${verifiedNotification.actions.map(a => a.label).join(' | ')}`);
-    console.log(`   - WhatsApp 1-tap URL:   ${verifiedNotification.click}`);
-    console.log(`   - Actions verification:  ✅ VERIFIED (Both 💬 WhatsApp & 📞 Call Lead buttons active)`);
-  } else {
-    console.warn(`   - Actions verification:  ⚠️ Action buttons pending in topic poll`);
-  }
-
   console.log('========================================================');
   console.log('🎉 SAFARI (WEBKIT) E2E LEAD VERIFICATION COMPLETED 100%!');
-  console.log(`📱 Push alert sent to https://ntfy.sh/klay-leads-dubai with 1-tap WhatsApp trigger.`);
   console.log('========================================================');
 } catch (err) {
   console.error('❌ E2E Verification failed:', err);

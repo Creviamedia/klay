@@ -41,6 +41,8 @@ import {
 const require = createRequire(import.meta.url);
 const leadIntakeCore = require('../netlify/functions/lead-intake-core.cjs');
 const adminCore = require('../netlify/functions/admin-core.cjs');
+process.env.ADMIN_INITIAL_PASSWORD = 'TestOnlyAdmin#297';
+process.env.KLAY_ADMIN_SECRET = 'test-only-hmac-secret-for-turso-suite';
 
 console.log('======================================================================');
 console.log('🏛️  KLAY TURSO DATABASE & TELEGRAM TELEMETRY VERIFICATION SUITE  🏛️');
@@ -345,7 +347,7 @@ await testAsync(
     assert.strictEqual(user.username, 'admin');
     assert.ok(user.password_hash.startsWith('$2a$10$') || user.password_hash.startsWith('$2b$10$'));
 
-    const passMatch = await bcrypt.compare('KlayAdmin2026!Dev', user.password_hash);
+    const passMatch = await bcrypt.compare('TestOnlyAdmin#297', user.password_hash);
     assert.strictEqual(passMatch, true);
   }
 );
@@ -880,7 +882,7 @@ await testAsync(
   '8.4 handleAdminLogin verifies credentials against Turso admin_users table',
   async () => {
     const loginRes = await adminCore.handleAdminLogin(
-      { username: 'admin', password: 'KlayAdmin2026!Dev' },
+      { username: 'admin', password: 'TestOnlyAdmin#297' },
       '127.0.0.1',
       { client: seedClient }
     );

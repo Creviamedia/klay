@@ -126,15 +126,9 @@ export function AdminBlogsPage() {
     setIsLoading(true);
     setFeedback(null);
     try {
-      const token =
-        localStorage.getItem('klay_admin_token') || sessionStorage.getItem('klay_admin_token');
-
       const headers: Record<string, string> = {
         Accept: 'application/json',
       };
-      if (token) {
-        headers['Authorization'] = `Bearer ${token}`;
-      }
 
       const res = await fetch('/api/admin/blogs', {
         headers,
@@ -278,16 +272,10 @@ export function AdminBlogsPage() {
     };
 
     try {
-      const token =
-        localStorage.getItem('klay_admin_token') || sessionStorage.getItem('klay_admin_token');
-
       const headers: Record<string, string> = {
         'Content-Type': 'application/json',
         Accept: 'application/json',
       };
-      if (token) {
-        headers['Authorization'] = `Bearer ${token}`;
-      }
 
       const res = await fetch('/api/admin/blogs', {
         method: 'POST',
@@ -350,15 +338,9 @@ export function AdminBlogsPage() {
 
     setIsSaving(true);
     try {
-      const token =
-        localStorage.getItem('klay_admin_token') || sessionStorage.getItem('klay_admin_token');
-
       const headers: Record<string, string> = {
         Accept: 'application/json',
       };
-      if (token) {
-        headers['Authorization'] = `Bearer ${token}`;
-      }
 
       const res = await fetch(`/api/admin/blogs/${encodeURIComponent(selectedSlug)}`, {
         method: 'DELETE',

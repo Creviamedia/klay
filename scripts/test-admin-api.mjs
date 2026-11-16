@@ -23,6 +23,8 @@ import { createRequire } from 'node:module';
 const require = createRequire(import.meta.url);
 const adminCore = require('../netlify/functions/admin-core.cjs');
 const adminFunction = require('../netlify/functions/admin.cjs');
+process.env.KLAY_ADMIN_SECRET = 'test-only-hmac-secret-for-admin-suite';
+process.env.ADMIN_PASSWORD_HASH = await adminCore.hashPassword('TestOnlyAdmin#297');
 
 console.log('======================================================================');
 console.log('🛡️  KLAY ADMIN API & SECURITY HARDENING VERIFICATION SUITE  🛡️');
@@ -81,7 +83,7 @@ console.log('--- SUITE 1: Password Hashing with Pure-JS bcryptjs ---');
 await testAsync(
   '1.1 Password hashing produces 60-character bcrypt hash with $2a$10$ or $2b$10$',
   async () => {
-    const hash = await adminCore.hashPassword('KlayAdmin2026!Dev');
+    const hash = await adminCore.hashPassword('TestOnlyAdmin#297');
     assert.strictEqual(typeof hash, 'string');
     assert.strictEqual(hash.length, 60);
     assert.ok(hash.startsWith('$2a$10$') || hash.startsWith('$2b$10$'), 'Must use 10 salt rounds');
@@ -122,7 +124,7 @@ test('2.1 Generates well-formed 3-part Base64URL session token', () => {
 
   const header = JSON.parse(Buffer.from(parts[0], 'base64url').toString('utf8'));
   assert.strictEqual(header.alg, 'HS256');
-  assert.strictEqual(header.typ, 'KLAY');
+  assert.strictEqual(header.typ, 'KLAY2');
 
   const payload = JSON.parse(Buffer.from(parts[1], 'base64url').toString('utf8'));
   assert.strictEqual(payload.sub, 'admin_user');
@@ -232,7 +234,7 @@ test('2.9 Fatal production guard throws if secret unset in production', () => {
 
     assert.throws(
       () => adminCore.getAdminSecret(),
-      /FATAL: KLAY_ADMIN_SECRET or ADMIN_JWT_SECRET must be set in production/
+      /FATAL: KLAY_ADMIN_SECRET or ADMIN_JWT_SECRET must be set/
     );
   } finally {
     process.env.NODE_ENV = prevEnv;
@@ -493,7 +495,7 @@ await testAsync(
 
     // 6th attempt MUST be blocked with 429
     const blockedRes = await adminCore.handleAdminLogin(
-      { username: 'admin', password: 'KlayAdmin2026!Dev' },
+      { username: 'admin', password: 'TestOnlyAdmin#297' },
       testIp
     );
     assert.strictEqual(blockedRes.statusCode, 429);
@@ -503,19 +505,19 @@ await testAsync(
 );
 
 await testAsync(
-  '5.4 Login returns 200 with session token and Set-Cookie on valid credentials',
+  '5.4 Login returns 200 with HttpOnly session cookie on valid credentials',
   async () => {
     const testIp = '198.51.100.22';
     adminCore.clearLoginRateLimit(testIp);
 
     const res = await adminCore.handleAdminLogin(
-      { username: 'admin', password: 'KlayAdmin2026!Dev' },
+      { username: 'admin', password: 'TestOnlyAdmin#297' },
       testIp
     );
 
     assert.strictEqual(res.statusCode, 200);
     assert.strictEqual(res.body.ok, true);
-    assert.strictEqual(typeof res.body.token, 'string');
+    assert.strictEqual(res.body.token, undefined, 'Session token must not be readable by browser JavaScript');
     assert.strictEqual(res.body.user.username, 'admin');
 
     const cookieHeader = res.headers['Set-Cookie'];
@@ -527,7 +529,15 @@ await testAsync(
   }
 );
 
-test('5.5 Logout returns 200 with expired session cookie (Max-Age=0)', () => {
+await testAsync('5.5 Published development credential is revoked', async () => {
+  const res = await adminCore.handleAdminLogin(
+    { username: 'admin', password: 'KlayAdmin2026!Dev' },
+    '198.51.100.230'
+  );
+  assert.strictEqual(res.statusCode, 401);
+});
+
+test('5.6 Logout returns 200 with expired session cookie (Max-Age=0)', () => {
   const res = adminCore.handleAdminLogout();
   assert.strictEqual(res.statusCode, 200);
   assert.strictEqual(res.body.ok, true);
@@ -727,20 +737,20 @@ await testAsync(
       path: '/api/admin/leads',
     });
     assert.strictEqual(res.statusCode, 204);
-    assert.strictEqual(res.headers['Access-Control-Allow-Origin'], '*');
+    assert.strictEqual(res.headers['Access-Control-Allow-Origin'], undefined);
     assert.strictEqual(
       res.headers['Access-Control-Allow-Credentials'],
       undefined,
-      'No credentials when origin is wildcard'
+      'No credentials without an approved origin'
     );
     assert.ok(res.headers['Access-Control-Allow-Methods'].includes('GET'));
   }
 );
 
 await testAsync(
-  '9.1b Pre-flight OPTIONS with origin reflects origin and sets credentials (W3C CORS)',
+  '9.1b Pre-flight OPTIONS permits the approved staging origin',
   async () => {
-    const origin = 'https://admin.klay.ae';
+    const origin = 'https://klay-consulting-staging.netlify.app';
     const res = await adminFunction.handler({
       httpMethod: 'OPTIONS',
       path: '/api/admin/leads',
@@ -753,9 +763,9 @@ await testAsync(
 );
 
 await testAsync(
-  '9.1c Pre-flight OPTIONS with uppercase Origin reflects origin and sets credentials',
+  '9.1c Pre-flight OPTIONS permits the approved production origin',
   async () => {
-    const origin = 'https://staging.klay.ae';
+    const origin = 'https://klayconsultants.com';
     const res = await adminFunction.handler({
       httpMethod: 'OPTIONS',
       path: '/api/admin/leads',
@@ -770,7 +780,7 @@ await testAsync(
 await testAsync(
   '9.1d Authenticated response with origin reflects origin and sets credentials',
   async () => {
-    const origin = 'https://portal.klay.ae';
+    const origin = 'https://klayconsultants.com';
     const token = adminCore.generateSessionToken('admin');
     const res = await adminFunction.handler({
       httpMethod: 'GET',
@@ -786,6 +796,17 @@ await testAsync(
     assert.strictEqual(res.headers['Access-Control-Allow-Credentials'], 'true');
   }
 );
+
+await testAsync('9.1e Untrusted origin is rejected before authentication', async () => {
+  const res = await adminFunction.handler({
+    httpMethod: 'OPTIONS',
+    path: '/api/admin/leads',
+    headers: { origin: 'https://untrusted.example' },
+  });
+  assert.strictEqual(res.statusCode, 403);
+  assert.strictEqual(res.headers['Access-Control-Allow-Origin'], undefined);
+  assert.strictEqual(res.headers['Access-Control-Allow-Credentials'], undefined);
+});
 
 await testAsync(
   '9.2 Unauthenticated access to protected /api/admin/leads returns 401',
@@ -832,14 +853,14 @@ await testAsync(
       },
       body: JSON.stringify({
         username: 'admin',
-        password: 'KlayAdmin2026!Dev',
+        password: 'TestOnlyAdmin#297',
       }),
     });
 
     assert.strictEqual(res.statusCode, 200);
     const body = JSON.parse(res.body);
     assert.strictEqual(body.ok, true);
-    assert.ok(body.token);
+    assert.strictEqual(body.token, undefined, 'Session token must stay in the HttpOnly cookie');
     assert.ok(
       res.headers['Set-Cookie'] || (res.multiValueHeaders && res.multiValueHeaders['Set-Cookie'])
     );

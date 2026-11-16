@@ -33,16 +33,17 @@ jobs:
           zip -r ../klay-dist.zip .
           cd ..
 
-      # Deploys directly to Hostinger LiteSpeed public_html via secure SFTP/SSH
-      - name: Deploy to Hostinger via SFTP
-        if: env.HOSTINGER_SFTP_HOST != ''
+      # Hostinger FTP account uses explicit TLS on port 21. This action does not
+      # support SFTP; fail the job if credentials are missing rather than skip.
+      - name: Deploy to Hostinger via FTPS
         uses: SamKirkland/FTP-Deploy-Action@v4.3.5
         with:
           server: ${{ secrets.HOSTINGER_SFTP_HOST }}
           username: ${{ secrets.HOSTINGER_SFTP_USER }}
           password: ${{ secrets.HOSTINGER_SFTP_PASSWORD }}
+          protocol: ftps
+          port: 21
+          security: strict
           server-dir: 'public_html/'
           local-dir: './dist/'
           dangerous-clean-slate: false
-        env:
-          HOSTINGER_SFTP_HOST: ${{ secrets.HOSTINGER_SFTP_HOST }}

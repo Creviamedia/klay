@@ -86,15 +86,9 @@ export function AdminLeadsPage() {
     setIsLoading(true);
     setError(null);
     try {
-      const token =
-        localStorage.getItem('klay_admin_token') || sessionStorage.getItem('klay_admin_token');
-
       const headers: Record<string, string> = {
         Accept: 'application/json',
       };
-      if (token) {
-        headers['Authorization'] = `Bearer ${token}`;
-      }
 
       // Fetch all leads for comprehensive table & stats
       const res = await fetch('/api/admin/leads?limit=500', {
@@ -137,16 +131,10 @@ export function AdminLeadsPage() {
   const handleStatusChange = async (leadId: string, newStatus: LeadRecord['status']) => {
     setUpdatingId(leadId);
     try {
-      const token =
-        localStorage.getItem('klay_admin_token') || sessionStorage.getItem('klay_admin_token');
-
       const headers: Record<string, string> = {
         'Content-Type': 'application/json',
         Accept: 'application/json',
       };
-      if (token) {
-        headers['Authorization'] = `Bearer ${token}`;
-      }
 
       const res = await fetch(`/api/admin/leads/${encodeURIComponent(leadId)}`, {
         method: 'PATCH',

@@ -40,7 +40,7 @@ function safeCreateLibsqlClient(config) {
 }
 
 const SALT_ROUNDS = 10;
-const DEFAULT_DEV_SECRET = 'klay-executive-admin-secret-dev-2026';
+const REVOKED_DEVELOPMENT_PASSWORD = 'KlayAdmin2026!Dev';
 const RATE_LIMIT_WINDOW_MS = 15 * 60 * 1000; // 15 minutes
 const MAX_FAILED_ATTEMPTS = 5;
 
@@ -54,10 +54,7 @@ const loginAttempts = new Map();
 function getAdminSecret() {
   const secret = process.env.KLAY_ADMIN_SECRET || process.env.ADMIN_JWT_SECRET;
   if (!secret) {
-    if (process.env.NODE_ENV === 'production') {
-      throw new Error('FATAL: KLAY_ADMIN_SECRET or ADMIN_JWT_SECRET must be set in production');
-    }
-    return DEFAULT_DEV_SECRET;
+    throw new Error('FATAL: KLAY_ADMIN_SECRET or ADMIN_JWT_SECRET must be set');
   }
   return secret;
 }
@@ -82,7 +79,7 @@ async function verifyPassword(password, hash) {
  */
 function generateSessionToken(username, options = {}) {
   const secret = getAdminSecret();
-  const header = Buffer.from(JSON.stringify({ alg: 'HS256', typ: 'KLAY' })).toString('base64url');
+  const header = Buffer.from(JSON.stringify({ alg: 'HS256', typ: 'KLAY2' })).toString('base64url');
 
   const now = options.now !== undefined ? options.now : Math.floor(Date.now() / 1000);
   const ttl = options.ttl !== undefined ? options.ttl : 86400; // 24-hour validity
@@ -139,6 +136,8 @@ function verifySessionToken(token) {
   }
 
   try {
+    const decodedHeader = JSON.parse(Buffer.from(header, 'base64url').toString('utf8'));
+    if (decodedHeader.alg !== 'HS256' || decodedHeader.typ !== 'KLAY2') return null;
     const decodedPayload = JSON.parse(Buffer.from(payload, 'base64url').toString('utf8'));
 
     const now = Math.floor(Date.now() / 1000);
@@ -304,17 +303,10 @@ function adminAuthMiddleware(req, res, next) {
   next();
 }
 
-// Cached admin credential state
-let cachedDevHash = null;
 async function getAdminPasswordHash() {
-  if (process.env.ADMIN_PASSWORD_HASH) return process.env.ADMIN_PASSWORD_HASH;
-  if (process.env.KLAY_ADMIN_PASSWORD_HASH) return process.env.KLAY_ADMIN_PASSWORD_HASH;
-  if (!cachedDevHash) {
-    const defaultPassword =
-      process.env.ADMIN_INITIAL_PASSWORD || process.env.ADMIN_PASSWORD || 'KlayAdmin2026!Dev';
-    cachedDevHash = await bcrypt.hash(defaultPassword, SALT_ROUNDS);
-  }
-  return cachedDevHash;
+  // No password fallback: a missing database user or environment secret must
+  // never turn a public deployment into a known-credential admin account.
+  return process.env.ADMIN_PASSWORD_HASH || process.env.KLAY_ADMIN_PASSWORD_HASH || null;
 }
 
 /**
@@ -420,6 +412,16 @@ async function handleAdminLogin(credentials, clientIp, options = {}) {
   // 2. IMMEDIATE ATTEMPT RESERVATION (Prevents concurrency race condition)
   recordFailedLogin(ip);
 
+  // Revoke the credential published in earlier source releases, including
+  // accounts that may already have been seeded into Turso with that password.
+  if (credentials.password === REVOKED_DEVELOPMENT_PASSWORD) {
+    return {
+      statusCode: 401,
+      headers: { 'Content-Type': 'application/json' },
+      body: { error: 'Invalid username or password' },
+    };
+  }
+
   // 3. Credential verification via Turso database or local fallback
   let tursoUser = null;
   const client = options.client || getTursoClient(options);
@@ -461,11 +463,11 @@ async function handleAdminLogin(credentials, clientIp, options = {}) {
     const isUsernameMatch = credentials.username === expectedUsername;
     const isPasswordMatch = await bcrypt.compare(
       credentials.password,
-      isUsernameMatch
+      isUsernameMatch && expectedHash
         ? expectedHash
         : '$2a$10$wT2eXoXo0Jv8.gQ7UoVqxeYQW1kF5JtD4iQpG8uE7W8a6Z7y8w0eO'
     );
-    if (isUsernameMatch && isPasswordMatch) {
+    if (isUsernameMatch && expectedHash && isPasswordMatch) {
       authenticated = true;
     }
   }
@@ -494,7 +496,6 @@ async function handleAdminLogin(credentials, clientIp, options = {}) {
     },
     body: {
       ok: true,
-      token,
       user: {
         username: credentials.username,
       },
@@ -1516,7 +1517,7 @@ function handleDeleteBlog(slug, options = {}) {
 
 module.exports = {
   // Constants
-  DEFAULT_DEV_SECRET,
+  REVOKED_DEVELOPMENT_PASSWORD,
   RATE_LIMIT_WINDOW_MS,
   MAX_FAILED_ATTEMPTS,
 
