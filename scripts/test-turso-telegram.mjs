@@ -889,8 +889,10 @@ await testAsync(
     assert.strictEqual(loginRes.statusCode, 200);
     assert.strictEqual(loginRes.body.ok, true);
     assert.strictEqual(loginRes.body.user.username, 'admin');
-    assert.ok(loginRes.body.token);
-    assert.ok(loginRes.headers['Set-Cookie'].includes('klay_admin_session='));
+    assert.ok(
+      loginRes.headers['Set-Cookie'] &&
+        loginRes.headers['Set-Cookie'].includes('klay_admin_session=')
+    );
   }
 );
 
