@@ -16,6 +16,7 @@ export interface RawIntakePayload {
   email: string;
   phone: string;
   dialCode?: string;
+  budget?: string;
   jurisdiction?: string;
   activity?: string;
   timeline?: string;
@@ -107,6 +108,7 @@ export async function submitIntakeDossier(
     name: rawInput.name.trim(),
     email: rawInput.email.trim(),
     phone,
+    budget: rawInput.budget ? String(rawInput.budget).trim() : undefined,
     submittedAt: new Date().toISOString(),
   };
 

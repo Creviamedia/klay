@@ -128,7 +128,7 @@ function persistLeadToDisk(leadRecord, targetDir) {
     );
     if (!fs.existsSync(leadsCsvPath)) {
       const csvHeader =
-        'Reference ID,Timestamp,Name,Email,Phone,Jurisdiction,Activity,Timeline,Visa Count,Notes,Source,WhatsApp Link\r\n';
+        'Reference ID,Timestamp,Name,Email,Phone,Budget,Jurisdiction,Activity,Timeline,Visa Count,Notes,Source,WhatsApp Link\r\n';
       fs.writeFileSync(leadsCsvPath, csvHeader, 'utf8');
     }
     const escapeCsv = (val) => `"${String(val || '').replace(/"/g, '""')}"`;
@@ -139,6 +139,7 @@ function persistLeadToDisk(leadRecord, targetDir) {
         escapeCsv(leadRecord.name),
         escapeCsv(leadRecord.email),
         escapeCsv(leadRecord.phone),
+        escapeCsv(leadRecord.budget),
         escapeCsv(leadRecord.jurisdiction),
         escapeCsv(leadRecord.activity),
         escapeCsv(leadRecord.timeline),
@@ -222,12 +223,13 @@ async function persistLeadToTurso(leadRecord, options = {}) {
 
     await client.execute({
       sql: `INSERT INTO leads (
-        id, reference_number, timestamp, name, email, phone,
+        id, reference_number, timestamp, name, email, phone, budget,
         jurisdiction, activity, timeline, visa_count, notes,
         source, platform, status, created_at, updated_at
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
       ON CONFLICT(id) DO UPDATE SET
         status = excluded.status,
+        budget = COALESCE(excluded.budget, leads.budget),
         updated_at = CURRENT_TIMESTAMP`,
       args: [
         leadId,
@@ -236,6 +238,7 @@ async function persistLeadToTurso(leadRecord, options = {}) {
         leadRecord.name || 'Anonymous',
         leadRecord.email || '',
         phoneToStore,
+        leadRecord.budget || null,
         leadRecord.jurisdiction || 'UAE',
         leadRecord.activity || 'General',
         leadRecord.timeline || null,
@@ -255,6 +258,14 @@ async function persistLeadToTurso(leadRecord, options = {}) {
 
     return true;
   } catch (err) {
+    if (err.message && err.message.includes('no such column: budget')) {
+      try {
+        await client.execute('ALTER TABLE leads ADD COLUMN budget TEXT;');
+        return await persistLeadToTurso(leadRecord, options);
+      } catch (retryErr) {
+        console.warn('[Turso Auto-Migration Error]:', retryErr.message);
+      }
+    }
     console.warn('[Turso Lead Persistence Error]:', err.message);
     return false;
   }
@@ -300,6 +311,7 @@ function buildTelegramAlertPayload(lead, chatId) {
 
   const safeName = escapeTelegramHtml((lead.name || 'Anonymous').slice(0, 100));
   const safeRef = escapeTelegramHtml(lead.referenceNumber || lead.id || 'N/A');
+  const safeBudget = escapeTelegramHtml(lead.budget || 'Not specified');
   const safeJurisdiction = escapeTelegramHtml(jurisdiction);
   const safeActivity = escapeTelegramHtml(lead.activity || 'General Commercial');
   const safeEmail = escapeTelegramHtml(lead.email || '');
@@ -320,6 +332,7 @@ function buildTelegramAlertPayload(lead, chatId) {
     `🏛️ <b>NEW INCOMING LEAD: ${safeName}</b>`,
     `🆔 Reference: <code>${safeRef}</code>`,
     `━━━━━━━━━━━━━━━━━━━━`,
+    `💰 <b>Budget:</b> ${safeBudget}`,
     `🌐 <b>Jurisdiction:</b> ${safeJurisdiction}`,
     `💼 <b>Activity:</b> ${safeActivity}`,
     `✉️ <b>Email:</b> ${safeEmail}`,
@@ -444,8 +457,9 @@ async function sendPushNotification(leadRecord) {
   const notesLine = leadRecord.notes ? `\n📝 Notes: ${leadRecord.notes}` : '';
   const waDirectLine = waUrl ? `\n💬 WhatsApp: ${waUrl}` : '';
   const callDirectLine = leadRecord.phone ? `\n📞 Call: ${leadRecord.phone}` : '';
+  const budgetLine = leadRecord.budget ? ` · 💰 ${leadRecord.budget}` : '';
 
-  const messageBody = `🏛️ ${leadRecord.jurisdiction || 'UAE'} · ${leadRecord.activity || 'General'}\n✉️ ${leadRecord.email}${callDirectLine}${waDirectLine}${notesLine}`;
+  const messageBody = `🏛️ ${leadRecord.jurisdiction || 'UAE'} · ${leadRecord.activity || 'General'}${budgetLine}\n✉️ ${leadRecord.email}${callDirectLine}${waDirectLine}${notesLine}`;
 
   const actions = [];
   if (waUrl) actions.push({ action: 'view', label: '💬 WhatsApp Lead', url: waUrl, clear: true });
@@ -488,8 +502,19 @@ async function processIntakeLead(rawBody = {}, context = {}) {
     };
   }
 
-  let { name, email, phone, contact, jurisdiction, activity, timeline, visaCount, notes, source } =
-    rawBody;
+  let {
+    name,
+    email,
+    phone,
+    contact,
+    budget,
+    jurisdiction,
+    activity,
+    timeline,
+    visaCount,
+    notes,
+    source,
+  } = rawBody;
 
   // Backward compatibility: If client sent single 'contact' field
   if (contact && (!email || !phone)) {
@@ -507,6 +532,8 @@ async function processIntakeLead(rawBody = {}, context = {}) {
   const trimmedName = typeof name === 'string' ? name.trim() : '';
   const trimmedEmail = typeof email === 'string' ? email.trim() : '';
   const trimmedPhone = typeof phone === 'string' ? phone.trim() : '';
+  const trimmedBudget =
+    typeof budget === 'string' && budget.trim().length > 0 ? budget.trim().slice(0, 100) : null;
 
   if (!trimmedName || !trimmedEmail || !trimmedPhone) {
     return {
@@ -538,6 +565,7 @@ async function processIntakeLead(rawBody = {}, context = {}) {
     name: trimmedName,
     email: trimmedEmail,
     phone: trimmedPhone,
+    budget: trimmedBudget,
     jurisdiction: jurisdiction || 'UAE',
     activity: activity || 'General',
     timeline: timeline || null,

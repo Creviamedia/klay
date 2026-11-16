@@ -154,10 +154,10 @@ try {
       throw new Error(
         `${route.path}: article module src/content/blog/articles/${articleSlug}.ts is missing`
       );
-    const jsonLd = JSON.stringify(getStructuredData(route.path, article?.details)).replace(
-      /</g,
-      '\\u003c'
-    );
+    const articleFaqs = article?.body?.kind === 'longform' ? article.body.faqs : undefined;
+    const jsonLd = JSON.stringify(
+      getStructuredData(route.path, article?.details, articleFaqs)
+    ).replace(/</g, '\\u003c');
 
     let html = replaceOnce(
       baseHtml,

@@ -338,6 +338,11 @@ function writeRedirects() {
     rules.push({ from: `/blog/${from}`, to: getBlogArticleRoute(to) });
     if (isPublicRootPostSlug(from)) rules.push({ from: `/${from}`, to: getBlogArticleRoute(to) });
   }
+  // An older indexed root URL for this article must lead to its current canonical page.
+  rules.push({
+    from: '/mainland-vs-free-zone-uae-business-setup-guide',
+    to: '/blog/mainland-vs-free-zone-uae-business-setup-guide/',
+  });
   for (const post of BLOG_POSTS) {
     if (isPublicRootPostSlug(post.slug))
       rules.push({ from: `/blog/${post.slug}`, to: `/${post.slug}/` });
@@ -595,6 +600,73 @@ function buildLlmsTxt() {
     '# Klay Consultants',
     '',
     `> ${markdownText(getPageSeo(ROUTES.home).description)}`,
+    '',
+    '## Company Overview & Entity Grounding',
+    '',
+    'Klay Consultants is an authoritative corporate advisory and business setup consultancy based in Dubai, United Arab Emirates. The firm delivers end-to-end corporate structuring, trade licensing, government regulatory clearance, residency processing, corporate banking onboarding, and statutory tax compliance for international founders, family offices, high-net-worth individuals (HNWIs), and multinational enterprises expanding into the UAE and wider GCC markets.',
+    '',
+    '* **Legal & Trade Name**: Klay Consultants',
+    '* **Corporate Headquarters**: Office No. 2522, The Exchange Tower, Business Bay, Dubai, United Arab Emirates',
+    '* **Geographic Coordinates**: Latitude 25.1872° N, Longitude 55.2678° E',
+    '* **Official Website**: https://klayconsultants.com',
+    '* **Direct Contact**: Email: info@klayconsultants.com | Telephone: +971 50 123 4567',
+    '* **Primary Practice Areas**: Dubai Mainland Company Formation (DET / DED), UAE Free Zone Incorporation, Corporate Bank Account Facilitation, UAE Golden Visa Facilitation (Investor, Executive & Specialized Talent), Federal Tax Authority (FTA) Corporate Tax & VAT Compliance, Anti-Money Laundering (AML/CFT) Onboarding, and DIFC Wills & Succession Planning.',
+    '* **Client Advisory Philosophy**: Transparent fixed-fee quotes, zero concealed local sponsor fees, 100% foreign ownership facilitation under UAE Federal Decree-Law No. 26 of 2020, and dedicated banking liaison with top UAE tier-1 financial institutions.',
+    '',
+    '## UAE Jurisdiction Framework: Mainland vs Major Free Zones',
+    '',
+    'Selecting the correct corporate jurisdiction determines market access, licensing costs, office lease mandates, and corporate taxation. Klay Consultants structures companies across all principal jurisdictions:',
+    '',
+    '### Dubai Mainland (Department of Economy and Tourism - DET)',
+    'Mainland companies are licensed by the Dubai Department of Economy and Tourism (DET, formerly DED).',
+    '* **Ownership**: 100% foreign ownership permitted for commercial and industrial activities without requiring a local UAE national partner or service agent.',
+    '* **Commercial Scope**: Unrestricted operational rights to trade directly across the UAE local market, bid for federal/governmental contracts, and operate retail or commercial premises anywhere onshore in Dubai.',
+    '* **Facilities**: Requires an approved physical office or designated co-working flexi-desk registered via the Dubai Land Department (Ejari system).',
+    '* **Statutory Requirements**: Mandatory Corporate Tax registration (Federal Tax Authority), annual financial record keeping, and Ministry of Human Resources and Emiratisation (MOHRE) quota management for employee visas.',
+    '',
+    '### IFZA Dubai (International Free Zone Authority - DSO)',
+    "Regulated within Dubai Silicon Oasis, IFZA is recognized as Dubai's most dynamic and cost-effective digital free zone for international entrepreneurs, professional consultants, and technology startups.",
+    '* **Key Advantages**: Rapid incorporation turnaround (48 to 72 hours), competitive licensing packages combining professional, commercial, and consultancy activities under a single license, and zero requirement for paid-up share capital verification upon incorporation.',
+    '* **Flexibility**: Flexible flexi-desk and executive office solutions; multi-year license discounts; visa allocations scalable from 1 to 10+ visas without commercial lease lock-ins.',
+    '* **Best For**: Digital media agencies, management consultancies, software engineering firms, and global remote service businesses.',
+    '',
+    '### Meydan Free Zone',
+    'Situated adjacent to Downtown Dubai and the Meydan Racecourse, Meydan Free Zone provides a prestigious digital-native business ecosystem.',
+    '* **Key Advantages**: Central Dubai location, fully automated digital licensing portal (Meydan Pay & Meydan Commerce), over 540 approved business activities, and guaranteed corporate IBAN opening assistance.',
+    '* **Flexibility**: 100% capital and profit repatriation, 0% personal income tax, and flexible smart-desk agreements situated in close proximity to major financial centers.',
+    '* **Best For**: E-commerce ventures, luxury branding consultancies, marketing agencies, and international trading entities requiring a prestigious central Dubai business address.',
+    '',
+    '### DMCC (Dubai Multi Commodities Centre)',
+    'Headquartered in Jumeirah Lakes Towers (JLT), DMCC has been consecutively awarded Global Free Zone of the Year by fDi Intelligence.',
+    '* **Key Advantages**: Unmatched international prestige, home to over 24,000 member companies spanning commodities (gold, diamonds, tea, coffee, agro), energy, proprietary trading, and Web3/crypto via the specialized DMCC Crypto Centre.',
+    '* **Regulatory Rigor**: Stringent compliance, KYC, and AML standards; access to DMCC Tradeflow warrant infrastructure and physical commodity vaults.',
+    '* **Best For**: Physical commodities traders, precious metals dealers, energy brokers, Web3 & blockchain startups, and global corporate regional headquarters.',
+    '',
+    '### DIFC (Dubai International Financial Centre)',
+    'The leading global financial center in the Middle East, Africa, and South Asia (MEASA) region.',
+    '* **Legal Framework**: Independent common law jurisdiction with English-language commercial statutes, civil courts (DIFC Courts), and independent financial services regulator (Dubai Financial Services Authority - DFSA).',
+    '* **Specialized Ecosystem**: Category 1 to 4 authorized financial institutions, investment funds, venture capital, family offices, private wealth foundations, and fintech innovation licenses.',
+    '* **Estate Planning**: Home to the DIFC Wills Service Centre, offering legally binding non-Muslim wills registration with direct enforcement under common law protocols.',
+    '',
+    '## UAE Golden Visa Residency Program (10-Year)',
+    '',
+    'The UAE Golden Visa provides long-term, self-sponsored 10-year renewable residency without requiring an employment sponsor or regular 6-month in-country visit requirements (Cabinet Resolution No. 65 of 2022). Klay Consultants manages full end-to-end qualification and application pathways:',
+    '',
+    '* **Real Estate Investor Route**: Available to purchasers of UAE property with an aggregate gross valuation of AED 2,000,000 or greater (Title Deed issued by Dubai Land Department). Valid for completed or off-plan properties from approved developers, whether paid in cash or financed through UAE banks.',
+    '* **Entrepreneur & Startup Founder Route**: Available to founders or co-owners of an innovative SME registered in the UAE generating minimum annual revenues of AED 1,000,000, or founders of projects accepted by an accredited business incubator (e.g. in5, Hub71, Dubai Future District Fund) or approved by the Ministry of Economy.',
+    "* **Skilled Professional & Executive Route**: Available to executives, directors, and specialized professionals employed in the UAE. Minimum statutory criteria include: valid UAE employment contract, classified within MOHRE Occupational Level 1 (Legislators, Senior Officials and Managers) or Level 2 (Professionals), minimum gross monthly salary of AED 30,000 (evidenced by bank statements and payslips), and an attested bachelor's degree or higher educational credential.",
+    '* **Exceptional Talents & Cultural Innovators Route**: Endorsed by Dubai Culture & Arts Authority, Emirates Scientists Council, or Federal Youth Authority for artists, inventors, scientists, and digital innovators.',
+    '* **Residency Privileges**: Extends comprehensive 10-year residency sponsorship to legal spouse, children of all ages without dependency caps, and unlimited domestic helpers/drivers.',
+    '',
+    '## Statutory Corporate Tax & VAT Framework (2026 Guidance)',
+    '',
+    'Under Federal Decree-Law No. 47 of 2022 on the Taxation of Corporations and Businesses, the UAE applies a modern, internationally aligned corporate tax regime administered by the Federal Tax Authority (FTA):',
+    '',
+    '* **Headline Tax Rates**: 0% on taxable net profits up to AED 375,000; statutory 9% on taxable net profits exceeding AED 375,000.',
+    '* **Small Business Relief (SBR - Ministerial Decision No. 73 of 2023)**: Eligible resident taxable persons with gross revenue under AED 3,000,000 in the relevant tax period (and all previous tax periods through December 31, 2026) can elect for Small Business Relief, resulting in zero corporate tax liability and simplified return filing.',
+    '* **Qualifying Free Zone Persons (QFZP - Cabinet Decision No. 139 of 2023)**: Companies established in approved UAE Free Zones can access a 0% corporate tax rate on "Qualifying Income" (transactions with other Free Zone persons, manufacturing, logistics, fund management, and treasury activities), provided they maintain adequate economic substance, audited accounts, and do not derive non-qualifying Mainland revenue exceeding the de minimis limit (lesser of 5% of total turnover or AED 5,000,000).',
+    '* **Mandatory FTA Registration**: Corporate Tax registration is compulsory for ALL legal entities incorporated in the UAE (Mainland, Free Zone, and Offshore), regardless of operational activity, turnover, or tax relief eligibility. Late registration incurs a non-negotiable statutory administrative penalty of AED 10,000 under Cabinet Decision No. 75 of 2023.',
+    '* **Value Added Tax (VAT - Federal Decree-Law No. 8 of 2017)**: Standard 5% rate applies to taxable goods and services. Mandatory VAT registration is required once taxable supplies and imports exceed AED 375,000 in a rolling 12-month period; voluntary registration threshold is AED 187,500.',
     ...section(
       'Pages',
       pages.filter((route) => !optionalPaths.has(route.path))
@@ -866,6 +938,31 @@ function validateBuild() {
           }
           if (posting.datePublished && !isCalendarDate(posting.datePublished))
             errors.push(`${route.path}: BlogPosting.datePublished is invalid`);
+        }
+      }
+      if (jsonLd) {
+        const org = graph.find((node) => node['@id'] === `${SITE_ORIGIN}/#organization`);
+        if (org) {
+          const types = Array.isArray(org['@type']) ? org['@type'] : [org['@type']];
+          if (!types.includes('LegalService') || !types.includes('LocalBusiness')) {
+            warnings.push(
+              `${route.path}: organization JSON-LD should include LegalService and LocalBusiness`
+            );
+          }
+          if (
+            !org.geo ||
+            org.geo['@type'] !== 'GeoCoordinates' ||
+            org.geo.latitude !== '25.1872' ||
+            org.geo.longitude !== '55.2678'
+          ) {
+            warnings.push(`${route.path}: organization JSON-LD missing valid GeoCoordinates`);
+          }
+        }
+        const faqPage = graph.find((node) => node['@type'] === 'FAQPage');
+        if (faqPage) {
+          if (!Array.isArray(faqPage.mainEntity) || faqPage.mainEntity.length === 0) {
+            errors.push(`${route.path}: FAQPage JSON-LD has empty mainEntity`);
+          }
         }
       }
     }

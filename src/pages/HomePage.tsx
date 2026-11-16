@@ -12,41 +12,8 @@ import { DivisionCard } from '@/components/ui/DivisionCard';
 import { PropertySetupCard } from '@/components/ui/PropertySetupCard';
 import { SetupCalculator } from '@/components/sections/SetupCalculator';
 import { ExecutiveEditorialSpotlight } from '@/components/sections/ExecutiveEditorialSpotlight';
-import { HOMEPAGE_SETUP_FACTORS, IMAGES } from '@/lib/data';
+import { HOMEPAGE_FAQS, HOMEPAGE_SETUP_FACTORS, IMAGES } from '@/lib/data';
 import { ROUTES } from '@/lib/routes';
-
-const HOMEPAGE_FAQS: AccordionItem[] = [
-  {
-    number: '01',
-    question: 'Can foreign nationals own 100% of a UAE company?',
-    answer:
-      'Yes. Under UAE Federal Decree-Law No. 26 of 2020, foreign investors can own 100% of companies across both Free Zones and most Dubai Mainland (DED) commercial activities without requiring an Emirati national shareholder or local nominee.',
-  },
-  {
-    number: '02',
-    question: 'What is the main difference between Mainland and Free Zone setup?',
-    answer:
-      'A Dubai Mainland (DED) license allows your company to trade directly across all 7 UAE emirates, open retail/office premises anywhere, and bid for UAE government contracts. A Free Zone license offers 100% customs duty exemptions and 0% corporate tax on qualifying foreign income, making it ideal for international consulting, tech, trade, and export services.',
-  },
-  {
-    number: '03',
-    question: 'How fast can a UAE business license be issued?',
-    answer:
-      'With Klay Consultants, pre-approved Free Zone licenses can be issued within 24 to 48 hours. Dubai Mainland licenses typically take 3 to 5 business days once trade name approvals and digital MOA notarisation are completed.',
-  },
-  {
-    number: '04',
-    question: 'How do you guarantee corporate bank account opening?',
-    answer:
-      'UAE banking regulations require rigorous KYC and AML compliance. Klay prepares an institutional compliance profile of your company, business activities, and ultimate beneficial owners (UBOs) prior to submission. We partner directly with senior relationship managers at Emirates NBD, Mashreq, FAB, and Wio to ensure seamless account approval.',
-  },
-  {
-    number: '05',
-    question: 'Can I sponsor my family and obtain a UAE Golden Visa?',
-    answer:
-      'Yes. Company shareholders and investors holding a trade license can sponsor their spouse, children, and parents for UAE residency visas. Qualifying investors with setup capital of AED 2M+ or real estate assets may also apply for the prestigious 10-year UAE Golden Visa.',
-  },
-];
 
 const STRATEGY_WORKFLOW_STEPS = [
   {

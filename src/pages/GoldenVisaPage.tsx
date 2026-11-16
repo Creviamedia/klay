@@ -21,6 +21,7 @@ import { EquitifyButton } from '@/components/ui/EquitifyButton';
 import { NumberedAccordion } from '@/components/ui/NumberedAccordion';
 import { AtmosphericBanner } from '@/components/ui/AtmosphericBanner';
 import { Link } from '@/components/ui/link';
+import { GOLDEN_VISA_FAQS as faqItems } from '@/lib/faqs';
 import { ROUTES } from '@/lib/routes';
 import { PrototypeSwitcher, type VariantOption } from '@/components/calculator/PrototypeSwitcher';
 import { VariantA_Dossier } from '@/components/golden-visa/variants/VariantA_Dossier';
@@ -28,9 +29,17 @@ import { VariantB_Matrix } from '@/components/golden-visa/variants/VariantB_Matr
 import { VariantC_Quiz } from '@/components/golden-visa/variants/VariantC_Quiz';
 
 const GOLDEN_VISA_VARIANTS: VariantOption[] = [
-  { key: 'A', name: 'VIP Gold Dossier', description: 'Luxury Sovereign Pass & Category Privilege Cards' },
+  {
+    key: 'A',
+    name: 'VIP Gold Dossier',
+    description: 'Luxury Sovereign Pass & Category Privilege Cards',
+  },
   { key: 'B', name: 'Statutory Matrix', description: 'Side-by-Side 5-Pathway Comparative Matrix' },
-  { key: 'C', name: '30-Sec Quiz Qualifier', description: 'Interactive Qualification Decision Engine' },
+  {
+    key: 'C',
+    name: '30-Sec Quiz Qualifier',
+    description: 'Interactive Qualification Decision Engine',
+  },
 ];
 
 const eligibilityCategories = [
@@ -92,12 +101,7 @@ const eligibilityCategories = [
     title: 'Specialized Talent',
     description:
       'Exceptional talent in fields such as science, medicine, media and creative industries may be considered under specific categories.',
-    points: [
-      'Doctors',
-      'Scientists',
-      'Creatives',
-      'Influencers',
-    ],
+    points: ['Doctors', 'Scientists', 'Creatives', 'Influencers'],
     icon: Stethoscope,
   },
   {
@@ -208,17 +212,20 @@ const comparisonRoutes = [
   {
     route: 'Investment',
     bestFor: 'Investors, property buyers',
-    details: 'Typically relevant when capital or ownership structure is already in place and documents are aligned.',
+    details:
+      'Typically relevant when capital or ownership structure is already in place and documents are aligned.',
   },
   {
     route: 'Salary-based',
     bestFor: 'Executives, professionals',
-    details: 'A common route for eligible specialists, provided the role, salary and legal status fit the category.',
+    details:
+      'A common route for eligible specialists, provided the role, salary and legal status fit the category.',
   },
   {
     route: 'Nomination-based',
     bestFor: 'Unique profiles',
-    details: 'Often dependent on profile positioning, authority review and careful preparation of supporting evidence.',
+    details:
+      'Often dependent on profile positioning, authority review and careful preparation of supporting evidence.',
   },
 ];
 
@@ -241,59 +248,6 @@ const differentiation = [
   },
 ];
 
-const faqItems = [
-  {
-    question: 'What is the UAE Golden Visa?',
-    answer:
-      'The UAE Golden Visa is a long-term residency program for eligible investors, entrepreneurs, professionals and talented individuals, offering renewable residency without the need for a local sponsor.',
-  },
-  {
-    question: 'Who can apply for Golden Visa UAE?',
-    answer:
-      'Eligibility varies by category and can include investors, entrepreneurs, skilled professionals, students or graduates, and recognized talent, subject to the applicable authority requirements and documentation.',
-  },
-  {
-    question: 'Is the UAE Golden Visa valid for 10 years?',
-    answer:
-      'The program commonly supports renewable long-term residency, and the precise duration depends on the specific category and authority processes involved.',
-  },
-  {
-    question: 'What is the minimum investment for property investors?',
-    answer:
-      'Requirements can vary, and property-related eligibility often depends on valuation, title deed documentation and the applicable conditions for the route being considered.',
-  },
-  {
-    question: 'How much does the UAE Golden Visa cost?',
-    answer:
-      'Government fees, medical and Emirates ID charges, and legal or advisory costs are different, so it is best to review the specific route and supporting costs before making assumptions.',
-  },
-  {
-    question: 'Can Golden Visa holders sponsor their family?',
-    answer:
-      'Family sponsorship is generally a key benefit of the program, but the specific rules and dependent conditions depend on the applicable regulations and circumstances.',
-  },
-  {
-    question: 'What documents are required?',
-    answer:
-      'A typical application requires a valid passport, financial records, relevant supporting documents for the category, health insurance and the necessary legal paperwork for the chosen route.',
-  },
-  {
-    question: 'Can a Golden Visa application be rejected?',
-    answer:
-      'Yes. Incomplete documentation, weak structure, non-alignment of records and compliance issues can create problems, which is why careful preparation matters.',
-  },
-  {
-    question: 'What is the difference between Dubai and Abu Dhabi processing?',
-    answer:
-      'The overall eligibility is federal in character, but the application route and authority handling can differ by emirate and by the specific category.',
-  },
-  {
-    question: 'How can I discuss my eligibility?',
-    answer:
-      'The best next step is to speak with an adviser to review your profile, category, documents and the most suitable route before filing anything.',
-  },
-];
-
 function ResponsiveGoldenVisaTicket() {
   const containerRef = useRef<HTMLDivElement>(null);
   const [width, setWidth] = useState(741);
@@ -310,7 +264,11 @@ function ResponsiveGoldenVisaTicket() {
   }, []);
 
   return (
-    <div ref={containerRef} className="relative mx-auto w-full min-w-0 max-w-[741px]" style={{ aspectRatio: '741 / 425' }}>
+    <div
+      ref={containerRef}
+      className="relative mx-auto w-full min-w-0 max-w-[741px]"
+      style={{ aspectRatio: '741 / 425' }}
+    >
       <div className="absolute left-0 top-0">
         <AdmitOneTicket
           name="GOLDEN VISA"
@@ -365,7 +323,9 @@ export default function GoldenVisaPage() {
     return () => clearInterval(interval);
   }, [isPaused]);
 
-  const activeCategory = eligibilityCategories.find((category) => category.id === selectedCategory) ?? eligibilityCategories[0];
+  const activeCategory =
+    eligibilityCategories.find((category) => category.id === selectedCategory) ??
+    eligibilityCategories[0];
   const activeRequirements =
     requirementGroups.find((group) => group.id === selectedRequirements) ?? requirementGroups[0];
 
@@ -373,7 +333,11 @@ export default function GoldenVisaPage() {
     <div className="golden-visa-page relative bg-[#FBFBFB] text-[#0C2D48]">
       {/* Floating Interactive Prototype Switcher for Option 2 (available when ?variant= is present) */}
       {searchParams.has('variant') && (
-        <PrototypeSwitcher current={activeVariant} variants={GOLDEN_VISA_VARIANTS} label="GOLDEN VISA" />
+        <PrototypeSwitcher
+          current={activeVariant}
+          variants={GOLDEN_VISA_VARIANTS}
+          label="GOLDEN VISA"
+        />
       )}
 
       {/* 1. OBSIDIAN HERO */}
@@ -393,7 +357,9 @@ export default function GoldenVisaPage() {
               </div>
               <h1 className="font-heading text-4xl font-light tracking-tight text-white sm:text-5xl lg:text-6xl">
                 UAE Golden Visa. <br />
-                <span className="font-semibold text-white">Structure First. Apply with Confidence.</span>
+                <span className="font-semibold text-white">
+                  Structure First. Apply with Confidence.
+                </span>
               </h1>
               <p className="mt-6 max-w-xl text-lg leading-relaxed text-white/70">
                 Explore your potential UAE Golden Visa pathway with a clearer understanding of
@@ -409,7 +375,8 @@ export default function GoldenVisaPage() {
               </div>
               <p className="mt-6 text-xs leading-relaxed text-white/40">
                 Eligibility, residency duration and approval depend on the applicable category,
-                regulatory requirements and decisions of the relevant UAE federal immigration authorities.
+                regulatory requirements and decisions of the relevant UAE federal immigration
+                authorities.
               </p>
             </div>
 
@@ -433,10 +400,14 @@ export default function GoldenVisaPage() {
             </div>
             <div className="space-y-6 text-lg leading-relaxed text-[#0C2D48]/80">
               <p>
-                Planning long-term residency in the UAE isn’t just about submitting a form. The Golden Visa UAE is a powerful pathway to 10-year residency, but approvals are not random. They are built on verified structure, documentation, and statutory alignment.
+                Planning long-term residency in the UAE isn’t just about submitting a form. The
+                Golden Visa UAE is a powerful pathway to 10-year residency, but approvals are not
+                random. They are built on verified structure, documentation, and statutory
+                alignment.
               </p>
               <p className="font-medium text-[#0C2D48]">
-                At Klay Consultants, your Golden Visa UAE application is handled by lawyers, not typing center agents. That changes everything.
+                At Klay Consultants, your Golden Visa UAE application is handled by lawyers, not
+                typing center agents. That changes everything.
               </p>
             </div>
           </div>
@@ -454,7 +425,9 @@ export default function GoldenVisaPage() {
               What is the <span className="font-semibold text-white">UAE Golden Visa?</span>
             </h2>
             <p className="mt-4 text-lg text-white/70">
-              A sovereign long-term residency program that allows investors, entrepreneurs, professionals, and exceptional talent to live, work, and scale in the UAE without needing a local national sponsor.
+              A sovereign long-term residency program that allows investors, entrepreneurs,
+              professionals, and exceptional talent to live, work, and scale in the UAE without
+              needing a local national sponsor.
             </p>
           </div>
 
@@ -465,7 +438,9 @@ export default function GoldenVisaPage() {
               <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[#E8A72E]">
                 Key Privileges
               </p>
-              <h3 className="mt-3 text-2xl font-semibold text-white">10-Year Renewable Framework</h3>
+              <h3 className="mt-3 text-2xl font-semibold text-white">
+                10-Year Renewable Framework
+              </h3>
               <ul className="mt-8 space-y-4">
                 {[
                   '10-year renewable residency self-sponsored status',
@@ -474,7 +449,10 @@ export default function GoldenVisaPage() {
                   'Freedom to live outside the UAE with no six-month expiry rule',
                   'Direct eligibility for VIP private banking and asset financing',
                 ].map((item) => (
-                  <li key={item} className="flex items-start gap-3 border-b border-white/5 pb-3 text-base text-white/80 last:border-b-0">
+                  <li
+                    key={item}
+                    className="flex items-start gap-3 border-b border-white/5 pb-3 text-base text-white/80 last:border-b-0"
+                  >
                     <span className="mt-1 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-[#22C55E]/15 text-[#22C55E]">
                       <Check className="h-3 w-3" strokeWidth={3} />
                     </span>
@@ -491,12 +469,18 @@ export default function GoldenVisaPage() {
                 <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[#22C55E]">
                   Strategic Positioning
                 </p>
-                <h3 className="mt-3 text-2xl font-semibold text-white">Residency as a Strategic Asset</h3>
+                <h3 className="mt-3 text-2xl font-semibold text-white">
+                  Residency as a Strategic Asset
+                </h3>
                 <p className="mt-4 text-base leading-relaxed text-white/70">
-                  The UAE Golden Visa is not merely an entry permit; it is an institutional platform for wealth preservation, tax optimization, and generational family security. Structuring the right category upfront ensures compliance with federal immigration guidelines and bank AML standards.
+                  The UAE Golden Visa is not merely an entry permit; it is an institutional platform
+                  for wealth preservation, tax optimization, and generational family security.
+                  Structuring the right category upfront ensures compliance with federal immigration
+                  guidelines and bank AML standards.
                 </p>
                 <div className="mt-6 border-l-2 border-[#22C55E] bg-white/[0.02] p-4 text-sm text-white/90">
-                  "Most applications do not fail at the immigration desk. They fail weeks earlier in the corporate structuring and activity classification stage."
+                  "Most applications do not fail at the immigration desk. They fail weeks earlier in
+                  the corporate structuring and activity classification stage."
                 </div>
               </div>
               <div className="mt-8 pt-6 border-t border-white/10">
@@ -520,7 +504,8 @@ export default function GoldenVisaPage() {
               Who Can Apply for <span className="font-semibold">Golden Visa UAE?</span>
             </h2>
             <p className="mt-4 text-lg text-[#0C2D48]/70">
-              Federal law establishes 5 primary long-term residency pathways. Explore specific qualification criteria, statutory thresholds, and required documentation blueprints:
+              Federal law establishes 5 primary long-term residency pathways. Explore specific
+              qualification criteria, statutory thresholds, and required documentation blueprints:
             </p>
           </div>
 
@@ -546,7 +531,8 @@ export default function GoldenVisaPage() {
               Golden Visa UAE <span className="font-semibold text-white">Requirements</span>
             </h2>
             <p className="mt-4 text-lg text-white/70">
-              Clear document preparation prevents costly delays. Choose your profile to review mandatory paperwork:
+              Clear document preparation prevents costly delays. Choose your profile to review
+              mandatory paperwork:
             </p>
           </div>
 
@@ -583,14 +569,21 @@ export default function GoldenVisaPage() {
                       <FileText className="h-5 w-5" />
                     </div>
                     <div>
-                      <p className="text-xs uppercase tracking-[0.2em] text-[#E8A72E]">Target Applicant</p>
-                      <h3 className="text-2xl font-semibold text-white">{activeRequirements.label} Pathway</h3>
+                      <p className="text-xs uppercase tracking-[0.2em] text-[#E8A72E]">
+                        Target Applicant
+                      </p>
+                      <h3 className="text-2xl font-semibold text-white">
+                        {activeRequirements.label} Pathway
+                      </h3>
                     </div>
                   </div>
 
                   <div className="grid gap-3 sm:grid-cols-2">
                     {activeRequirements.items.map((item) => (
-                      <div key={item} className="flex items-start gap-3 border border-white/5 bg-white/[0.02] p-4 text-sm text-white/80">
+                      <div
+                        key={item}
+                        className="flex items-start gap-3 border border-white/5 bg-white/[0.02] p-4 text-sm text-white/80"
+                      >
                         <span className="mt-0.5 flex h-4 w-4 shrink-0 items-center justify-center rounded-full bg-[#22C55E] text-black">
                           <Check className="h-2.5 w-2.5" strokeWidth={3} />
                         </span>
@@ -600,7 +593,9 @@ export default function GoldenVisaPage() {
                   </div>
 
                   <div className="mt-6 border-l-2 border-[#E8A72E] bg-white/[0.02] p-4 text-sm text-white/80">
-                    <span className="font-semibold text-white">Risk Warning:</span> Missing alignment between trade license activity, salary certificates, and bank statements is the #1 reason for authority rejections.
+                    <span className="font-semibold text-white">Risk Warning:</span> Missing
+                    alignment between trade license activity, salary certificates, and bank
+                    statements is the #1 reason for authority rejections.
                   </div>
                 </motion.div>
               </AnimatePresence>
@@ -631,17 +626,23 @@ export default function GoldenVisaPage() {
               <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[#22C55E]">
                 Statutory &amp; Legal Breakdown
               </p>
-              <h3 className="mt-2 text-2xl font-semibold text-[#0C2D48]">Standard Processing Costs</h3>
+              <h3 className="mt-2 text-2xl font-semibold text-[#0C2D48]">
+                Standard Processing Costs
+              </h3>
               <div className="mt-6 divide-y divide-[#0C2D48]/10">
                 {costBreakdown.map((item) => (
                   <div key={item.label} className="flex items-center justify-between py-4">
                     <span className="font-medium text-[#0C2D48]">{item.label}</span>
-                    <span className="font-mono text-sm font-semibold text-[#0C2D48]">{item.value}</span>
+                    <span className="font-mono text-sm font-semibold text-[#0C2D48]">
+                      {item.value}
+                    </span>
                   </div>
                 ))}
               </div>
               <p className="mt-6 border-l-2 border-[#0C2D48]/20 bg-[#0C2D48]/5 p-4 text-sm text-[#0C2D48]/80">
-                Notice: Beware of misleading promotional claims like "23 Lakh Golden Visa." Statutory fees and actual investment capital thresholds are separate requirements under federal law.
+                Notice: Beware of misleading promotional claims like "23 Lakh Golden Visa."
+                Statutory fees and actual investment capital thresholds are separate requirements
+                under federal law.
               </p>
             </div>
 
@@ -651,10 +652,15 @@ export default function GoldenVisaPage() {
               <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[#E8A72E]">
                 Capital Routes
               </p>
-              <h3 className="mt-2 text-2xl font-semibold text-[#0C2D48]">Primary Investment Pathways</h3>
+              <h3 className="mt-2 text-2xl font-semibold text-[#0C2D48]">
+                Primary Investment Pathways
+              </h3>
               <div className="mt-6 space-y-4">
                 {investmentRoutes.map((route, i) => (
-                  <div key={route} className="flex items-center gap-4 border border-[#0C2D48]/10 p-4">
+                  <div
+                    key={route}
+                    className="flex items-center gap-4 border border-[#0C2D48]/10 p-4"
+                  >
                     <span className="flex h-8 w-8 items-center justify-center bg-[#0C2D48] text-xs font-bold text-white">
                       0{i + 1}
                     </span>
@@ -663,7 +669,8 @@ export default function GoldenVisaPage() {
                 ))}
               </div>
               <p className="mt-6 text-sm text-[#0C2D48]/70">
-                Government application fees, medical exams, Emirates ID processing, and advisory retainers are distinct and structured cleanly in our initial proposal.
+                Government application fees, medical exams, Emirates ID processing, and advisory
+                retainers are distinct and structured cleanly in our initial proposal.
               </p>
             </div>
           </div>
@@ -681,7 +688,8 @@ export default function GoldenVisaPage() {
               How to Apply for <span className="font-semibold text-white">Golden Visa UAE</span>
             </h2>
             <p className="mt-4 text-lg text-white/70">
-              Our 5-stage institutional workflow ensures complete legal compliance and predictable turnaround:
+              Our 5-stage institutional workflow ensures complete legal compliance and predictable
+              turnaround:
             </p>
           </div>
 
@@ -690,14 +698,17 @@ export default function GoldenVisaPage() {
               <div key={step} className="relative border border-white/10 bg-[#0C2D48]/30 p-6">
                 <CornerCrosshairs />
                 <span className="font-mono text-2xl font-light text-[#22C55E]">0{index + 1}</span>
-                <p className="mt-4 text-xs uppercase tracking-[0.2em] text-white/40">Phase 0{index + 1}</p>
+                <p className="mt-4 text-xs uppercase tracking-[0.2em] text-white/40">
+                  Phase 0{index + 1}
+                </p>
                 <h3 className="mt-2 text-lg font-semibold text-white">{step}</h3>
               </div>
             ))}
           </div>
 
           <p className="mt-10 border-l border-[#22C55E] pl-4 text-sm text-white/70">
-            * Most delays across amateur filings happen during Stage 2 (Structuring). Having legal counsel ensure title deed, trade license, and AML alignment eliminates friction.
+            * Most delays across amateur filings happen during Stage 2 (Structuring). Having legal
+            counsel ensure title deed, trade license, and AML alignment eliminates friction.
           </p>
         </div>
       </section>
@@ -713,13 +724,17 @@ export default function GoldenVisaPage() {
               Common Reasons for <span className="font-semibold">Golden Visa Rejection</span>
             </h2>
             <p className="mt-4 text-lg text-[#0C2D48]/70">
-              Submissions handled like generic paperwork frequently fail due to these preventable structural missteps:
+              Submissions handled like generic paperwork frequently fail due to these preventable
+              structural missteps:
             </p>
           </div>
 
           <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-5">
             {rejectionReasons.map((reason, index) => (
-              <div key={reason} className="relative border border-[#0C2D48]/10 bg-white p-6 shadow-sm">
+              <div
+                key={reason}
+                className="relative border border-[#0C2D48]/10 bg-white p-6 shadow-sm"
+              >
                 <CornerCrosshairs />
                 <div className="mb-4 flex h-10 w-10 items-center justify-center border border-red-200 bg-red-50 text-red-600">
                   <ShieldAlert className="h-5 w-5" />
@@ -744,11 +759,18 @@ export default function GoldenVisaPage() {
               <div className="mb-4 flex h-10 w-10 items-center justify-center border border-[#22C55E]/30 bg-[#22C55E]/10 text-[#22C55E]">
                 <TrendingUp className="h-5 w-5" />
               </div>
-              <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[#22C55E]">Strategic Advantages</p>
-              <h3 className="mt-2 text-2xl font-semibold text-white">Why Establish 10-Year UAE Residency</h3>
+              <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[#22C55E]">
+                Strategic Advantages
+              </p>
+              <h3 className="mt-2 text-2xl font-semibold text-white">
+                Why Establish 10-Year UAE Residency
+              </h3>
               <ul className="mt-6 space-y-3">
                 {advantagesList.map((item) => (
-                  <li key={item} className="flex items-start gap-3 border-b border-white/5 pb-2.5 text-sm text-white/80">
+                  <li
+                    key={item}
+                    className="flex items-start gap-3 border-b border-white/5 pb-2.5 text-sm text-white/80"
+                  >
                     <span className="mt-1 flex h-4 w-4 shrink-0 items-center justify-center rounded-full bg-[#22C55E] text-black">
                       <Check className="h-2.5 w-2.5" strokeWidth={3} />
                     </span>
@@ -764,18 +786,27 @@ export default function GoldenVisaPage() {
               <div className="mb-4 flex h-10 w-10 items-center justify-center border border-[#E8A72E]/30 bg-[#E8A72E]/10 text-[#E8A72E]">
                 <ShieldCheck className="h-5 w-5" />
               </div>
-              <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[#E8A72E]">Honest Evaluation</p>
-              <h3 className="mt-2 text-2xl font-semibold text-white">What You Must Weigh Honestly</h3>
+              <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[#E8A72E]">
+                Honest Evaluation
+              </p>
+              <h3 className="mt-2 text-2xl font-semibold text-white">
+                What You Must Weigh Honestly
+              </h3>
               <ul className="mt-6 space-y-3">
                 {disadvantagesList.map((item) => (
-                  <li key={item} className="flex items-start gap-3 border-b border-white/5 pb-2.5 text-sm text-white/80">
+                  <li
+                    key={item}
+                    className="flex items-start gap-3 border-b border-white/5 pb-2.5 text-sm text-white/80"
+                  >
                     <span className="mt-1.5 h-1.5 w-1.5 shrink-0 bg-[#E8A72E]" />
                     <span>{item}</span>
                   </li>
                 ))}
               </ul>
               <p className="mt-6 text-sm text-white/60">
-                If an agency promises an "instant, guaranteed" Golden Visa without reviewing your banking or corporate structure, they are cutting legal corners that jeopardize your standing.
+                If an agency promises an "instant, guaranteed" Golden Visa without reviewing your
+                banking or corporate structure, they are cutting legal corners that jeopardize your
+                standing.
               </p>
             </div>
           </div>
@@ -793,7 +824,8 @@ export default function GoldenVisaPage() {
               Abu Dhabi vs Dubai <span className="font-semibold">Processing</span>
             </h2>
             <p className="mt-4 text-lg text-[#0C2D48]/70">
-              Golden Visa eligibility is federal law, but administrative workflows differ significantly between emirates:
+              Golden Visa eligibility is federal law, but administrative workflows differ
+              significantly between emirates:
             </p>
           </div>
 
@@ -803,10 +835,16 @@ export default function GoldenVisaPage() {
               <div className="mb-4 flex h-10 w-10 items-center justify-center border border-[#0C2D48]/10 bg-[#0C2D48]/5 text-[#0C2D48]">
                 <Building2 className="h-5 w-5" />
               </div>
-              <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[#0C2D48]/60">Emirate of Abu Dhabi</p>
-              <h3 className="mt-2 text-2xl font-semibold text-[#0C2D48]">TAMM &amp; ADRO Nomination Framework</h3>
+              <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[#0C2D48]/60">
+                Emirate of Abu Dhabi
+              </p>
+              <h3 className="mt-2 text-2xl font-semibold text-[#0C2D48]">
+                TAMM &amp; ADRO Nomination Framework
+              </h3>
               <p className="mt-4 text-base leading-relaxed text-[#0C2D48]/80">
-                Routed prominently through TAMM and Abu Dhabi Residents Office (ADRO). Often emphasizes structured government endorsement and nomination prerequisites for commercial founders.
+                Routed prominently through TAMM and Abu Dhabi Residents Office (ADRO). Often
+                emphasizes structured government endorsement and nomination prerequisites for
+                commercial founders.
               </p>
             </div>
 
@@ -815,10 +853,16 @@ export default function GoldenVisaPage() {
               <div className="mb-4 flex h-10 w-10 items-center justify-center border border-[#0C2D48]/10 bg-[#0C2D48]/5 text-[#0C2D48]">
                 <Landmark className="h-5 w-5" />
               </div>
-              <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[#22C55E]">Emirate of Dubai</p>
-              <h3 className="mt-2 text-2xl font-semibold text-[#0C2D48]">GDRFA &amp; Dedicated Visa Centers</h3>
+              <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[#22C55E]">
+                Emirate of Dubai
+              </p>
+              <h3 className="mt-2 text-2xl font-semibold text-[#0C2D48]">
+                GDRFA &amp; Dedicated Visa Centers
+              </h3>
               <p className="mt-4 text-base leading-relaxed text-[#0C2D48]/80">
-                Processed through the General Directorate of Residency and Foreigners Affairs (GDRFA) Dubai, featuring expedited digital tracking and specialized physical VIP biometric lounges.
+                Processed through the General Directorate of Residency and Foreigners Affairs
+                (GDRFA) Dubai, featuring expedited digital tracking and specialized physical VIP
+                biometric lounges.
               </p>
             </div>
           </div>
@@ -858,11 +902,14 @@ export default function GoldenVisaPage() {
               Golden Visa UAE <span className="font-semibold">Intelligence</span>
             </h2>
             <p className="mt-4 text-lg text-[#0C2D48]/70">
-              Clear, definitive legal answers for investors, business owners, and corporate executives:
+              Clear, definitive legal answers for investors, business owners, and corporate
+              executives:
             </p>
           </div>
 
-          <NumberedAccordion items={faqItems.map((item, i) => ({ number: String(i + 1).padStart(2, '0'), ...item }))} />
+          <NumberedAccordion
+            items={faqItems.map((item, i) => ({ number: String(i + 1).padStart(2, '0'), ...item }))}
+          />
         </div>
       </section>
 

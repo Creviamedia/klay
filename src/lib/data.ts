@@ -24,7 +24,8 @@ export const SERVICES = [
     slug: 'mainland-company-setup',
     icon: Building2,
     title: 'Mainland Company Setup',
-    short: 'Establish your business in the UAE Mainland with full commercial rights and the ability to trade across all Emirates.',
+    short:
+      'Establish your business in the UAE Mainland with full commercial rights and the ability to trade across all Emirates.',
     description:
       'Mainland companies are licensed by the Department of Economic Development (DED) and can operate across the entire UAE market without restriction. Ideal for businesses that need to serve the local market, bid on government contracts, or open physical branches anywhere in the country.',
     features: [
@@ -57,7 +58,8 @@ export const SERVICES = [
     slug: 'free-zone-company-setup',
     icon: Globe2,
     title: 'Free Zone Company Setup',
-    short: 'Set up in a UAE Free Zone with 100% foreign ownership, tax benefits and streamlined licensing.',
+    short:
+      'Set up in a UAE Free Zone with 100% foreign ownership, tax benefits and streamlined licensing.',
     description:
       'UAE Free Zones are special economic zones designed for international business, offering 100% foreign ownership, zero corporate tax (in most cases), full repatriation of profits, and fast-track licensing. Each Free Zone caters to specific industries and activity types.',
     features: [
@@ -89,7 +91,8 @@ export const SERVICES = [
     slug: 'offshore-company-setup',
     icon: Anchor,
     title: 'Offshore Company Setup',
-    short: 'Register an offshore company for international business, asset protection and holding structures.',
+    short:
+      'Register an offshore company for international business, asset protection and holding structures.',
     description:
       'UAE offshore companies are non-resident entities incorporated under specific Free Zone authorities. They cannot conduct business within the UAE mainland but are powerful vehicles for international trade, asset holding, and tax-efficient corporate structuring.',
     features: [
@@ -121,7 +124,8 @@ export const SERVICES = [
     slug: 'golden-visa',
     icon: Plane,
     title: 'Golden Visa',
-    short: 'Long-term residency for investors, entrepreneurs, skilled professionals and exceptional talents.',
+    short:
+      'Long-term residency for investors, entrepreneurs, skilled professionals and exceptional talents.',
     description:
       'The UAE Golden Visa grants long-term residency (5 or 10 years) to investors, entrepreneurs, skilled professionals, scientists, outstanding students and humanitarian pioneers. It provides stability and a clear path to building a life in the UAE.',
     features: [
@@ -288,37 +292,43 @@ export const HOMEPAGE_SERVICES = [
   {
     icon: Building2,
     title: 'UAE Business Formation',
-    description: 'Set up your company in Dubai, UAE with experts who can handle approvals and paperwork and help guide you through any red tape.',
+    description:
+      'Set up your company in Dubai, UAE with experts who can handle approvals and paperwork and help guide you through any red tape.',
     href: '/services/mainland-company-setup',
   },
   {
     icon: WalletCards,
     title: 'Corporate Taxes and VAT',
-    description: 'We can provide expert insights on UAE tax laws, accounting, VAT compliance, corporate tax filing, and tax advisory services.',
+    description:
+      'We can provide expert insights on UAE tax laws, accounting, VAT compliance, corporate tax filing, and tax advisory services.',
     href: '/services',
   },
   {
     icon: BriefcaseBusiness,
     title: 'Dubai Business Visa',
-    description: 'Acquire your Dubai business visa to set up and conduct business, conferences, and explore networking opportunities in Dubai with ease.',
+    description:
+      'Acquire your Dubai business visa to set up and conduct business, conferences, and explore networking opportunities in Dubai with ease.',
     href: '/golden-visa',
   },
   {
     icon: Stamp,
     title: 'Trade Licensing',
-    description: 'Secure your trade license with our expert trade licensing services to conduct business in Dubai.',
+    description:
+      'Secure your trade license with our expert trade licensing services to conduct business in Dubai.',
     href: '/services/mainland-company-setup',
   },
   {
     icon: Plane,
     title: 'Golden Visa',
-    description: 'Get long-term residency as an Indian expat that gives the ability to live, work and access various services in Dubai, UAE.',
+    description:
+      'Get long-term residency as an Indian expat that gives the ability to live, work and access various services in Dubai, UAE.',
     href: '/golden-visa',
   },
   {
     icon: FileText,
     title: 'PRO Services for Entrepreneurs',
-    description: 'Let our experts interface with government authorities and help you navigate renewals and regulations.',
+    description:
+      'Let our experts interface with government authorities and help you navigate renewals and regulations.',
     href: '/services/pro-services',
   },
 ] as const;
@@ -398,8 +408,14 @@ export const HOMEPAGE_ADVANTAGES = [
     number: '01',
     icon: Layers3,
     title: 'Structure First, Not Just Setup',
-    description: 'We focus on the right jurisdiction, activity, and structure before incorporation.',
-    points: ['Banking delays', 'Visa complications', 'Operational restrictions', 'Costly restructuring later'],
+    description:
+      'We focus on the right jurisdiction, activity, and structure before incorporation.',
+    points: [
+      'Banking delays',
+      'Visa complications',
+      'Operational restrictions',
+      'Costly restructuring later',
+    ],
     closing: undefined,
     emphasis: undefined,
   },
@@ -408,7 +424,12 @@ export const HOMEPAGE_ADVANTAGES = [
     icon: Globe2,
     title: 'Multi-Jurisdiction Expertise',
     description: 'Mainland, Free Zone, Offshore — each has different rules.',
-    points: ['Business activity', 'Expansion plans', 'Ownership structure', 'Compliance requirements'],
+    points: [
+      'Business activity',
+      'Expansion plans',
+      'Ownership structure',
+      'Compliance requirements',
+    ],
     closing: undefined,
     emphasis: undefined,
   },
@@ -442,7 +463,12 @@ export const HOMEPAGE_ADVANTAGES = [
     icon: ShieldCheck,
     title: 'End-to-End Support',
     description: undefined,
-    points: ['Bank account opening', 'AML compliance guidance', 'ESR filing support', 'Structuring for growth'],
+    points: [
+      'Bank account opening',
+      'AML compliance guidance',
+      'ESR filing support',
+      'Structuring for growth',
+    ],
     closing: undefined,
     emphasis: undefined,
   },
@@ -470,17 +496,20 @@ export const HOMEPAGE_PROCESS_STEPS = [
   {
     icon: Clock3,
     title: 'Fast-Tracked Visa & License',
-    description: 'Faster processing and approvals. A dedicated manager who handles everything for you.',
+    description:
+      'Faster processing and approvals. A dedicated manager who handles everything for you.',
   },
   {
     icon: BriefcaseBusiness,
     title: 'Choose up to 5 Activities',
-    description: 'Faster processing and approvals. A dedicated manager who handles everything for you.',
+    description:
+      'Faster processing and approvals. A dedicated manager who handles everything for you.',
   },
   {
     icon: ClipboardCheck,
     title: 'Free VAT & C.T Registration',
-    description: 'Mandatory VAT & Corporate Tax registration worth AED 1,000 each – at no extra cost.',
+    description:
+      'Mandatory VAT & Corporate Tax registration worth AED 1,000 each – at no extra cost.',
   },
   {
     icon: Building2,
@@ -687,3 +716,11 @@ export const JURISDICTION_SERVICES: {
     ],
   },
 ];
+
+export {
+  HOMEPAGE_FAQS,
+  CALCULATOR_FAQS,
+  GOLDEN_VISA_FAQS,
+  type FaqItem,
+  type NumberedFaqItem,
+} from './faqs';

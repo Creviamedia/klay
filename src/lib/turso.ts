@@ -30,6 +30,7 @@ export interface LeadRecord {
   name: string;
   email: string;
   phone: string;
+  budget?: string | null;
   jurisdiction: string;
   activity: string;
   timeline?: string | null;
@@ -193,6 +194,7 @@ export async function initTursoSchema(client?: Client): Promise<void> {
       name TEXT NOT NULL,
       email TEXT NOT NULL,
       phone TEXT NOT NULL,
+      budget TEXT,
       jurisdiction TEXT NOT NULL DEFAULT 'UAE',
       activity TEXT NOT NULL DEFAULT 'General',
       timeline TEXT,
@@ -244,6 +246,19 @@ export async function initTursoSchema(client?: Client): Promise<void> {
   for (const sql of ddlStatements) {
     await db.execute(sql);
   }
+
+  // Safe backward-compatible migration for existing leads table
+  try {
+    const tableInfo = await db.execute(`PRAGMA table_info(leads)`);
+    const hasBudget = tableInfo.rows.some((row: any) => row.name === 'budget');
+    if (!hasBudget) {
+      await db.execute(`ALTER TABLE leads ADD COLUMN budget TEXT;`);
+    }
+  } catch (err: any) {
+    if (!err.message?.includes('duplicate column name')) {
+      console.warn('[Turso Schema Migration Warning]:', err.message);
+    }
+  }
 }
 
 /**
@@ -291,10 +306,10 @@ export async function seedHistoricalLeads(
 
       statements.push({
         sql: `INSERT OR IGNORE INTO leads (
-          id, reference_number, timestamp, name, email, phone,
+          id, reference_number, timestamp, name, email, phone, budget,
           jurisdiction, activity, timeline, visa_count, notes,
           source, platform, status, created_at, updated_at
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
         args: [
           leadId,
           refNum,
@@ -302,6 +317,7 @@ export async function seedHistoricalLeads(
           record.name || 'Unknown',
           record.email || '',
           normalizedPhone,
+          record.budget || null,
           record.jurisdiction || 'UAE',
           record.activity || 'General',
           record.timeline || null,
@@ -404,12 +420,13 @@ export async function insertLead(leadOrClient: any, maybeLead?: any): Promise<an
 
   const result = await db.execute({
     sql: `INSERT INTO leads (
-      id, reference_number, timestamp, name, email, phone,
+      id, reference_number, timestamp, name, email, phone, budget,
       jurisdiction, activity, timeline, visa_count, notes,
       source, platform, status, created_at, updated_at
-    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     ON CONFLICT(id) DO UPDATE SET
       status = excluded.status,
+      budget = COALESCE(excluded.budget, leads.budget),
       updated_at = CURRENT_TIMESTAMP
     RETURNING *`,
     args: [
@@ -419,6 +436,7 @@ export async function insertLead(leadOrClient: any, maybeLead?: any): Promise<an
       lead.name || 'Anonymous',
       lead.email || '',
       normalizedPhone,
+      lead.budget || null,
       lead.jurisdiction || 'UAE',
       lead.activity || 'General',
       lead.timeline || null,

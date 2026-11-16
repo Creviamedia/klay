@@ -1,6 +1,7 @@
 import { BLOG_POSTS } from '../content/blog/posts';
 import type { BlogArticleDetails, BlogPostSummary } from '../content/blog/types';
 import { COMPANY, SERVICES } from './data';
+import { CALCULATOR_FAQS, GOLDEN_VISA_FAQS, HOMEPAGE_FAQS } from './faqs';
 import pageSeo from './seo-pages.json';
 import {
   BLOG_POSTS_PER_PAGE,
@@ -261,9 +262,9 @@ export function getPrerenderRoutes(): PublicSeoRoute[] {
   return getPublicSeoRoutes().filter((route) => !route.path.startsWith('/admin'));
 }
 
-function organizationSchema() {
+export function organizationSchema() {
   return {
-    '@type': 'ProfessionalService',
+    '@type': ['ProfessionalService', 'LegalService', 'LocalBusiness'],
     '@id': `${SITE_ORIGIN}/#organization`,
     name: COMPANY.name,
     url: `${SITE_ORIGIN}/`,
@@ -275,6 +276,11 @@ function organizationSchema() {
       addressLocality: 'Dubai',
       addressCountry: 'AE',
     },
+    geo: {
+      '@type': 'GeoCoordinates',
+      latitude: '25.1872',
+      longitude: '55.2678',
+    },
     contactPoint: {
       '@type': 'ContactPoint',
       telephone: COMPANY.phone,
@@ -284,11 +290,29 @@ function organizationSchema() {
   };
 }
 
+export function faqPageSchema(faqs: readonly { question: string; answer: string }[]) {
+  return {
+    '@type': 'FAQPage',
+    mainEntity: faqs.map((faq) => ({
+      '@type': 'Question',
+      name: faq.question,
+      acceptedAnswer: {
+        '@type': 'Answer',
+        text: faq.answer,
+      },
+    })),
+  };
+}
+
 /**
  * JSON-LD for a page. `articleDetails` (from the article module) adds the rich image
  * description; it is passed during prerendering and optional on the client.
  */
-export function getStructuredData(pathname: string, articleDetails?: BlogArticleDetails): object {
+export function getStructuredData(
+  pathname: string,
+  articleDetails?: BlogArticleDetails,
+  faqs?: readonly { question: string; answer: string }[]
+): object {
   const path = normalizedPath(pathname);
   const seo = getPageSeo(path);
   const article = findArticle(path);
@@ -372,6 +396,19 @@ export function getStructuredData(pathname: string, articleDetails?: BlogArticle
       provider: { '@id': `${SITE_ORIGIN}/#organization` },
       areaServed: { '@type': 'Country', name: 'United Arab Emirates' },
     });
+  }
+
+  const pageFaqs =
+    path === '/' || path === ROUTES.home
+      ? HOMEPAGE_FAQS
+      : path === '/cost-calculator' || path === ROUTES.costCalculator.replace(/\/+$/, '')
+        ? CALCULATOR_FAQS
+        : path === '/golden-visa' || path === ROUTES.goldenVisa.replace(/\/+$/, '')
+          ? GOLDEN_VISA_FAQS
+          : (faqs ?? articleDetails?.faqs);
+
+  if (pageFaqs && pageFaqs.length > 0) {
+    graph.push(faqPageSchema(pageFaqs));
   }
 
   return { '@context': 'https://schema.org', '@graph': graph };
