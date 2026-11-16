@@ -14,6 +14,7 @@ import {
   User,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { submitIntakeDossier } from '@/lib/intake-conduit';
 
 export type JurisdictionOption = 'Free Zone' | 'Mainland DED' | 'Offshore' | 'DIFC / ADGM';
 export type TimelineOption = 'Immediate (1-2 weeks)' | '1-3 months' | 'Planning stage';
@@ -195,51 +196,28 @@ export function KlayLeadForm({
       return;
     }
 
-    let cleanedLocal = phoneLocal.trim();
-    if (cleanedLocal.startsWith('0')) {
-      cleanedLocal = cleanedLocal.replace(/^0+/, '');
-    }
-    const fullPhone = `${dialCode} ${cleanedLocal}`;
-    const payload = {
-      name: name.trim(),
-      email: email.trim(),
-      phone: fullPhone,
-      jurisdiction,
-      activity,
-      timeline,
-      notes: notes.trim(),
-      source,
-    };
-
     setStatus('submitting');
     setErrorMessage('');
 
-    try {
-      const endpoint = import.meta.env?.VITE_LEAD_API_ENDPOINT || '/api/leads';
-      const response = await fetch(endpoint, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(payload),
-      });
+    const result = await submitIntakeDossier({
+      name,
+      email,
+      phone: phoneLocal,
+      dialCode,
+      jurisdiction,
+      activity,
+      timeline,
+      notes,
+      source,
+    });
 
-      if (response.ok) {
-        const data = await response.json();
-        setLeadId(data.leadId || data.referenceNumber);
-        setStatus('success');
-      } else {
-        const errorData = await response.json().catch(() => ({}));
-        setErrorMessage(
-          errorData.error ||
-            errorData.message ||
-            'Unable to register your request with the Legal Desk. Please try again or call us directly.'
-        );
-        setStatus('error');
-      }
-    } catch {
+    if (result.success) {
+      setLeadId(result.referenceNumber);
+      setStatus('success');
+    } else {
       setErrorMessage(
-        'Unable to connect to the Legal Advisory Desk due to a network error. Please try again or call us directly.'
+        result.error ||
+          'Unable to register your request with the Legal Desk. Please try again or call us directly.'
       );
       setStatus('error');
     }

@@ -84,6 +84,7 @@ function sendNotFound(_request, response, next) {
 }
 
 app.disable('x-powered-by');
+app.set('trust proxy', 1);
 
 app.use((_request, response, next) => {
   for (const [name, value] of Object.entries(SECURITY_HEADERS)) response.setHeader(name, value);
@@ -162,315 +163,107 @@ app.get('/api/health', (_request, response) => {
   response.json({ status: 'ok', environment: process.env.VITE_ENVIRONMENT || 'production' });
 });
 
-const dataDir = path.join(__dirname, 'data');
-const leadsFilePath = path.join(dataDir, 'leads.json');
-const leadsJsonlPath = path.join(dataDir, 'leads.jsonl');
-const leadsCsvPath = path.join(dataDir, 'google-sheet-crm.csv');
+const { processIntakeLead } = require('./netlify/functions/lead-intake-core.cjs');
 
-// Lightweight in-memory sliding window rate limiter (max 20 requests per 15 min per external IP)
-const submissionRateMap = new Map();
-function isRateLimited(ip) {
-  // Allow local loopback addresses (automated testing, development, and UAT verification)
-  if (ip === '127.0.0.1' || ip === '::1' || ip === '::ffff:127.0.0.1' || ip === 'unknown') {
-    return false;
-  }
-  const now = Date.now();
-  const windowMs = 15 * 60 * 1000;
-  const maxRequests = 20;
-  const timestamps = (submissionRateMap.get(ip) || []).filter((t) => now - t < windowMs);
-  if (timestamps.length >= maxRequests) return true;
-  timestamps.push(now);
-  submissionRateMap.set(ip, timestamps);
-  return false;
-}
-
-const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-
-function generateSovereignReference() {
-  const year = new Date().getFullYear();
-  const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
-  let randomPart = '';
-  for (let i = 0; i < 4; i++) {
-    randomPart += chars.charAt(Math.floor(Math.random() * chars.length));
-  }
-  return `KLAY-${year}-${randomPart}`;
-}
-
-function formatWhatsAppDetails(phone, name, jurisdiction) {
-  let cleanDigits = (phone || '').replace(/\D/g, '');
-  // UAE trunk prefix fix: e.g. +971 050 123 4567 -> 9710501234567 -> 971501234567
-  if (cleanDigits.startsWith('9710')) {
-    cleanDigits = '971' + cleanDigits.slice(4);
-  }
-  const cleanTel = (phone || '').replace(/[^\d+]/g, '');
-  const waUrl = cleanDigits
-    ? `https://wa.me/${cleanDigits}?text=${encodeURIComponent(`Hello ${name}, thank you for contacting Klay Consultants regarding your ${jurisdiction || 'UAE'} setup. How may our legal desk assist you?`)}`
-    : '';
-  const callUrl = cleanTel ? `tel:${cleanTel}` : '';
-  return { cleanDigits, cleanTel, waUrl, callUrl };
-}
-
-function persistLeadToDisk(leadRecord) {
-  try {
-    if (!fs.existsSync(dataDir)) {
-      fs.mkdirSync(dataDir, { recursive: true });
-    }
-    // Atomic append to JSONL (immune to concurrent read-modify-write overwrite)
-    fs.appendFileSync(leadsJsonlPath, JSON.stringify(leadRecord) + '\n', 'utf8');
-
-    try {
-      let leads = [];
-      if (fs.existsSync(leadsFilePath)) {
-        const raw = fs.readFileSync(leadsFilePath, 'utf8');
-        leads = JSON.parse(raw);
-        if (!Array.isArray(leads)) leads = [];
-      }
-      leads.push(leadRecord);
-      fs.writeFileSync(leadsFilePath, JSON.stringify(leads, null, 2), 'utf8');
-    } catch (parseErr) {
-      console.warn(`[LEADS DB] Warning updating ${leadsFilePath}:`, parseErr.message);
-    }
-
-    // Also maintain a local Google Sheets compatible CSV mirror for testing
-    const { waUrl } = formatWhatsAppDetails(
-      leadRecord.phone,
-      leadRecord.name,
-      leadRecord.jurisdiction
-    );
-
-    if (!fs.existsSync(leadsCsvPath)) {
-      const csvHeader =
-        'Reference ID,Timestamp,Name,Email,Phone,Jurisdiction,Activity,Timeline,Visa Count,Notes,Source,WhatsApp Link\r\n';
-      fs.writeFileSync(leadsCsvPath, csvHeader, 'utf8');
-    }
-    const escapeCsv = (val) => `"${String(val || '').replace(/"/g, '""')}"`;
-    const csvRow =
-      [
-        escapeCsv(leadRecord.id),
-        escapeCsv(leadRecord.timestamp),
-        escapeCsv(leadRecord.name),
-        escapeCsv(leadRecord.email),
-        escapeCsv(leadRecord.phone),
-        escapeCsv(leadRecord.jurisdiction),
-        escapeCsv(leadRecord.activity),
-        escapeCsv(leadRecord.timeline),
-        escapeCsv(leadRecord.visaCount),
-        escapeCsv(leadRecord.notes),
-        escapeCsv(leadRecord.source),
-        escapeCsv(waUrl),
-      ].join(',') + '\r\n';
-    fs.appendFileSync(leadsCsvPath, csvRow, 'utf8');
-
-    return true;
-  } catch (err) {
-    console.error(`[LEADS DB ERROR] Failed to save lead ${leadRecord.id}:`, err.message);
-    return false;
-  }
-}
-
-function forwardLeadToGoogleSheet(leadRecord) {
-  const webhookUrl = process.env.GOOGLE_SHEET_WEBHOOK_URL;
-  if (!webhookUrl) return;
-
-  fetch(webhookUrl, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(leadRecord),
-    signal: AbortSignal.timeout(10000),
-  })
-    .then((res) => {
-      if (!res.ok) {
-        console.warn(`[GOOGLE SHEET WEBHOOK WARNING] HTTP ${res.status} for lead ${leadRecord.id}`);
-      } else {
-        console.log(`[GOOGLE SHEET WEBHOOK SUCCESS] Dispatched lead ${leadRecord.id}`);
-      }
-    })
-    .catch((err) => {
-      console.warn(`[GOOGLE SHEET WEBHOOK ERROR] Lead ${leadRecord.id}:`, err.message);
-    });
-}
-
-function sendPushNotification(leadRecord) {
-  const ntfyTarget = (process.env.NTFY_TOPIC_URL || 'https://ntfy.sh/klay-leads-dubai').trim();
-  if (!ntfyTarget) return;
-
-  let targetUrl = 'https://ntfy.sh';
-  let topic = 'klay-leads-dubai';
-
-  try {
-    if (ntfyTarget.startsWith('http://') || ntfyTarget.startsWith('https://')) {
-      const parsed = new URL(ntfyTarget);
-      const segments = parsed.pathname.split('/').filter(Boolean);
-      if (segments.length > 0) {
-        topic = segments[segments.length - 1];
-        targetUrl = parsed.origin;
-      } else {
-        targetUrl = parsed.origin;
-      }
-    } else {
-      topic = ntfyTarget;
-    }
-  } catch (err) {
-    console.warn(
-      `[NTFY TARGET ERROR] Could not parse "${ntfyTarget}", falling back to default topic:`,
-      err.message
-    );
-  }
-
-  const { waUrl, callUrl } = formatWhatsAppDetails(
-    leadRecord.phone,
-    leadRecord.name,
-    leadRecord.jurisdiction
-  );
-
-  const notesLine = leadRecord.notes ? `\n📝 Notes: ${leadRecord.notes}` : '';
-  const waDirectLine = waUrl ? `\n💬 WhatsApp: ${waUrl}` : '';
-  const callDirectLine = leadRecord.phone ? `\n📞 Call: ${leadRecord.phone}` : '';
-
-  // Rich message body formatted for mobile notification shade and web client
-  const messageBody = `🏛️ ${leadRecord.jurisdiction || 'UAE'} · ${leadRecord.activity || 'General'}\n✉️ ${leadRecord.email}${callDirectLine}${waDirectLine}${notesLine}`;
-
-  const actions = [];
-  if (waUrl) {
-    actions.push({
-      action: 'view',
-      label: '💬 WhatsApp Lead',
-      url: waUrl,
-      clear: true,
-    });
-  }
-  if (callUrl) {
-    actions.push({
-      action: 'view',
-      label: '📞 Call Lead',
-      url: callUrl,
-      clear: true,
-    });
-  }
-
-  fetch(targetUrl, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      topic,
-      title: `🏛️ New Klay Lead: ${leadRecord.name}`,
-      priority: 4,
-      tags: ['briefcase', 'dubai', 'whatsapp'],
-      message: messageBody,
-      click: waUrl || undefined,
-      actions: actions.length > 0 ? actions : undefined,
-    }),
-    signal: AbortSignal.timeout(10000),
-  })
-    .then((res) => {
-      if (!res.ok) {
-        console.warn(`[NTFY WARNING] HTTP ${res.status} for lead ${leadRecord.id}`);
-      } else {
-        console.log(
-          `[NTFY SUCCESS] Push alert with 1-tap WhatsApp and Call buttons dispatched for lead ${leadRecord.id} (topic: ${topic})`
-        );
-      }
-    })
-    .catch((err) => {
-      console.warn(`[NTFY ERROR] Lead ${leadRecord.id}:`, err.message);
-    });
-}
-
-app.post('/api/leads', (request, response) => {
+app.post('/api/leads', async (request, response) => {
   const clientIp =
     request.headers['x-forwarded-for']?.toString().split(',')[0].trim() ||
     request.socket.remoteAddress ||
     'unknown';
-  if (isRateLimited(clientIp)) {
-    return response.status(429).json({
-      success: false,
-      error: 'Too many requests. Please wait a few minutes before submitting again.',
-    });
-  }
 
-  let { name, email, phone, contact, jurisdiction, activity, timeline, visaCount, notes, source } =
-    request.body || {};
-
-  // Backward compatibility: If client sent single 'contact' field (e.g. legacy quick widgets)
-  if (contact && (!email || !phone)) {
-    const contactStr = String(contact).trim();
-    if (contactStr.includes('@')) {
-      email = email || contactStr;
-      phone = phone || '+971 50 000 0000';
-    } else {
-      phone = phone || contactStr;
-      email = email || 'inquiry@klayconsultants.com';
-    }
-    name = name || 'Executive Calculator Lead';
-  }
-
-  const trimmedName = typeof name === 'string' ? name.trim() : '';
-  const trimmedEmail = typeof email === 'string' ? email.trim() : '';
-  const trimmedPhone = typeof phone === 'string' ? phone.trim() : '';
-
-  if (!trimmedName || !trimmedEmail || !trimmedPhone) {
-    return response.status(400).json({
-      success: false,
-      error: "Validation failed: 'name', 'email', and 'phone' are required fields.",
-    });
-  }
-
-  if (!EMAIL_REGEX.test(trimmedEmail)) {
-    return response.status(400).json({
-      success: false,
-      error: 'Please provide a valid email address.',
-    });
-  }
-
-  const leadId = generateSovereignReference();
-  const timestamp = new Date().toISOString();
-
-  // Whitelist fields only — no arbitrary property spreading
-  const leadRecord = {
-    id: leadId,
-    referenceNumber: leadId,
-    timestamp,
-    name: trimmedName,
-    email: trimmedEmail,
-    phone: trimmedPhone,
-    jurisdiction: jurisdiction || 'UAE',
-    activity: activity || 'General',
-    timeline: timeline || null,
-    visaCount: visaCount !== undefined ? visaCount : null,
-    notes: notes ? String(notes).trim().slice(0, 1000) : null,
-    source: source || 'calculator',
-  };
-
-  console.log(`[LEAD RECEIVED - ${process.env.VITE_ENVIRONMENT || 'local'}] ID: ${leadId}`, {
-    name: trimmedName,
-    email: trimmedEmail,
-    phone: trimmedPhone,
-    jurisdiction: leadRecord.jurisdiction,
-    activity: leadRecord.activity,
-    source: leadRecord.source,
-    timestamp,
+  const result = await processIntakeLead(request.body, {
+    clientIp,
+    platform: 'express',
+    dataDir: path.join(__dirname, 'data'),
   });
 
-  // 1. Persist lead to local JSON database
-  persistLeadToDisk(leadRecord);
+  return response.status(result.statusCode).json(result.body);
+});
 
-  // 2. Asynchronously forward to Google Sheet Webhook if configured
-  forwardLeadToGoogleSheet(leadRecord);
+const {
+  resolveClientIp,
+  requireAdminAuth,
+  handleAdminLogin,
+  handleAdminLogout,
+  handleGetLeads,
+  handlePatchLead,
+  handleGetBlogs,
+  handlePostBlog,
+  handleDeleteBlog,
+} = require('./netlify/functions/admin-core.cjs');
 
-  // 3. Asynchronously send instant push notification via ntfy.sh
-  sendPushNotification(leadRecord);
+// Admin Authentication & Session routes
+app.post('/api/admin/login', async (request, response) => {
+  const clientIp = resolveClientIp(request);
+  const result = await handleAdminLogin(request.body, clientIp);
+  for (const [key, value] of Object.entries(result.headers || {})) {
+    response.setHeader(key, value);
+  }
+  return response.status(result.statusCode).json(result.body);
+});
 
-  // 4. Respond to client
-  return response.status(201).json({
-    success: true,
-    leadId,
-    referenceNumber: leadId,
-    message: `Lead received and registered under ${leadId}`,
-  });
+app.post('/api/admin/logout', (request, response) => {
+  const result = handleAdminLogout();
+  for (const [key, value] of Object.entries(result.headers || {})) {
+    response.setHeader(key, value);
+  }
+  return response.status(result.statusCode).json(result.body);
+});
+
+// Admin Authorization Middleware
+function requireAdmin(request, response, next) {
+  const auth = requireAdminAuth(request);
+  if (!auth.authenticated) {
+    return response.status(auth.status || 401).json({ error: auth.error || 'Unauthorized' });
+  }
+  request.adminUser = auth.user;
+  next();
+}
+
+// Protected Admin API Endpoints
+app.get('/api/admin/leads', requireAdmin, (request, response) => {
+  const result = handleGetLeads(request.query);
+  return response.status(result.statusCode).json(result.body);
+});
+
+app.patch('/api/admin/leads/:id', requireAdmin, (request, response) => {
+  const result = handlePatchLead(request.params.id, request.body);
+  return response.status(result.statusCode).json(result.body);
+});
+
+app.get('/api/admin/blogs', requireAdmin, (request, response) => {
+  const result = handleGetBlogs();
+  return response.status(result.statusCode).json(result.body);
+});
+
+app.post('/api/admin/blogs', requireAdmin, (request, response) => {
+  const result = handlePostBlog(request.body);
+  return response.status(result.statusCode).json(result.body);
+});
+
+app.delete('/api/admin/blogs/:slug', requireAdmin, (request, response) => {
+  const result = handleDeleteBlog(request.params.slug);
+  return response.status(result.statusCode).json(result.body);
 });
 
 app.use('/api', (_request, response) => {
   response.status(404).json({ error: 'Not found' });
+});
+
+// SPA fallback for /admin* routes so direct browser hits or refreshes do not 404
+app.get(/^\/admin(\/.*)?$/, (_request, response, next) => {
+  const indexPath = path.join(distPath, 'index.html');
+  if (hasBuild && fs.existsSync(indexPath)) {
+    return response.sendFile(indexPath, { headers: { 'Cache-Control': CACHE_HTML } }, (error) => {
+      if (error) next(error);
+    });
+  }
+  return response
+    .status(200)
+    .type('text/html')
+    .send(
+      '<!DOCTYPE html><html><head><meta charset="utf-8"><title>Klay Admin Portal</title></head><body><div id="root">Admin Portal Loading...</div></body></html>'
+    );
 });
 
 if (hasBuild) {

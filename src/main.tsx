@@ -1,12 +1,17 @@
 import React from 'react';
 import { createRoot, hydrateRoot } from 'react-dom/client';
 import App from './App';
+import { initSentry } from './lib/sentry';
+import { ErrorBoundary } from './components/ui/ErrorBoundary';
 import './styles/globals.css';
 // These page stylesheets are fully scoped (.contact-page / .cost-page). They are bundled with the
 // main stylesheet on purpose: imported from the lazy page chunks they arrived only after the page
 // JavaScript, so the prerendered HTML first painted unstyled and then jumped (large layout shift).
 import './pages/ContactPage.css';
 import './pages/CostCalculatorPage.css';
+
+// Initialize Sentry monitoring
+initSentry();
 
 const rootElement = document.getElementById('root');
 
@@ -16,7 +21,9 @@ if (!rootElement) {
 
 const app = (
   <React.StrictMode>
-    <App />
+    <ErrorBoundary>
+      <App />
+    </ErrorBoundary>
   </React.StrictMode>
 );
 

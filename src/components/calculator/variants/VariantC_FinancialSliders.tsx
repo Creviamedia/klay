@@ -1,6 +1,7 @@
 import React, { useState, useMemo } from 'react';
 import {
   calculateSetupCost,
+  formatCurrency,
   JURISDICTIONS,
   ACTIVITIES,
   OFFICE_SPACES,
@@ -9,11 +10,13 @@ import {
   type ActivityTypeId,
   type OfficeTypeId,
   type SetupOptions,
+  type CurrencyCode,
 } from '@/lib/calculator-engine';
 import { Check, ArrowRight, Sliders, Award, DollarSign, PieChart, ShieldCheck } from 'lucide-react';
+import { submitIntakeDossier } from '@/lib/intake-conduit';
 
 export function VariantC_FinancialSliders() {
-  const [currency, setCurrency] = useState<'AED' | 'USD'>('AED');
+  const [currency, setCurrency] = useState<CurrencyCode>('AED');
 
   // Form states
   const [jurisdiction, setJurisdiction] = useState<JurisdictionId>('freezone-meydan');
@@ -35,7 +38,7 @@ export function VariantC_FinancialSliders() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitSuccess, setSubmitSuccess] = useState<string | null>(null);
 
-  // Compute live calculation
+  // Compute live calculation via unified ledger engine
   const currentOptions: SetupOptions = useMemo(
     () => ({
       jurisdiction,
@@ -50,48 +53,18 @@ export function VariantC_FinancialSliders() {
 
   const calculation = useMemo(() => calculateSetupCost(currentOptions), [currentOptions]);
 
-  // Group breakdown by category for the percentage breakdown matrix
-  const categoryTotals = useMemo(() => {
-    let licensing = 0;
-    let visas = 0;
-    let premises = 0;
-    let advisory = 0;
-
-    calculation.breakdown.forEach((item) => {
-      if (item.category === 'Licence & Authority') licensing += item.amountAed;
-      else if (item.category === 'Visas & Immigration') visas += item.amountAed;
-      else if (item.category === 'Premises') premises += item.amountAed;
-      else if (item.category === 'Advisory & Compliance') advisory += item.amountAed;
-    });
-
-    const total = calculation.totalAed || 1;
-    return {
-      licensing: { aed: licensing, pct: Math.round((licensing / total) * 100) },
-      visas: { aed: visas, pct: Math.round((visas / total) * 100) },
-      premises: { aed: premises, pct: Math.round((premises / total) * 100) },
-      advisory: { aed: advisory, pct: Math.round((advisory / total) * 100) },
-    };
-  }, [calculation]);
-
-  const displayTotal =
-    currency === 'AED'
-      ? `AED ${calculation.totalAed.toLocaleString()}`
-      : `$${Math.round(calculation.totalUsd).toLocaleString()} USD`;
-
-  const formatAmount = (aed: number) => {
-    if (currency === 'AED') return `AED ${aed.toLocaleString()}`;
-    return `$${Math.round(aed / 3.6725).toLocaleString()} USD`;
-  };
-
+  // Pure view bindings from unified ledger engine
+  const { categoryTotals, goldenVisaEligible } = calculation;
+  const displayTotal = formatCurrency(calculation.totalAed, currency);
+  const formatAmount = (aed: number) => formatCurrency(aed, currency);
   const isOffshore = jurisdiction === 'offshore-rak';
-  const isGoldenVisaEligible = !isOffshore && (investorVisas >= 2 || calculation.totalAed >= 35000);
 
   const handleLeadSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!leadName || !leadEmail || !leadPhone) return;
 
     setIsSubmitting(true);
-    const leadPayload = {
+    const result = await submitIntakeDossier({
       name: leadName,
       email: leadEmail,
       phone: leadPhone,
@@ -101,27 +74,10 @@ export function VariantC_FinancialSliders() {
       options: currentOptions,
       breakdown: calculation.breakdown,
       variant: 'C-FinancialSliders',
-      submittedAt: new Date().toISOString(),
-    };
+    });
 
-    try {
-      const endpoint = import.meta.env?.VITE_LEAD_API_ENDPOINT || '/api/leads';
-      const res = await fetch(endpoint, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(leadPayload),
-      });
-      if (res.ok) {
-        const data = await res.json();
-        setSubmitSuccess(data.leadId || 'CONFIRMED-' + Math.floor(100000 + Math.random() * 900000));
-      } else {
-        setSubmitSuccess('KLAY-' + Math.floor(100000 + Math.random() * 900000));
-      }
-    } catch {
-      setSubmitSuccess('KLAY-' + Math.floor(100000 + Math.random() * 900000));
-    } finally {
-      setIsSubmitting(false);
-    }
+    setSubmitSuccess(result.referenceNumber);
+    setIsSubmitting(false);
   };
 
   return (
@@ -137,7 +93,7 @@ export function VariantC_FinancialSliders() {
               <span className="font-mono text-[11px] font-semibold tracking-wider uppercase text-[#16A34A]">
                 VARIANT C · FINANCIAL SLIDERS &amp; MATRIX
               </span>
-              {isGoldenVisaEligible && (
+              {goldenVisaEligible && (
                 <span className="hidden sm:inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-amber-500/10 text-amber-700 font-mono text-[10px] font-semibold border border-amber-500/20">
                   <Award className="w-3 h-3 text-amber-600" /> Golden Visa Track
                 </span>

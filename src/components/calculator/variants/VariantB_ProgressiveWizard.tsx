@@ -1,6 +1,7 @@
 import React, { useState, useMemo } from 'react';
 import {
   calculateSetupCost,
+  formatCurrency,
   JURISDICTIONS,
   ACTIVITIES,
   OFFICE_SPACES,
@@ -9,12 +10,24 @@ import {
   type ActivityTypeId,
   type OfficeTypeId,
   type SetupOptions,
+  type CurrencyCode,
 } from '@/lib/calculator-engine';
-import { Check, ArrowRight, ArrowLeft, ShieldCheck, Clock, Building2, Users, FileText, Sparkles } from 'lucide-react';
+import {
+  Check,
+  ArrowRight,
+  ArrowLeft,
+  ShieldCheck,
+  Clock,
+  Building2,
+  Users,
+  FileText,
+  Sparkles,
+} from 'lucide-react';
+import { submitIntakeDossier } from '@/lib/intake-conduit';
 
 export function VariantB_ProgressiveWizard() {
   const [step, setStep] = useState<number>(1);
-  const [currency, setCurrency] = useState<'AED' | 'USD'>('AED');
+  const [currency, setCurrency] = useState<CurrencyCode>('AED');
 
   // Setup form states
   const [jurisdiction, setJurisdiction] = useState<JurisdictionId>('freezone-meydan');
@@ -50,11 +63,7 @@ export function VariantB_ProgressiveWizard() {
   );
 
   const calculation = useMemo(() => calculateSetupCost(currentOptions), [currentOptions]);
-
-  const displayTotal =
-    currency === 'AED'
-      ? `AED ${calculation.totalAed.toLocaleString()}`
-      : `$${Math.round(calculation.totalUsd).toLocaleString()} USD`;
+  const displayTotal = formatCurrency(calculation.totalAed, currency);
 
   const isOffshore = jurisdiction === 'offshore-rak';
 
@@ -66,7 +75,7 @@ export function VariantB_ProgressiveWizard() {
     if (!leadName || !leadEmail || !leadPhone) return;
 
     setIsSubmitting(true);
-    const leadPayload = {
+    const result = await submitIntakeDossier({
       name: leadName,
       email: leadEmail,
       phone: leadPhone,
@@ -76,27 +85,10 @@ export function VariantB_ProgressiveWizard() {
       options: currentOptions,
       breakdown: calculation.breakdown,
       variant: 'B-ProgressiveWizard',
-      submittedAt: new Date().toISOString(),
-    };
+    });
 
-    try {
-      const endpoint = import.meta.env?.VITE_LEAD_API_ENDPOINT || '/api/leads';
-      const res = await fetch(endpoint, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(leadPayload),
-      });
-      if (res.ok) {
-        const data = await res.json();
-        setSubmitSuccess(data.leadId || 'CONFIRMED-' + Math.floor(100000 + Math.random() * 900000));
-      } else {
-        setSubmitSuccess('KLAY-' + Math.floor(100000 + Math.random() * 900000));
-      }
-    } catch {
-      setSubmitSuccess('KLAY-' + Math.floor(100000 + Math.random() * 900000));
-    } finally {
-      setIsSubmitting(false);
-    }
+    setSubmitSuccess(result.referenceNumber);
+    setIsSubmitting(false);
   };
 
   const stepsMeta = [
@@ -108,7 +100,6 @@ export function VariantB_ProgressiveWizard() {
 
   return (
     <div className="w-full max-w-5xl mx-auto rounded-3xl bg-white border border-[#0C2D48]/12 shadow-[0_24px_60px_rgba(12,45,72,0.08)] overflow-hidden text-[#0C2D48] font-sans">
-      
       {/* ================= TOP CONTROLS & WIZARD STEP HEADER ================= */}
       <div className="bg-[#FAFBFD] border-b border-[#0C2D48]/10 px-6 sm:px-10 py-6">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
@@ -129,7 +120,9 @@ export function VariantB_ProgressiveWizard() {
           {/* Running total mini-pill & Currency toggle */}
           <div className="flex items-center gap-3">
             <div className="px-3.5 py-1.5 rounded-xl bg-white border border-[#0C2D48]/10 shadow-sm text-right">
-              <span className="text-[10px] font-mono uppercase tracking-wider text-[#0C2D48]/50 block">ESTIMATE</span>
+              <span className="text-[10px] font-mono uppercase tracking-wider text-[#0C2D48]/50 block">
+                ESTIMATE
+              </span>
               <span className="font-mono text-sm font-bold text-[#0C2D48]">{displayTotal}</span>
             </div>
             <div className="flex items-center gap-1 bg-white p-1 rounded-xl border border-[#0C2D48]/10 shadow-sm">
@@ -137,7 +130,9 @@ export function VariantB_ProgressiveWizard() {
                 type="button"
                 onClick={() => setCurrency('AED')}
                 className={`px-3 py-1 font-mono text-xs font-semibold rounded-lg transition-all ${
-                  currency === 'AED' ? 'bg-[#0C2D48] text-white shadow-sm' : 'text-[#0C2D48]/60 hover:text-[#0C2D48]'
+                  currency === 'AED'
+                    ? 'bg-[#0C2D48] text-white shadow-sm'
+                    : 'text-[#0C2D48]/60 hover:text-[#0C2D48]'
                 }`}
               >
                 AED
@@ -146,7 +141,9 @@ export function VariantB_ProgressiveWizard() {
                 type="button"
                 onClick={() => setCurrency('USD')}
                 className={`px-3 py-1 font-mono text-xs font-semibold rounded-lg transition-all ${
-                  currency === 'USD' ? 'bg-[#0C2D48] text-white shadow-sm' : 'text-[#0C2D48]/60 hover:text-[#0C2D48]'
+                  currency === 'USD'
+                    ? 'bg-[#0C2D48] text-white shadow-sm'
+                    : 'text-[#0C2D48]/60 hover:text-[#0C2D48]'
                 }`}
               >
                 USD
@@ -170,8 +167,8 @@ export function VariantB_ProgressiveWizard() {
                   isCurrent
                     ? 'bg-white border-[#22C55E] shadow-sm'
                     : isCompleted
-                    ? 'bg-white/60 border-[#0C2D48]/15 hover:bg-white'
-                    : 'bg-transparent border-transparent opacity-60'
+                      ? 'bg-white/60 border-[#0C2D48]/15 hover:bg-white'
+                      : 'bg-transparent border-transparent opacity-60'
                 }`}
               >
                 <div
@@ -179,17 +176,23 @@ export function VariantB_ProgressiveWizard() {
                     isCurrent
                       ? 'bg-[#22C55E] text-white'
                       : isCompleted
-                      ? 'bg-[#0C2D48] text-white'
-                      : 'bg-[#0C2D48]/10 text-[#0C2D48]'
+                        ? 'bg-[#0C2D48] text-white'
+                        : 'bg-[#0C2D48]/10 text-[#0C2D48]'
                   }`}
                 >
-                  {isCompleted ? <Check className="w-3.5 h-3.5" /> : <Icon className="w-3.5 h-3.5" />}
+                  {isCompleted ? (
+                    <Check className="w-3.5 h-3.5" />
+                  ) : (
+                    <Icon className="w-3.5 h-3.5" />
+                  )}
                 </div>
                 <div className="hidden sm:block overflow-hidden">
                   <span className="text-[10px] font-mono uppercase tracking-wider block text-[#0C2D48]/50">
                     STEP 0{s.num}
                   </span>
-                  <span className={`text-xs font-semibold truncate block ${isCurrent ? 'text-[#0C2D48]' : 'text-[#0C2D48]/70'}`}>
+                  <span
+                    className={`text-xs font-semibold truncate block ${isCurrent ? 'text-[#0C2D48]' : 'text-[#0C2D48]/70'}`}
+                  >
                     {s.title}
                   </span>
                 </div>
@@ -209,7 +212,8 @@ export function VariantB_ProgressiveWizard() {
                 Select Primary Corporate Jurisdiction
               </h3>
               <p className="text-sm text-[#0C2D48]/70 mt-1">
-                Choose the economic zone that best aligns with your target market, ownership requirements, and speed.
+                Choose the economic zone that best aligns with your target market, ownership
+                requirements, and speed.
               </p>
             </div>
 
@@ -317,15 +321,21 @@ export function VariantB_ProgressiveWizard() {
 
               {isOffshore ? (
                 <div className="p-4 rounded-xl bg-amber-50 border border-amber-200 text-amber-900 text-xs">
-                  <strong>Notice:</strong> RAK ICC Offshore entities do not issue UAE residency visas. If you require UAE residence permits, select a Free Zone or Dubai Mainland in Step 1.
+                  <strong>Notice:</strong> RAK ICC Offshore entities do not issue UAE residency
+                  visas. If you require UAE residence permits, select a Free Zone or Dubai Mainland
+                  in Step 1.
                 </div>
               ) : (
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                   {/* Investor Visas */}
                   <div className="p-4 rounded-xl bg-[#FAFBFD] border border-[#0C2D48]/10 flex items-center justify-between">
                     <div>
-                      <span className="font-semibold text-sm text-[#0C2D48] block">Investor / Partner Visas</span>
-                      <span className="text-xs text-[#0C2D48]/60">For shareholders &amp; company directors</span>
+                      <span className="font-semibold text-sm text-[#0C2D48] block">
+                        Investor / Partner Visas
+                      </span>
+                      <span className="text-xs text-[#0C2D48]/60">
+                        For shareholders &amp; company directors
+                      </span>
                     </div>
                     <div className="flex items-center gap-2">
                       <button
@@ -335,7 +345,9 @@ export function VariantB_ProgressiveWizard() {
                       >
                         -
                       </button>
-                      <span className="font-mono font-bold text-base w-6 text-center">{investorVisas}</span>
+                      <span className="font-mono font-bold text-base w-6 text-center">
+                        {investorVisas}
+                      </span>
                       <button
                         type="button"
                         onClick={() => setInvestorVisas((v) => Math.min(5, v + 1))}
@@ -349,8 +361,12 @@ export function VariantB_ProgressiveWizard() {
                   {/* Employee Visas */}
                   <div className="p-4 rounded-xl bg-[#FAFBFD] border border-[#0C2D48]/10 flex items-center justify-between">
                     <div>
-                      <span className="font-semibold text-sm text-[#0C2D48] block">Employee / Staff Visas</span>
-                      <span className="text-xs text-[#0C2D48]/60">For hired managers &amp; operations team</span>
+                      <span className="font-semibold text-sm text-[#0C2D48] block">
+                        Employee / Staff Visas
+                      </span>
+                      <span className="text-xs text-[#0C2D48]/60">
+                        For hired managers &amp; operations team
+                      </span>
                     </div>
                     <div className="flex items-center gap-2">
                       <button
@@ -360,7 +376,9 @@ export function VariantB_ProgressiveWizard() {
                       >
                         -
                       </button>
-                      <span className="font-mono font-bold text-base w-6 text-center">{employeeVisas}</span>
+                      <span className="font-mono font-bold text-base w-6 text-center">
+                        {employeeVisas}
+                      </span>
                       <button
                         type="button"
                         onClick={() => setEmployeeVisas((v) => Math.min(10, v + 1))}
@@ -384,7 +402,8 @@ export function VariantB_ProgressiveWizard() {
                 Office Facilities &amp; Strategic Advisory
               </h3>
               <p className="text-sm text-[#0C2D48]/70 mt-1">
-                Configure registered office premises and essential banking, tax, and compliance services.
+                Configure registered office premises and essential banking, tax, and compliance
+                services.
               </p>
             </div>
 
@@ -414,7 +433,9 @@ export function VariantB_ProgressiveWizard() {
                       </div>
                       <p className="text-xs text-[#0C2D48]/65 mb-3">{off.description}</p>
                       <div className="font-mono text-xs font-bold text-[#0C2D48]">
-                        {off.costAed === 0 ? 'Included in Base' : `+AED ${off.costAed.toLocaleString()}/yr`}
+                        {off.costAed === 0
+                          ? 'Included in Base'
+                          : `+AED ${off.costAed.toLocaleString()}/yr`}
                       </div>
                     </button>
                   );
@@ -478,7 +499,9 @@ export function VariantB_ProgressiveWizard() {
                 Itemized Formation Dossier
               </h3>
               <p className="text-sm text-[#0C2D48]/70">
-                Official statutory estimate for <strong className="text-[#0C2D48]">{calculation.jurisdictionName}</strong>. Turnaround: <span className="font-mono">{calculation.turnaroundDays}</span>.
+                Official statutory estimate for{' '}
+                <strong className="text-[#0C2D48]">{calculation.jurisdictionName}</strong>.
+                Turnaround: <span className="font-mono">{calculation.turnaroundDays}</span>.
               </p>
             </div>
 
@@ -491,15 +514,18 @@ export function VariantB_ProgressiveWizard() {
                   <span>Tariff ({currency})</span>
                 </div>
                 {calculation.breakdown.map((item) => (
-                  <div key={item.id} className="flex items-center justify-between py-1 text-[#0C2D48]/85">
+                  <div
+                    key={item.id}
+                    className="flex items-center justify-between py-1 text-[#0C2D48]/85"
+                  >
                     <div>
                       <span className="font-medium text-[#0C2D48]">{item.label}</span>
-                      {item.note && <span className="block text-[10px] text-[#0C2D48]/50">{item.note}</span>}
+                      {item.note && (
+                        <span className="block text-[10px] text-[#0C2D48]/50">{item.note}</span>
+                      )}
                     </div>
                     <span className="font-semibold text-right">
-                      {currency === 'AED'
-                        ? `AED ${item.amountAed.toLocaleString()}`
-                        : `$${Math.round(item.amountAed / 3.6725).toLocaleString()}`}
+                      {currency === 'AED' ? item.formattedAed : item.formattedUsd}
                     </span>
                   </div>
                 ))}
@@ -516,12 +542,16 @@ export function VariantB_ProgressiveWizard() {
                     <span className="w-10 h-10 rounded-full bg-[#22C55E] text-white mx-auto flex items-center justify-center mb-2">
                       <Check className="w-5 h-5" />
                     </span>
-                    <h4 className="font-heading font-semibold text-base text-[#0C2D48]">Dossier Dispatched</h4>
+                    <h4 className="font-heading font-semibold text-base text-[#0C2D48]">
+                      Dossier Dispatched
+                    </h4>
                     <p className="text-xs text-[#0C2D48]/75 mt-1">
-                      Reference: <strong className="font-mono text-[#16A34A]">{submitSuccess}</strong>
+                      Reference:{' '}
+                      <strong className="font-mono text-[#16A34A]">{submitSuccess}</strong>
                     </p>
                     <p className="text-xs text-[#0C2D48]/60 mt-2">
-                      Our corporate structuring director will email your binding contract within 2 business hours.
+                      Our corporate structuring director will email your binding contract within 2
+                      business hours.
                     </p>
                   </div>
                 ) : (
@@ -533,7 +563,9 @@ export function VariantB_ProgressiveWizard() {
                       Receive an official government-stamped breakdown and booking clearance.
                     </p>
                     <div>
-                      <label className="text-[10px] font-mono uppercase text-[#0C2D48]/60 block mb-1">Full Name</label>
+                      <label className="text-[10px] font-mono uppercase text-[#0C2D48]/60 block mb-1">
+                        Full Name
+                      </label>
                       <input
                         type="text"
                         required
@@ -544,7 +576,9 @@ export function VariantB_ProgressiveWizard() {
                       />
                     </div>
                     <div>
-                      <label className="text-[10px] font-mono uppercase text-[#0C2D48]/60 block mb-1">Corporate Email</label>
+                      <label className="text-[10px] font-mono uppercase text-[#0C2D48]/60 block mb-1">
+                        Corporate Email
+                      </label>
                       <input
                         type="email"
                         required
@@ -555,7 +589,9 @@ export function VariantB_ProgressiveWizard() {
                       />
                     </div>
                     <div>
-                      <label className="text-[10px] font-mono uppercase text-[#0C2D48]/60 block mb-1">Phone / WhatsApp</label>
+                      <label className="text-[10px] font-mono uppercase text-[#0C2D48]/60 block mb-1">
+                        Phone / WhatsApp
+                      </label>
                       <input
                         type="tel"
                         required

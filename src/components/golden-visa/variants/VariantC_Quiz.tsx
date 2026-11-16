@@ -13,6 +13,7 @@ import {
   HelpCircle,
 } from 'lucide-react';
 import { ROUTES } from '@/lib/routes';
+import { submitIntakeDossier } from '@/lib/intake-conduit';
 
 interface QuizState {
   profileType: 'property' | 'business' | 'executive' | 'tech';
@@ -89,39 +90,24 @@ export function VariantC_Quiz() {
     if (!leadName || !leadEmail || !leadPhone) return;
 
     setIsSubmitting(true);
-    const leadPayload = {
-      name: leadName,
-      email: leadEmail,
-      phone: leadPhone,
-      quizAnswers: quiz,
-      result: qualificationResult,
-      variant: 'C-GoldenVisaQuiz',
-      submittedAt: new Date().toISOString(),
-    };
+    const result = await submitIntakeDossier(
+      {
+        name: leadName,
+        email: leadEmail,
+        phone: leadPhone,
+        quizAnswers: quiz,
+        result: qualificationResult,
+        variant: 'C-GoldenVisaQuiz',
+      },
+      { referencePrefix: 'KLAY-GV' }
+    );
 
-    try {
-      const endpoint = import.meta.env?.VITE_LEAD_API_ENDPOINT || '/api/leads';
-      const res = await fetch(endpoint, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(leadPayload),
-      });
-      if (res.ok) {
-        const data = await res.json();
-        setSubmitSuccess(data.leadId || 'GV-' + Math.floor(100000 + Math.random() * 900000));
-      } else {
-        setSubmitSuccess('KLAY-GV-' + Math.floor(100000 + Math.random() * 900000));
-      }
-    } catch {
-      setSubmitSuccess('KLAY-GV-' + Math.floor(100000 + Math.random() * 900000));
-    } finally {
-      setIsSubmitting(false);
-    }
+    setSubmitSuccess(result.referenceNumber);
+    setIsSubmitting(false);
   };
 
   return (
     <div className="w-full max-w-4xl mx-auto rounded-3xl bg-white border border-[#0C2D48]/12 shadow-[0_24px_60px_rgba(12,45,72,0.08)] overflow-hidden text-[#0C2D48] font-sans">
-      
       {/* Top Header */}
       <div className="bg-[#FAFBFD] border-b border-[#0C2D48]/10 px-6 sm:px-10 py-5 flex items-center justify-between">
         <div className="flex items-center gap-3">
@@ -146,7 +132,6 @@ export function VariantC_Quiz() {
 
       {/* Quiz Body */}
       <div className="p-6 sm:p-10 min-h-[400px] flex flex-col justify-between">
-        
         {/* STEP 1: Primary Profile */}
         {step === 1 && (
           <div className="space-y-6 animate-in fade-in duration-300">
@@ -155,7 +140,8 @@ export function VariantC_Quiz() {
                 What best represents your primary profile in the UAE?
               </h4>
               <p className="text-sm text-[#0C2D48]/70 mt-1">
-                Select your primary economic base. We will tailor the statutory legal criteria accordingly.
+                Select your primary economic base. We will tailor the statutory legal criteria
+                accordingly.
               </p>
             </div>
 
@@ -177,12 +163,17 @@ export function VariantC_Quiz() {
                     <Landmark className="w-5 h-5" />
                   </div>
                   <div>
-                    <h5 className="font-heading font-semibold text-base text-[#0C2D48]">Real Estate Owner</h5>
-                    <span className="text-[10px] font-mono uppercase text-[#0C2D48]/60">Property Investment</span>
+                    <h5 className="font-heading font-semibold text-base text-[#0C2D48]">
+                      Real Estate Owner
+                    </h5>
+                    <span className="text-[10px] font-mono uppercase text-[#0C2D48]/60">
+                      Property Investment
+                    </span>
                   </div>
                 </div>
                 <p className="text-xs text-[#0C2D48]/70 leading-relaxed">
-                  You own or are acquiring Dubai properties (ready or off-plan) with minimum AED 2M aggregate value.
+                  You own or are acquiring Dubai properties (ready or off-plan) with minimum AED 2M
+                  aggregate value.
                 </p>
               </button>
 
@@ -203,12 +194,17 @@ export function VariantC_Quiz() {
                     <Building2 className="w-5 h-5" />
                   </div>
                   <div>
-                    <h5 className="font-heading font-semibold text-base text-[#0C2D48]">Corporate Founder / Investor</h5>
-                    <span className="text-[10px] font-mono uppercase text-[#0C2D48]/60">Business Ownership</span>
+                    <h5 className="font-heading font-semibold text-base text-[#0C2D48]">
+                      Corporate Founder / Investor
+                    </h5>
+                    <span className="text-[10px] font-mono uppercase text-[#0C2D48]/60">
+                      Business Ownership
+                    </span>
                   </div>
                 </div>
                 <p className="text-xs text-[#0C2D48]/70 leading-relaxed">
-                  You hold shares in an onshore or Free Zone enterprise with AED 2M+ capital or pay corporate tax.
+                  You hold shares in an onshore or Free Zone enterprise with AED 2M+ capital or pay
+                  corporate tax.
                 </p>
               </button>
 
@@ -229,12 +225,17 @@ export function VariantC_Quiz() {
                     <BriefcaseBusiness className="w-5 h-5" />
                   </div>
                   <div>
-                    <h5 className="font-heading font-semibold text-base text-[#0C2D48]">Salaried Executive / Professional</h5>
-                    <span className="text-[10px] font-mono uppercase text-[#0C2D48]/60">MoHRE Level 1 or 2</span>
+                    <h5 className="font-heading font-semibold text-base text-[#0C2D48]">
+                      Salaried Executive / Professional
+                    </h5>
+                    <span className="text-[10px] font-mono uppercase text-[#0C2D48]/60">
+                      MoHRE Level 1 or 2
+                    </span>
                   </div>
                 </div>
                 <p className="text-xs text-[#0C2D48]/70 leading-relaxed">
-                  Senior director, physician, or technology leader earning AED 30,000+/mo under an active employment contract.
+                  Senior director, physician, or technology leader earning AED 30,000+/mo under an
+                  active employment contract.
                 </p>
               </button>
 
@@ -255,12 +256,17 @@ export function VariantC_Quiz() {
                     <Sparkles className="w-5 h-5" />
                   </div>
                   <div>
-                    <h5 className="font-heading font-semibold text-base text-[#0C2D48]">Innovation, AI or Elite Talent</h5>
-                    <span className="text-[10px] font-mono uppercase text-[#0C2D48]/60">Incubator / Scholar</span>
+                    <h5 className="font-heading font-semibold text-base text-[#0C2D48]">
+                      Innovation, AI or Elite Talent
+                    </h5>
+                    <span className="text-[10px] font-mono uppercase text-[#0C2D48]/60">
+                      Incubator / Scholar
+                    </span>
                   </div>
                 </div>
                 <p className="text-xs text-[#0C2D48]/70 leading-relaxed">
-                  Tech innovator with incubator backing, certified patent holder, or top 100 global university graduate.
+                  Tech innovator with incubator backing, certified patent holder, or top 100 global
+                  university graduate.
                 </p>
               </button>
             </div>
@@ -275,7 +281,8 @@ export function VariantC_Quiz() {
                 Select your financial or qualification bracket:
               </h4>
               <p className="text-sm text-[#0C2D48]/70 mt-1">
-                Criteria specific to your selected profile: <strong className="capitalize text-[#0C2D48]">{quiz.profileType}</strong>.
+                Criteria specific to your selected profile:{' '}
+                <strong className="capitalize text-[#0C2D48]">{quiz.profileType}</strong>.
               </p>
             </div>
 
@@ -283,10 +290,23 @@ export function VariantC_Quiz() {
               {quiz.profileType === 'property' && (
                 <>
                   {[
-                    { id: 'aed-2m-ready', label: 'Single Ready Property valued at AED 2,000,000+ (Full Title Deed)' },
-                    { id: 'aed-2m-multiple', label: 'Multiple Properties totaling AED 2,000,000+ in combined equity' },
-                    { id: 'aed-2m-offplan', label: 'Off-Plan Property under construction with AED 2M+ value (Oqood certificate)' },
-                    { id: 'aed-2m-mortgaged', label: 'Mortgaged Property with AED 2M+ value and Bank NOC letter' },
+                    {
+                      id: 'aed-2m-ready',
+                      label: 'Single Ready Property valued at AED 2,000,000+ (Full Title Deed)',
+                    },
+                    {
+                      id: 'aed-2m-multiple',
+                      label: 'Multiple Properties totaling AED 2,000,000+ in combined equity',
+                    },
+                    {
+                      id: 'aed-2m-offplan',
+                      label:
+                        'Off-Plan Property under construction with AED 2M+ value (Oqood certificate)',
+                    },
+                    {
+                      id: 'aed-2m-mortgaged',
+                      label: 'Mortgaged Property with AED 2M+ value and Bank NOC letter',
+                    },
                   ].map((opt) => (
                     <button
                       key={opt.id}
@@ -307,9 +327,18 @@ export function VariantC_Quiz() {
               {quiz.profileType === 'business' && (
                 <>
                   {[
-                    { id: 'biz-2m-capital', label: 'AED 2,000,000+ paid-up share capital in a UAE registered company' },
-                    { id: 'biz-250k-tax', label: 'Company paying AED 250,000+ annually in UAE Federal Corporate Tax' },
-                    { id: 'biz-new-syndicate', label: 'Planning to establish a new corporate entity with AED 2M capital' },
+                    {
+                      id: 'biz-2m-capital',
+                      label: 'AED 2,000,000+ paid-up share capital in a UAE registered company',
+                    },
+                    {
+                      id: 'biz-250k-tax',
+                      label: 'Company paying AED 250,000+ annually in UAE Federal Corporate Tax',
+                    },
+                    {
+                      id: 'biz-new-syndicate',
+                      label: 'Planning to establish a new corporate entity with AED 2M capital',
+                    },
                   ].map((opt) => (
                     <button
                       key={opt.id}
@@ -330,9 +359,19 @@ export function VariantC_Quiz() {
               {quiz.profileType === 'executive' && (
                 <>
                   {[
-                    { id: 'exec-30k-plus', label: 'Basic Monthly Salary of AED 30,000+ under MoHRE contract' },
-                    { id: 'exec-managing-dir', label: 'Managing Director / GM role with executive company authorization' },
-                    { id: 'exec-under-30k', label: 'Currently earning under AED 30k but eligible via specialized degree attestation' },
+                    {
+                      id: 'exec-30k-plus',
+                      label: 'Basic Monthly Salary of AED 30,000+ under MoHRE contract',
+                    },
+                    {
+                      id: 'exec-managing-dir',
+                      label: 'Managing Director / GM role with executive company authorization',
+                    },
+                    {
+                      id: 'exec-under-30k',
+                      label:
+                        'Currently earning under AED 30k but eligible via specialized degree attestation',
+                    },
                   ].map((opt) => (
                     <button
                       key={opt.id}
@@ -353,9 +392,19 @@ export function VariantC_Quiz() {
               {quiz.profileType === 'tech' && (
                 <>
                   {[
-                    { id: 'tech-incubator', label: 'Project approved or incubated by Dubai Future District / Area 2071' },
-                    { id: 'tech-exit', label: 'Previous successful business exit of AED 7,000,000+ in tech/commercial' },
-                    { id: 'tech-patents', label: 'Holder of registered intellectual property or certified scientist' },
+                    {
+                      id: 'tech-incubator',
+                      label: 'Project approved or incubated by Dubai Future District / Area 2071',
+                    },
+                    {
+                      id: 'tech-exit',
+                      label:
+                        'Previous successful business exit of AED 7,000,000+ in tech/commercial',
+                    },
+                    {
+                      id: 'tech-patents',
+                      label: 'Holder of registered intellectual property or certified scientist',
+                    },
                   ].map((opt) => (
                     <button
                       key={opt.id}
@@ -416,7 +465,9 @@ export function VariantC_Quiz() {
                   className="w-full p-5 rounded-2xl border border-[#0C2D48]/12 bg-white hover:border-[#22C55E] hover:bg-[#22C55E]/5 text-left flex items-start justify-between transition-all"
                 >
                   <div>
-                    <h5 className="font-heading font-semibold text-base text-[#0C2D48]">{goal.title}</h5>
+                    <h5 className="font-heading font-semibold text-base text-[#0C2D48]">
+                      {goal.title}
+                    </h5>
                     <p className="text-xs text-[#0C2D48]/65 mt-1">{goal.desc}</p>
                   </div>
                   <ArrowRight className="w-5 h-5 text-[#22C55E] shrink-0 mt-1 ml-4" />
@@ -429,7 +480,6 @@ export function VariantC_Quiz() {
         {/* STEP 4: INSTANT QUALIFICATION ASSESSMENT & DOSSIER DISPATCH */}
         {step === 4 && (
           <div className="space-y-6 animate-in fade-in duration-300">
-            
             {/* Qualification Result Banner */}
             <div className="p-6 rounded-2xl bg-[#05131F] text-white border border-[#D4AF37]/50 shadow-lg relative overflow-hidden">
               <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
@@ -446,12 +496,17 @@ export function VariantC_Quiz() {
                     {qualificationResult.pathwayTitle}
                   </h4>
                   <p className="text-xs text-white/70 mt-1 max-w-xl">
-                    Authority: <strong className="text-[#F6DF98]">{qualificationResult.authority}</strong> · Filing Turnaround: <span className="font-mono">{qualificationResult.turnaround}</span>
+                    Authority:{' '}
+                    <strong className="text-[#F6DF98]">{qualificationResult.authority}</strong> ·
+                    Filing Turnaround:{' '}
+                    <span className="font-mono">{qualificationResult.turnaround}</span>
                   </p>
                 </div>
 
                 <div className="text-right sm:border-l sm:border-white/15 sm:pl-6 shrink-0">
-                  <span className="text-[10px] font-mono uppercase text-white/50 block">RESIDENCY TERM</span>
+                  <span className="text-[10px] font-mono uppercase text-white/50 block">
+                    RESIDENCY TERM
+                  </span>
                   <span className="font-mono text-lg font-bold text-[#F6DF98]">10 YEARS</span>
                   <span className="text-[10px] text-[#22C55E] block font-mono">100% Renewable</span>
                 </div>
@@ -483,7 +538,8 @@ export function VariantC_Quiz() {
                     Application ID: <strong>{submitSuccess}</strong>
                   </p>
                   <p className="text-xs text-[#0C2D48]/70 mt-2">
-                    Our Senior Immigration Legal Director will verify your title deed / corporate documents and contact you within 2 business hours.
+                    Our Senior Immigration Legal Director will verify your title deed / corporate
+                    documents and contact you within 2 business hours.
                   </p>
                 </div>
               ) : (
@@ -494,7 +550,8 @@ export function VariantC_Quiz() {
                         Lock In Your Priority Pre-Clearance
                       </h5>
                       <p className="text-xs text-[#0C2D48]/60">
-                        Receive official document submission guidance and direct immigration filing slot.
+                        Receive official document submission guidance and direct immigration filing
+                        slot.
                       </p>
                     </div>
                     <ShieldCheck className="w-6 h-6 text-[#16A34A] shrink-0" />
@@ -532,7 +589,9 @@ export function VariantC_Quiz() {
                     disabled={isSubmitting}
                     className="w-full py-3 px-5 rounded-xl bg-[#0C2D48] hover:bg-[#0C2D48]/90 text-white font-medium text-xs sm:text-sm flex items-center justify-center gap-2 shadow-md transition-all active:scale-[0.99]"
                   >
-                    {isSubmitting ? 'Verifying Credentials...' : 'Claim Guaranteed Pre-Clearance File'}
+                    {isSubmitting
+                      ? 'Verifying Credentials...'
+                      : 'Claim Guaranteed Pre-Clearance File'}
                     <ArrowRight className="w-4 h-4 text-[#22C55E]" />
                   </button>
                 </form>

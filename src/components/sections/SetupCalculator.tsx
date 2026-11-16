@@ -1,43 +1,19 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ArrowRight, Check, Building2, Shield, Landmark } from 'lucide-react';
 import { ROUTES } from '@/lib/routes';
+import { submitIntakeDossier } from '@/lib/intake-conduit';
+import {
+  INSTANT_SETUP_PRESETS,
+  calculateInstantSetup,
+  type InstantPresetId,
+} from '@/lib/calculator-engine';
 
-interface JurisdictionPreset {
-  id: string;
-  name: string;
-  subtitle: string;
-  basePrice: number;
-  badge: string;
-  icon: typeof Building2;
-}
-
-const JURISDICTIONS: JurisdictionPreset[] = [
-  {
-    id: 'freezone',
-    name: 'Free Zone',
-    subtitle: 'Meydan / IFZA / DMCC',
-    basePrice: 12500,
-    badge: '100% Tax Exemption',
-    icon: Landmark,
-  },
-  {
-    id: 'mainland',
-    name: 'Dubai Mainland',
-    subtitle: 'DED Commercial LLC',
-    basePrice: 18500,
-    badge: 'Local UAE Market',
-    icon: Building2,
-  },
-  {
-    id: 'offshore',
-    name: 'Offshore Holding',
-    subtitle: 'RAK ICC / JAFZA',
-    basePrice: 24000,
-    badge: 'Asset Protection',
-    icon: Shield,
-  },
-];
+const PRESET_ICONS: Record<InstantPresetId, typeof Building2> = {
+  freezone: Landmark,
+  mainland: Building2,
+  offshore: Shield,
+};
 
 /**
  * Executive Instant Formation Calculator (Single-Fold, High-Conversion Design).
@@ -45,7 +21,7 @@ const JURISDICTIONS: JurisdictionPreset[] = [
  */
 export function SetupCalculator() {
   const navigate = useNavigate();
-  const [jurisdiction, setJurisdiction] = useState<string>('freezone');
+  const [jurisdiction, setJurisdiction] = useState<InstantPresetId>('freezone');
   const [visas, setVisas] = useState<number>(1);
   const [officeType, setOfficeType] = useState<'flexi' | 'physical'>('flexi');
   const [leadName, setLeadName] = useState<string>('');
@@ -56,51 +32,40 @@ export function SetupCalculator() {
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
   const [confirmedRef, setConfirmedRef] = useState<string>('');
 
-  const selectedJur = JURISDICTIONS.find((j) => j.id === jurisdiction) || JURISDICTIONS[0];
-  const visaPrice = visas * 3750;
-  const officePrice = officeType === 'physical' ? 12000 : 0;
-  const grandTotal = selectedJur.basePrice + visaPrice + officePrice;
-  const usdTotal = Math.round(grandTotal / 3.6725);
+  // Pure view bindings from unified calculator engine
+  const estimate = useMemo(
+    () =>
+      calculateInstantSetup({
+        preset: jurisdiction,
+        visas,
+        officeType,
+      }),
+    [jurisdiction, visas, officeType]
+  );
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!leadName.trim() || !leadEmail.trim() || !leadPhone.trim()) {
-      setErrorMessage('Please provide your name, email, and phone number.');
-      return;
-    }
-
     setIsSubmitting(true);
     setErrorMessage(null);
-    try {
-      const res = await fetch('/api/leads', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          name: leadName.trim(),
-          email: leadEmail.trim(),
-          phone: leadPhone.trim(),
-          jurisdiction: selectedJur.name,
-          visaCount: visas,
-          officeType: officeType === 'flexi' ? 'Flexi Desk' : 'Physical Lease',
-          notes: `Estimated First-Year Cost: AED ${grandTotal.toLocaleString()} (~$${usdTotal.toLocaleString()} USD)`,
-          source: 'executive_instant_calculator',
-          timestamp: new Date().toISOString(),
-        }),
-      });
-      const data = await res.json().catch(() => ({}));
-      if (res.ok && data.success) {
-        setConfirmedRef(data.leadId || data.referenceNumber || 'KLAY-CONFIRMED');
-        setIsSubmitted(true);
-      } else {
-        setErrorMessage(data.error || 'Failed to submit inquiry. Please try again.');
-      }
-    } catch {
-      setErrorMessage(
-        'Network connection error. Please try again or contact our advisory desk directly.'
-      );
-    } finally {
-      setIsSubmitting(false);
+
+    const result = await submitIntakeDossier({
+      name: leadName,
+      email: leadEmail,
+      phone: leadPhone,
+      jurisdiction: estimate.preset.name,
+      visaCount: estimate.visas,
+      officeType: estimate.officeType === 'flexi' ? 'Flexi Desk' : 'Physical Lease',
+      notes: `Estimated First-Year Cost: ${estimate.formattedTotalAed} (~${estimate.formattedTotalUsd})`,
+      source: 'executive_instant_calculator',
+    });
+
+    if (result.success) {
+      setConfirmedRef(result.referenceNumber);
+      setIsSubmitted(true);
+    } else {
+      setErrorMessage(result.error || 'Failed to submit inquiry. Please try again.');
     }
+    setIsSubmitting(false);
   };
 
   return (
@@ -138,9 +103,9 @@ export function SetupCalculator() {
               1. Choose Jurisdiction Structure
             </label>
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
-              {JURISDICTIONS.map((jur) => {
+              {Object.values(INSTANT_SETUP_PRESETS).map((jur) => {
                 const isSelected = jurisdiction === jur.id;
-                const Icon = jur.icon;
+                const Icon = PRESET_ICONS[jur.id];
                 return (
                   <button
                     key={jur.id}
@@ -173,7 +138,7 @@ export function SetupCalculator() {
                       {jur.subtitle}
                     </span>
                     <span className="text-xs font-mono font-medium text-[#16A34A] mt-2">
-                      From AED {jur.basePrice.toLocaleString()}
+                      From AED {jur.basePriceAed.toLocaleString()}
                     </span>
                   </button>
                 );
@@ -189,18 +154,25 @@ export function SetupCalculator() {
                 <label className="text-xs font-mono uppercase tracking-wider text-[#0C2D48]/70">
                   2. Residency Visas
                 </label>
-                <span className="text-[11px] font-mono text-[#0C2D48]/50">+AED 3,750 / visa</span>
+                <span className="text-[11px] font-mono text-[#0C2D48]/50">
+                  {estimate.preset.id === 'offshore'
+                    ? 'Visas Excluded (Offshore)'
+                    : '+AED 3,750 / visa'}
+                </span>
               </div>
               <div className="grid grid-cols-4 gap-1.5 bg-[#0C2D48]/5 p-1 rounded-xl border border-[#0C2D48]/10">
                 {[0, 1, 2, 3].map((num) => (
                   <button
                     key={num}
                     type="button"
+                    disabled={estimate.preset.id === 'offshore'}
                     onClick={() => setVisas(num)}
                     className={`py-2 text-center rounded-lg text-sm font-semibold transition-all ${
-                      visas === num
-                        ? 'bg-[#0C2D48] text-white shadow-sm'
-                        : 'text-[#0C2D48]/75 hover:bg-white/60'
+                      estimate.preset.id === 'offshore'
+                        ? 'text-[#0C2D48]/30 cursor-not-allowed'
+                        : visas === num
+                          ? 'bg-[#0C2D48] text-white shadow-sm'
+                          : 'text-[#0C2D48]/75 hover:bg-white/60'
                     }`}
                   >
                     {num === 3 ? '3+' : num}
@@ -250,10 +222,10 @@ export function SetupCalculator() {
                 </span>
                 <div className="flex items-baseline gap-2.5">
                   <span className="text-3xl sm:text-4xl font-heading font-semibold text-white tracking-tight">
-                    AED {grandTotal.toLocaleString()}
+                    {estimate.formattedTotalAed}
                   </span>
                   <span className="text-xs sm:text-sm font-mono text-white/60">
-                    (&asymp; ${usdTotal.toLocaleString()} USD)
+                    (&asymp; {estimate.formattedTotalUsd})
                   </span>
                 </div>
               </div>
@@ -261,13 +233,14 @@ export function SetupCalculator() {
               {/* Line items mini-pill */}
               <div className="flex flex-wrap gap-2 text-[11px] font-mono text-white/80 border-t sm:border-t-0 sm:border-l border-white/10 pt-3 sm:pt-0 sm:pl-4">
                 <span className="bg-white/10 px-2 py-0.5 rounded">
-                  License: AED {selectedJur.basePrice.toLocaleString()}
+                  License: {estimate.formattedBasePrice}
                 </span>
                 <span className="bg-white/10 px-2 py-0.5 rounded">
-                  Visas: AED {visaPrice.toLocaleString()}
+                  Visas: {estimate.formattedVisaPrice}
                 </span>
                 <span className="bg-white/10 px-2 py-0.5 rounded">
-                  Office: {officePrice === 0 ? 'Included' : `AED ${officePrice.toLocaleString()}`}
+                  Office:{' '}
+                  {estimate.officePriceAed === 0 ? 'Included' : estimate.formattedOfficePrice}
                 </span>
               </div>
             </div>
