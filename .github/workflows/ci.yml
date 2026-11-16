@@ -27,6 +27,9 @@ jobs:
       - name: TypeScript Static Typecheck
         run: npm run typecheck
 
+      - name: Security Gate Regression Tests
+        run: node scripts/test-security-gates.mjs
+
       - name: Production Build & SSG Prerendering
         run: npm run build
 

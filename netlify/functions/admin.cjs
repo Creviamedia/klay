@@ -23,18 +23,22 @@ const {
   handleDeleteBlog,
 } = require('./admin-core.cjs');
 
+const ALLOWED_ADMIN_ORIGINS = new Set([
+  'https://klay-consulting-staging.netlify.app',
+  'https://klayconsultants.com',
+]);
+
 function getCorsHeaders(event) {
   const origin = event?.headers?.origin || event?.headers?.Origin || '';
   const headers = {
-    'Access-Control-Allow-Headers': 'Content-Type, Authorization, Cookie',
+    'Access-Control-Allow-Headers': 'Content-Type, Authorization',
     'Access-Control-Allow-Methods': 'GET, POST, PATCH, DELETE, OPTIONS',
+    Vary: 'Origin',
   };
 
-  if (origin) {
+  if (ALLOWED_ADMIN_ORIGINS.has(origin)) {
     headers['Access-Control-Allow-Origin'] = origin;
     headers['Access-Control-Allow-Credentials'] = 'true';
-  } else {
-    headers['Access-Control-Allow-Origin'] = '*';
   }
 
   return headers;
@@ -54,6 +58,17 @@ function safeDecode(val) {
 
 exports.handler = async (event, context) => {
   const corsHeaders = getCorsHeaders(event);
+  const origin = event?.headers?.origin || event?.headers?.Origin || '';
+
+  // Reject cross-origin browser requests before authentication, including
+  // credentialed writes that could otherwise bypass a CORS read restriction.
+  if (origin && !ALLOWED_ADMIN_ORIGINS.has(origin)) {
+    return {
+      statusCode: 403,
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ error: 'Origin not allowed' }),
+    };
+  }
 
   // Pre-flight CORS request
   if (event.httpMethod === 'OPTIONS') {
