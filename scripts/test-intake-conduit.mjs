@@ -48,6 +48,11 @@ global.fetch = async (url, opts) => {
   const body = JSON.parse(opts.body);
   assert.strictEqual(body.name, 'Sovereign Founder');
   assert.strictEqual(body.phone, '+971 55 987 6543');
+  assert.strictEqual(
+    body.budget,
+    'AED 50k - 100k',
+    'Budget qualifier must be forwarded in payload'
+  );
   return {
     ok: true,
     status: 201,
@@ -60,6 +65,7 @@ const resSuccess = await submitIntakeDossier({
   email: 'founder@sovereign.ae',
   phone: '055 987 6543',
   dialCode: '+971',
+  budget: '   AED 50k - 100k   ',
   jurisdiction: 'DIFC',
 });
 assert.strictEqual(resSuccess.success, true);

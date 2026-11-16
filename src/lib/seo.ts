@@ -1,6 +1,7 @@
 import { BLOG_POSTS } from '../content/blog/posts';
 import type { BlogArticleDetails, BlogPostSummary } from '../content/blog/types';
 import { COMPANY, SERVICES } from './data';
+import { CALCULATOR_FAQS, GOLDEN_VISA_FAQS, HOMEPAGE_FAQS } from './faqs';
 import pageSeo from './seo-pages.json';
 import {
   BLOG_POSTS_PER_PAGE,
@@ -60,6 +61,30 @@ const serviceSeo: Record<string, { title: string; description: string; keyword: 
     description:
       'Get guidance preparing for a UAE corporate bank account application, including bank selection, company documents and KYC information.',
     keyword: 'UAE corporate bank account assistance',
+  },
+  'meydan-free-zone': {
+    title: 'Meydan Free Zone Setup Dubai | 60-Min License | Klay',
+    description:
+      'Set up in Meydan Free Zone Dubai. Fast 60-minute Fawri license, 100% foreign ownership, prime Downtown location, flexi-desk and corporate bank account support.',
+    keyword: 'Meydan Free Zone Setup Dubai',
+  },
+  'ifza-free-zone': {
+    title: 'IFZA Free Zone Setup Dubai | Silicon Oasis Company Setup',
+    description:
+      'Incorporate in IFZA Dubai (Dubai Silicon Oasis). Multi-activity packages, zero visa to multi-visa allocations, 100% ownership and fast investor visa support.',
+    keyword: 'IFZA Free Zone Setup Dubai',
+  },
+  'dmcc-free-zone': {
+    title: 'DMCC Free Zone Setup Dubai | JLT Company Formation',
+    description:
+      'Form your company in DMCC Free Zone at JLT Dubai. Voted #1 global free zone. Comprehensive corporate setup, commodities, crypto and executive visa services.',
+    keyword: 'DMCC Free Zone Setup Dubai',
+  },
+  'difc-company-setup': {
+    title: 'DIFC Company Formation Dubai | Financial & FinTech Hub',
+    description:
+      'Incorporate in Dubai International Financial Centre (DIFC). English common-law jurisdiction, SPVs, Innovation licenses, venture structures and family offices.',
+    keyword: 'DIFC Company Formation Dubai',
   },
 };
 
@@ -261,26 +286,74 @@ export function getPrerenderRoutes(): PublicSeoRoute[] {
   return getPublicSeoRoutes().filter((route) => !route.path.startsWith('/admin'));
 }
 
-function organizationSchema() {
+export function organizationSchema() {
   return {
-    '@type': 'ProfessionalService',
+    '@type': ['ProfessionalService', 'LegalService', 'LocalBusiness'],
     '@id': `${SITE_ORIGIN}/#organization`,
     name: COMPANY.name,
     url: `${SITE_ORIGIN}/`,
     email: COMPANY.email,
     telephone: COMPANY.phone,
+    priceRange: 'AED 12,000 - AED 100,000',
     address: {
       '@type': 'PostalAddress',
       streetAddress: 'THE EXCHANGE TOWER - Office No.2522, Business Bay',
       addressLocality: 'Dubai',
+      addressRegion: 'Dubai',
+      postalCode: '00000',
       addressCountry: 'AE',
     },
+    geo: {
+      '@type': 'GeoCoordinates',
+      latitude: '25.1872',
+      longitude: '55.2678',
+    },
+    openingHoursSpecification: [
+      {
+        '@type': 'OpeningHoursSpecification',
+        dayOfWeek: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'],
+        opens: '09:00',
+        closes: '18:00',
+      },
+    ],
+    areaServed: [
+      { '@type': 'AdministrativeArea', name: 'Dubai' },
+      { '@type': 'AdministrativeArea', name: 'Abu Dhabi' },
+      { '@type': 'AdministrativeArea', name: 'Sharjah' },
+      { '@type': 'Country', name: 'United Arab Emirates' },
+    ],
+    knowsAbout: [
+      'Dubai Free Zone Setup',
+      'Dubai Mainland DED License Formation',
+      'Meydan Free Zone License',
+      'IFZA Free Zone License',
+      'DMCC Business Setup',
+      'DIFC Corporate Structuring',
+      'UAE Corporate Tax & Accounting',
+      'UAE Golden Visa & Residency',
+    ],
     contactPoint: {
       '@type': 'ContactPoint',
       telephone: COMPANY.phone,
       email: COMPANY.email,
       contactType: 'customer service',
+      areaServed: 'AE',
+      availableLanguage: ['en', 'ar', 'ur', 'hi', 'fr', 'ru'],
     },
+  };
+}
+
+export function faqPageSchema(faqs: readonly { question: string; answer: string }[]) {
+  return {
+    '@type': 'FAQPage',
+    mainEntity: faqs.map((faq) => ({
+      '@type': 'Question',
+      name: faq.question,
+      acceptedAnswer: {
+        '@type': 'Answer',
+        text: faq.answer,
+      },
+    })),
   };
 }
 
@@ -288,7 +361,11 @@ function organizationSchema() {
  * JSON-LD for a page. `articleDetails` (from the article module) adds the rich image
  * description; it is passed during prerendering and optional on the client.
  */
-export function getStructuredData(pathname: string, articleDetails?: BlogArticleDetails): object {
+export function getStructuredData(
+  pathname: string,
+  articleDetails?: BlogArticleDetails,
+  faqs?: readonly { question: string; answer: string }[]
+): object {
   const path = normalizedPath(pathname);
   const seo = getPageSeo(path);
   const article = findArticle(path);
@@ -372,6 +449,19 @@ export function getStructuredData(pathname: string, articleDetails?: BlogArticle
       provider: { '@id': `${SITE_ORIGIN}/#organization` },
       areaServed: { '@type': 'Country', name: 'United Arab Emirates' },
     });
+  }
+
+  const pageFaqs =
+    path === '/' || path === ROUTES.home
+      ? HOMEPAGE_FAQS
+      : path === '/cost-calculator' || path === ROUTES.costCalculator.replace(/\/+$/, '')
+        ? CALCULATOR_FAQS
+        : path === '/golden-visa' || path === ROUTES.goldenVisa.replace(/\/+$/, '')
+          ? GOLDEN_VISA_FAQS
+          : (faqs ?? articleDetails?.faqs);
+
+  if (pageFaqs && pageFaqs.length > 0) {
+    graph.push(faqPageSchema(pageFaqs));
   }
 
   return { '@context': 'https://schema.org', '@graph': graph };

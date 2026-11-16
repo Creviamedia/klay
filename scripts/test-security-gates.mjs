@@ -34,6 +34,17 @@ try {
   );
   assert.equal(login.statusCode, 401);
 
+  process.env.ADMIN_PASSWORD_HASH = await admin.hashPassword('RecoveryOnly#297');
+  const staleUserClient = { execute: async () => ({ rows: [{ id: 1, username: 'admin', password_hash: await admin.hashPassword('OldOnly#297') }] }) };
+  const recovered = await admin.handleAdminLogin(
+    { username: 'admin', password: 'RecoveryOnly#297' },
+    '198.51.100.201',
+    { client: staleUserClient }
+  );
+  assert.equal(recovered.statusCode, 200, 'Environment credential should recover a stale Turso admin');
+  assert.equal(recovered.body.token, undefined);
+  delete process.env.ADMIN_PASSWORD_HASH;
+
   const token = admin.generateSessionToken('admin');
   assert.equal(admin.verifySessionToken(token)?.sub, 'admin');
   const [header, payload] = token.split('.');

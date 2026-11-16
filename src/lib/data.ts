@@ -24,7 +24,8 @@ export const SERVICES = [
     slug: 'mainland-company-setup',
     icon: Building2,
     title: 'Mainland Company Setup',
-    short: 'Establish your business in the UAE Mainland with full commercial rights and the ability to trade across all Emirates.',
+    short:
+      'Establish your business in the UAE Mainland with full commercial rights and the ability to trade across all Emirates.',
     description:
       'Mainland companies are licensed by the Department of Economic Development (DED) and can operate across the entire UAE market without restriction. Ideal for businesses that need to serve the local market, bid on government contracts, or open physical branches anywhere in the country.',
     features: [
@@ -57,7 +58,8 @@ export const SERVICES = [
     slug: 'free-zone-company-setup',
     icon: Globe2,
     title: 'Free Zone Company Setup',
-    short: 'Set up in a UAE Free Zone with 100% foreign ownership, tax benefits and streamlined licensing.',
+    short:
+      'Set up in a UAE Free Zone with 100% foreign ownership, tax benefits and streamlined licensing.',
     description:
       'UAE Free Zones are special economic zones designed for international business, offering 100% foreign ownership, zero corporate tax (in most cases), full repatriation of profits, and fast-track licensing. Each Free Zone caters to specific industries and activity types.',
     features: [
@@ -89,7 +91,8 @@ export const SERVICES = [
     slug: 'offshore-company-setup',
     icon: Anchor,
     title: 'Offshore Company Setup',
-    short: 'Register an offshore company for international business, asset protection and holding structures.',
+    short:
+      'Register an offshore company for international business, asset protection and holding structures.',
     description:
       'UAE offshore companies are non-resident entities incorporated under specific Free Zone authorities. They cannot conduct business within the UAE mainland but are powerful vehicles for international trade, asset holding, and tax-efficient corporate structuring.',
     features: [
@@ -121,7 +124,8 @@ export const SERVICES = [
     slug: 'golden-visa',
     icon: Plane,
     title: 'Golden Visa',
-    short: 'Long-term residency for investors, entrepreneurs, skilled professionals and exceptional talents.',
+    short:
+      'Long-term residency for investors, entrepreneurs, skilled professionals and exceptional talents.',
     description:
       'The UAE Golden Visa grants long-term residency (5 or 10 years) to investors, entrepreneurs, skilled professionals, scientists, outstanding students and humanitarian pioneers. It provides stability and a clear path to building a life in the UAE.',
     features: [
@@ -246,6 +250,154 @@ export const SERVICES = [
       'Company license copy',
     ],
   },
+  {
+    slug: 'meydan-free-zone',
+    icon: Building2,
+    title: 'Meydan Free Zone Setup Dubai',
+    short:
+      'Form your business in Meydan Free Zone with fast Fawri 60-minute licensing, 100% foreign ownership, and prime Dubai location.',
+    description:
+      "Meydan Free Zone is strategically located near Downtown Dubai, offering a modern, digital-first licensing authority. With guaranteed 100% foreign ownership, flexible flexi-desk and physical office facilities, instant Fawri trade licenses, and seamless eligibility for UAE residency visas and corporate bank accounts, Meydan is one of Dubai's most competitive business hubs.",
+    features: [
+      'Instant 60-minute Fawri license option',
+      '100% foreign ownership & capital repatriation',
+      'Central Dubai location near Downtown & Business Bay',
+      'Zero paid-up share capital requirement',
+    ],
+    benefits: [
+      'Central Dubai registered business address (The Meydan Hotel)',
+      'Multi-year license packages with bundled visa allocations',
+      'Over 1,500 approved commercial, consulting, and media activities',
+      'Fast-track partner & employment visa quotas',
+      'Direct gateway to top UAE Tier-1 corporate bank accounts',
+    ],
+    process: [
+      'Activity selection & trade name clearance',
+      'KYC documentation & security pre-approval',
+      'Digital license issuance (standard 24h or Fawri 60-min)',
+      'Establishment card & e-Channel registration',
+      'Medical VIP test & Emirates ID biometrics',
+      'Corporate bank account opening assistance',
+    ],
+    requirements: [
+      'Passport copy with 6+ months validity for all partners',
+      'UAE entry stamp or residency visa copy (if resident)',
+      'Proposed trade names (minimum 3 options in order of preference)',
+      'Detailed description of planned commercial activities',
+      'Passport-sized digital photograph with white background',
+    ],
+  },
+  {
+    slug: 'ifza-free-zone',
+    icon: Globe2,
+    title: 'IFZA Free Zone Setup Dubai',
+    short:
+      'Cost-effective, highly scalable business setup in the International Free Zone Authority (Dubai Silicon Oasis) with flexible visa allocations.',
+    description:
+      'The International Free Zone Authority (IFZA), operating in Dubai Silicon Oasis, provides an internationally recognized, agile, and cost-effective ecosystem. IFZA allows entrepreneurs to combine commercial, professional, and industrial activities under a single license with flexible office and visa packages, making it an ideal choice for global startups, consultancies, and digital agencies.',
+    features: [
+      'Cost-effective multi-activity licensing under one license',
+      '0 to 6+ visa allocation packages',
+      '100% foreign ownership with 0% corporate tax on qualifying income',
+      'No physical office requirement (dedicated virtual flexi-desks)',
+    ],
+    benefits: [
+      'Combine professional, commercial, and consulting activities on one license',
+      'Streamlined digital incorporation without physical presence required for license',
+      'Strategic access to Dubai Silicon Oasis tech infrastructure',
+      'Predictable renewal fees and transparent package pricing',
+      'Dedicated assistance for UAE investor and employee residency visas',
+    ],
+    process: [
+      'Consultation on activity bundling and visa quota selection',
+      'Trade name reservation and passport compliance submission',
+      'Digital signing of Articles of Association (MOA)',
+      'Official IFZA trade license issuance within 48 to 72 hours',
+      'Immigration file activation & e-Visa issuance',
+      'Emirates ID biometrics, medical VIP screening & bank onboarding',
+    ],
+    requirements: [
+      'Shareholder and manager passport copies',
+      'Clear color passport-size digital photographs',
+      'Proof of residential address (utility bill or bank statement)',
+      'Selected business activities from the official IFZA registry',
+      'Emirates ID and cancellation papers (if already in UAE on previous visa)',
+    ],
+  },
+  {
+    slug: 'dmcc-free-zone',
+    icon: Anchor,
+    title: 'DMCC Free Zone Setup Dubai',
+    short:
+      'Incorporate in Dubai Multi Commodities Centre (DMCC) at JLT—voted Global Free Zone of the Year nine times.',
+    description:
+      "Dubai Multi Commodities Centre (DMCC) is the premier interconnected business district in Jumeirah Lakes Towers (JLT), Dubai. Ranked as the world's top free zone by Financial Times fDi Intelligence, DMCC is the global benchmark for international commodities, energy, technology, Web3 crypto, financial services, and global consulting corporations seeking prestigious corporate presence and world-class infrastructure.",
+    features: [
+      'Voted #1 Free Zone in the world for 9 consecutive years',
+      'Prestigious JLT Dubai address with freehold commercial property options',
+      'Specialized Crypto Centre, Gaming Centre, and Sustainability Hubs',
+      'Full capital and profit repatriation with 0% personal tax',
+    ],
+    benefits: [
+      'Global prestige and immediate credibility with international tier-1 banks',
+      'Access to DMCC trade platforms (Dubai Gold & Commodities Exchange)',
+      'Customized physical office spaces from serviced desks to full corporate floors',
+      'World-class networking, trade delegations, and institutional events',
+      'Fast-track digital visa processing and family sponsorship',
+    ],
+    process: [
+      'Pre-incorporation review, activity selection & initial name approval',
+      'Company registration documentation & DMCC portal onboarding',
+      'Office lease selection (Flexi-desk, DMCC business centre, or physical lease)',
+      'Issuance of DMCC Electronic License & Memorandum of Association',
+      'Establishment card registration & investor/employee visa processing',
+      'Corporate bank account introduction with primary UAE and international banks',
+    ],
+    requirements: [
+      'Shareholder passport copies & proof of address (last 3 months)',
+      'Comprehensive CV / professional profile of beneficial owners',
+      'Brief business plan or summary of corporate operations',
+      'Selected DMCC licensed activities and designated manager appointment',
+      'Tenancy contract or DMCC business centre flexi-desk agreement',
+    ],
+  },
+  {
+    slug: 'difc-company-setup',
+    icon: Landmark,
+    title: 'DIFC Company Formation Dubai',
+    short:
+      'Establish your financial institution, tech startup, holding company, or family office in the DIFC common-law jurisdiction.',
+    description:
+      'Dubai International Financial Centre (DIFC) is the leading independent financial jurisdiction in the Middle East, Africa, and South Asia (MEASA). Governed by an independent common-law judicial system based on English common law, DIFC is home to premier global banks, asset managers, fintech innovators, private wealth family offices, and holding structures requiring sovereign-grade legal certainty.',
+    features: [
+      'Independent English common-law jurisdiction and DIFC Courts',
+      'Subsidised Innovation Hub licenses for fintech, Web3, and AI startups',
+      'Prescribed Companies, SPVs, and Family Office holding structures',
+      'Regulated by DFSA for financial institutions and asset management',
+    ],
+    benefits: [
+      'World-class institutional reputation recognized by international regulators',
+      'Unrivaled access to institutional capital, venture funds, and sovereign investors',
+      'Flexible SPV regimes for regional asset holding and estate planning',
+      'Direct access to DIFC FinTech Hive and global acceleration ecosystems',
+      'Long-term 10-year UAE Golden Visa sponsorship for founders and executives',
+    ],
+    process: [
+      'Structural consultation & determination of regulatory scope (DFSA vs Non-regulated)',
+      'Initial submission & letter of intent to the DIFC Registrar of Companies (ROC)',
+      'Drafting DIFC-compliant Articles of Association and registry filings',
+      'Office space lease agreement (Innovation hub desk or DIFC commercial office)',
+      'Commercial license issuance by the DIFC ROC',
+      'Establishment card, DIFC portal onboarding & executive visa processing',
+    ],
+    requirements: [
+      'Passports and detailed profiles of UBOs, Directors, and Authorized Signatories',
+      'Institutional business plan detailing operations, capital, and compliance',
+      'Proof of source of funds / wealth documentation for regulated structures',
+      'Registry name reservation & proposed DIFC legal structure (Ltd, SPV, Branch)',
+      'DIFC registered office lease or co-working membership agreement',
+    ],
+  },
 ] as const;
 
 export const NAV_LINKS = [
@@ -288,37 +440,43 @@ export const HOMEPAGE_SERVICES = [
   {
     icon: Building2,
     title: 'UAE Business Formation',
-    description: 'Set up your company in Dubai, UAE with experts who can handle approvals and paperwork and help guide you through any red tape.',
+    description:
+      'Set up your company in Dubai, UAE with experts who can handle approvals and paperwork and help guide you through any red tape.',
     href: '/services/mainland-company-setup',
   },
   {
     icon: WalletCards,
     title: 'Corporate Taxes and VAT',
-    description: 'We can provide expert insights on UAE tax laws, accounting, VAT compliance, corporate tax filing, and tax advisory services.',
+    description:
+      'We can provide expert insights on UAE tax laws, accounting, VAT compliance, corporate tax filing, and tax advisory services.',
     href: '/services',
   },
   {
     icon: BriefcaseBusiness,
     title: 'Dubai Business Visa',
-    description: 'Acquire your Dubai business visa to set up and conduct business, conferences, and explore networking opportunities in Dubai with ease.',
+    description:
+      'Acquire your Dubai business visa to set up and conduct business, conferences, and explore networking opportunities in Dubai with ease.',
     href: '/golden-visa',
   },
   {
     icon: Stamp,
     title: 'Trade Licensing',
-    description: 'Secure your trade license with our expert trade licensing services to conduct business in Dubai.',
+    description:
+      'Secure your trade license with our expert trade licensing services to conduct business in Dubai.',
     href: '/services/mainland-company-setup',
   },
   {
     icon: Plane,
     title: 'Golden Visa',
-    description: 'Get long-term residency as an Indian expat that gives the ability to live, work and access various services in Dubai, UAE.',
+    description:
+      'Get long-term residency as an Indian expat that gives the ability to live, work and access various services in Dubai, UAE.',
     href: '/golden-visa',
   },
   {
     icon: FileText,
     title: 'PRO Services for Entrepreneurs',
-    description: 'Let our experts interface with government authorities and help you navigate renewals and regulations.',
+    description:
+      'Let our experts interface with government authorities and help you navigate renewals and regulations.',
     href: '/services/pro-services',
   },
 ] as const;
@@ -398,8 +556,14 @@ export const HOMEPAGE_ADVANTAGES = [
     number: '01',
     icon: Layers3,
     title: 'Structure First, Not Just Setup',
-    description: 'We focus on the right jurisdiction, activity, and structure before incorporation.',
-    points: ['Banking delays', 'Visa complications', 'Operational restrictions', 'Costly restructuring later'],
+    description:
+      'We focus on the right jurisdiction, activity, and structure before incorporation.',
+    points: [
+      'Banking delays',
+      'Visa complications',
+      'Operational restrictions',
+      'Costly restructuring later',
+    ],
     closing: undefined,
     emphasis: undefined,
   },
@@ -408,7 +572,12 @@ export const HOMEPAGE_ADVANTAGES = [
     icon: Globe2,
     title: 'Multi-Jurisdiction Expertise',
     description: 'Mainland, Free Zone, Offshore — each has different rules.',
-    points: ['Business activity', 'Expansion plans', 'Ownership structure', 'Compliance requirements'],
+    points: [
+      'Business activity',
+      'Expansion plans',
+      'Ownership structure',
+      'Compliance requirements',
+    ],
     closing: undefined,
     emphasis: undefined,
   },
@@ -442,7 +611,12 @@ export const HOMEPAGE_ADVANTAGES = [
     icon: ShieldCheck,
     title: 'End-to-End Support',
     description: undefined,
-    points: ['Bank account opening', 'AML compliance guidance', 'ESR filing support', 'Structuring for growth'],
+    points: [
+      'Bank account opening',
+      'AML compliance guidance',
+      'ESR filing support',
+      'Structuring for growth',
+    ],
     closing: undefined,
     emphasis: undefined,
   },
@@ -470,17 +644,20 @@ export const HOMEPAGE_PROCESS_STEPS = [
   {
     icon: Clock3,
     title: 'Fast-Tracked Visa & License',
-    description: 'Faster processing and approvals. A dedicated manager who handles everything for you.',
+    description:
+      'Faster processing and approvals. A dedicated manager who handles everything for you.',
   },
   {
     icon: BriefcaseBusiness,
     title: 'Choose up to 5 Activities',
-    description: 'Faster processing and approvals. A dedicated manager who handles everything for you.',
+    description:
+      'Faster processing and approvals. A dedicated manager who handles everything for you.',
   },
   {
     icon: ClipboardCheck,
     title: 'Free VAT & C.T Registration',
-    description: 'Mandatory VAT & Corporate Tax registration worth AED 1,000 each – at no extra cost.',
+    description:
+      'Mandatory VAT & Corporate Tax registration worth AED 1,000 each – at no extra cost.',
   },
   {
     icon: Building2,
@@ -577,6 +754,7 @@ export const JURISDICTION_SERVICES: {
   {
     number: '06',
     title: 'Meydan Free Zone – Dubai',
+    href: '/services/meydan-free-zone',
     features: [
       'Regular Business License (per annum)',
       'Fawri License – Instant, 60 mins (per annum)',
@@ -589,6 +767,7 @@ export const JURISDICTION_SERVICES: {
   {
     number: '07',
     title: 'International Free Zone Authority (IFZA) – Dubai Silicon Oasis',
+    href: '/services/ifza-free-zone',
     features: [
       '0-Visa License Package (per annum)',
       '1-Visa License Package (per annum)',
@@ -603,6 +782,37 @@ export const JURISDICTION_SERVICES: {
   },
   {
     number: '08',
+    title: 'Dubai Multi Commodities Centre (DMCC) – JLT Dubai',
+    href: '/services/dmcc-free-zone',
+    features: [
+      'Global Free Zone of the Year Accreditation',
+      'Flexi-desk & Physical Office Commercial Leases',
+      'Specialized Crypto, AI & Gaming Innovation Hubs',
+      '100% Capital Repatriation & 0% Personal Tax',
+      'Investor / Partner Visa (per person, 2-year)',
+      'Employment (Work) Visa (per person, 2-year)',
+      'Corporate Bank Account Introduction Support',
+    ],
+  },
+  {
+    number: '09',
+    title: 'Dubai International Financial Centre – Dubai',
+    href: '/services/difc-company-setup',
+    features: [
+      'Innovation License – Subsidised (Per Annum, 2 Years)',
+      'Innovation Holding License (Per Annum)',
+      'Standard Commercial License (Per Annum)',
+      'Company Registration / Incorporation (One-Time)',
+      'Branch Registration (One-Time)',
+      'Establishment Card (Per Annum)',
+      'Data Protection Registration – Initial',
+      'Data Protection Registration – Annual Renewal',
+      'Investor / Partner Visa (Per Person, 3-Year)',
+      'Employment (Work) Visa (Per Person, 3-Year)',
+    ],
+  },
+  {
+    number: '10',
     title: 'Ras Al Khaimah Economic Zone (RAKEZ)',
     features: [
       'Biz Starter Package – Includes 0 Visa (Per Annum)',
@@ -687,3 +897,11 @@ export const JURISDICTION_SERVICES: {
     ],
   },
 ];
+
+export {
+  HOMEPAGE_FAQS,
+  CALCULATOR_FAQS,
+  GOLDEN_VISA_FAQS,
+  type FaqItem,
+  type NumberedFaqItem,
+} from './faqs';

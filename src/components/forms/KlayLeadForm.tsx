@@ -18,6 +18,14 @@ import { submitIntakeDossier } from '@/lib/intake-conduit';
 
 export type JurisdictionOption = 'Free Zone' | 'Mainland DED' | 'Offshore' | 'DIFC / ADGM';
 export type TimelineOption = 'Immediate (1-2 weeks)' | '1-3 months' | 'Planning stage';
+export type BudgetOption = '< AED 25k' | 'AED 25k - 50k' | 'AED 50k - 100k' | 'AED 100k+';
+
+export const BUDGET_OPTIONS: BudgetOption[] = [
+  '< AED 25k',
+  'AED 25k - 50k',
+  'AED 50k - 100k',
+  'AED 100k+',
+];
 
 export interface KlayLeadFormProps {
   /**
@@ -140,6 +148,7 @@ export function KlayLeadForm({
   const emailId = useId();
   const phoneId = useId();
   const dialCodeId = useId();
+  const budgetId = useId();
   const activityId = useId();
   const timelineId = useId();
   const notesId = useId();
@@ -150,6 +159,7 @@ export function KlayLeadForm({
   const [email, setEmail] = useState('');
   const [dialCode, setDialCode] = useState('+971');
   const [phoneLocal, setPhoneLocal] = useState('');
+  const [budget, setBudget] = useState<BudgetOption | ''>('');
   const [activity, setActivity] = useState(COMMERCIAL_ACTIVITIES[0]);
   const [timeline, setTimeline] = useState<TimelineOption>('Immediate (1-2 weeks)');
   const [notes, setNotes] = useState('');
@@ -175,6 +185,7 @@ export function KlayLeadForm({
     setName('');
     setEmail('');
     setPhoneLocal('');
+    setBudget('');
     setNotes('');
     setJurisdiction('Free Zone');
     setActivity(COMMERCIAL_ACTIVITIES[0]);
@@ -188,10 +199,46 @@ export function KlayLeadForm({
     e.preventDefault();
     if (status === 'submitting') return;
 
-    // Validate phone number has digits
+    // 1. Full Legal Name validation
+    const trimmedName = name.trim();
+    if (!trimmedName || trimmedName.length < 2) {
+      setErrorMessage('Please provide your full legal name (minimum 2 characters).');
+      setStatus('error');
+      return;
+    }
+
+    // 2. Strict corporate email format validation
+    const trimmedEmail = email.trim();
+    const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!trimmedEmail || !EMAIL_REGEX.test(trimmedEmail)) {
+      setErrorMessage('Please provide a valid corporate or business email address.');
+      setStatus('error');
+      return;
+    }
+
+    // 3. Strict Phone validation
     const cleanedDigits = phoneLocal.replace(/\D/g, '');
     if (!cleanedDigits) {
       setErrorMessage('Please provide a valid phone or WhatsApp number.');
+      setStatus('error');
+      return;
+    }
+    if (dialCode === '+971') {
+      const uaeDigits = cleanedDigits.replace(/^0+/, '');
+      if (uaeDigits.length !== 9) {
+        setErrorMessage('Please provide a valid 9-digit UAE phone number (e.g. 50 123 4567).');
+        setStatus('error');
+        return;
+      }
+    } else if (cleanedDigits.length < 7 || cleanedDigits.length > 15) {
+      setErrorMessage('Please provide a valid international phone number (7 to 15 digits).');
+      setStatus('error');
+      return;
+    }
+
+    // 4. Required Budget Qualifier selection
+    if (!budget) {
+      setErrorMessage('Please select an estimated setup budget to proceed.');
       setStatus('error');
       return;
     }
@@ -200,10 +247,11 @@ export function KlayLeadForm({
     setErrorMessage('');
 
     const result = await submitIntakeDossier({
-      name,
-      email,
+      name: trimmedName,
+      email: trimmedEmail,
       phone: phoneLocal,
       dialCode,
+      budget,
       jurisdiction,
       activity,
       timeline,
@@ -603,7 +651,72 @@ export function KlayLeadForm({
             </div>
           </div>
 
-          {/* 4. ACTIVITY & TIMELINE ROW (Clean native dropdowns without overlapping icons) */}
+          {/* 4. BUDGET QUALIFIER (REQUIRED) */}
+          <div>
+            <div className="flex items-center justify-between mb-1">
+              <label
+                id={budgetId}
+                className={cn(
+                  'text-xs font-bold uppercase tracking-wider',
+                  isDark ? 'text-white/90' : 'text-[#0C2D48]'
+                )}
+              >
+                Estimated Setup Budget <span className="text-[#E8A72E]">*</span>
+              </label>
+              {budget && (
+                <span
+                  className={cn(
+                    'text-xs font-medium',
+                    isDark ? 'text-[#E8C37A]' : 'text-[#0C2D48]/80'
+                  )}
+                >
+                  {budget}
+                </span>
+              )}
+            </div>
+
+            <div
+              role="radiogroup"
+              aria-labelledby={budgetId}
+              className={cn(
+                'grid grid-cols-2 sm:grid-cols-4 gap-1 rounded-xl p-1 transition-colors',
+                isDark
+                  ? 'bg-black/25 border border-white/15'
+                  : 'bg-[#0C2D48]/[0.05] border border-[#0C2D48]/12'
+              )}
+            >
+              {BUDGET_OPTIONS.map((opt) => {
+                const isSelected = budget === opt;
+                return (
+                  <button
+                    key={opt}
+                    type="button"
+                    role="radio"
+                    aria-checked={isSelected}
+                    disabled={status === 'submitting'}
+                    onClick={() => {
+                      setBudget(opt);
+                      if (errorMessage) setErrorMessage('');
+                    }}
+                    className={cn(
+                      'relative flex items-center justify-center rounded-lg py-1.5 px-2 text-center text-xs font-semibold transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#E8C37A]',
+                      isSelected
+                        ? isDark
+                          ? 'bg-[#E8C37A] text-[#0C2D48] font-bold shadow-[0_2px_8px_rgba(232,195,122,0.3)]'
+                          : 'bg-[#0C2D48] text-[#E8C37A] font-bold shadow-[0_2px_8px_rgba(12,45,72,0.2)]'
+                        : isDark
+                          ? 'text-white/75 hover:text-white hover:bg-white/[0.08]'
+                          : 'text-[#0C2D48]/75 hover:text-[#0C2D48] hover:bg-white/80'
+                    )}
+                  >
+                    <span>{opt}</span>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* 5. ACTIVITY & TIMELINE ROW (Clean native dropdowns without overlapping icons) */}
           <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-2">
             {/* Primary Commercial Activity */}
             <div>

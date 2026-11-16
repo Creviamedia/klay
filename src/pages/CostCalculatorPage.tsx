@@ -8,40 +8,8 @@ import { CornerCrosshairs } from '@/components/ui/CornerCrosshairs';
 import { EquitifyButton } from '@/components/ui/EquitifyButton';
 import { NumberedAccordion, type AccordionItem } from '@/components/ui/NumberedAccordion';
 import { AtmosphericBanner } from '@/components/ui/AtmosphericBanner';
+import { CALCULATOR_FAQS } from '@/lib/data';
 import { ROUTES } from '@/lib/routes';
-
-const CALCULATOR_FAQS: AccordionItem[] = [
-  {
-    number: '01',
-    question: 'How accurate is the Dubai trade license cost estimate?',
-    answer:
-      'The calculator uses the official 2026 tariff schedules across UAE Mainland (DED) and major Free Zones (Meydan, IFZA, DMCC, RAK ICC). Exact fees are verified with the regulatory authority prior to filing based on your exact commercial activities.',
-  },
-  {
-    number: '02',
-    question: 'Does the estimated cost include UAE residency visas?',
-    answer:
-      'Yes. When you specify investor, partner, or employment visas, the calculation dynamically incorporates entry permits, medical VIP screening, Emirates ID fees, and immigration establishment card allocations.',
-  },
-  {
-    number: '03',
-    question: 'Can overseas international investors use this calculator?',
-    answer:
-      'Yes. The calculator supports both UAE residents and foreign founders worldwide. International investors can incorporate 100% foreign-owned entities remotely without traveling to Dubai for initial trade license issuance.',
-  },
-  {
-    number: '04',
-    question: 'Are external regulatory approvals included in the quote?',
-    answer:
-      'General commercial and consulting activities require zero external approvals. Specialized sectors (healthcare, legal, education, engineering, cryptocurrency) may require approvals from MOHAP, KHDA, or VARA, which our advisory desk pre-screens for you.',
-  },
-  {
-    number: '05',
-    question: 'How do I proceed once I receive my estimate?',
-    answer:
-      'You can submit your calculation directly to receive an official, line-item verified proposal from our senior corporate structuring directors with zero hidden fees.',
-  },
-];
 
 export default function CostCalculatorPage() {
   const [searchParams] = useSearchParams();
@@ -69,7 +37,8 @@ export default function CostCalculatorPage() {
               <span className="text-[#16A34A]">Understand Your True Costs.</span>
             </h1>
             <p className="text-base text-[#0C2D48]/75 font-normal leading-relaxed max-w-2xl mx-auto">
-              Calculate exact government fees, trade licensing, shareholder quotas, and visa allocations across Dubai Mainland and Free Zones. Zero hidden markups.
+              Calculate exact government fees, trade licensing, shareholder quotas, and visa
+              allocations across Dubai Mainland and Free Zones. Zero hidden markups.
             </p>
           </div>
 
@@ -113,7 +82,8 @@ export default function CostCalculatorPage() {
                   Scope &amp; Activity Verification
                 </h3>
                 <p className="text-sm text-[#0C2D48]/75 leading-relaxed mb-6">
-                  Our regulatory desk reviews your target business activities against the official Department of Economy (DED) or Free Zone activity lists to ensure 100% compliance.
+                  Our regulatory desk reviews your target business activities against the official
+                  Department of Economy (DED) or Free Zone activity lists to ensure 100% compliance.
                 </p>
               </div>
               <div className="pt-4 border-t border-[#0C2D48]/10 font-mono text-xs text-[#0C2D48]/50">
@@ -130,7 +100,8 @@ export default function CostCalculatorPage() {
                   Name Reservation &amp; Security Clearance
                 </h3>
                 <p className="text-sm text-[#0C2D48]/75 leading-relaxed mb-6">
-                  We submit your trade name for initial approval, prepare founding resolutions, and complete digital identity verification without requiring your physical presence.
+                  We submit your trade name for initial approval, prepare founding resolutions, and
+                  complete digital identity verification without requiring your physical presence.
                 </p>
               </div>
               <div className="pt-4 border-t border-[#0C2D48]/10 font-mono text-xs text-[#0C2D48]/50">
@@ -147,7 +118,9 @@ export default function CostCalculatorPage() {
                   License Issuance &amp; Bank Account
                 </h3>
                 <p className="text-sm text-[#0C2D48]/75 leading-relaxed mb-6">
-                  Your commercial trade license is issued. We immediately dispatch your pre-cleared compliance dossier to tier-1 UAE banks (Emirates NBD, Wio, Mashreq) for rapid activation.
+                  Your commercial trade license is issued. We immediately dispatch your pre-cleared
+                  compliance dossier to tier-1 UAE banks (Emirates NBD, Wio, Mashreq) for rapid
+                  activation.
                 </p>
               </div>
               <div className="pt-4 border-t border-[#0C2D48]/10 font-mono text-xs text-[#0C2D48]/50">

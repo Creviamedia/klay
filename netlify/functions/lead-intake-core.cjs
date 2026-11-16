@@ -129,7 +129,7 @@ function persistLeadToDisk(leadRecord, targetDir) {
     );
     if (!fs.existsSync(leadsCsvPath)) {
       const csvHeader =
-        'Reference ID,Timestamp,Name,Email,Phone,Jurisdiction,Activity,Timeline,Visa Count,Notes,Source,WhatsApp Link\r\n';
+        'Reference ID,Timestamp,Name,Email,Phone,Budget,Jurisdiction,Activity,Timeline,Visa Count,Notes,Source,WhatsApp Link\r\n';
       fs.writeFileSync(leadsCsvPath, csvHeader, 'utf8');
     }
     const escapeCsv = (val) => `"${String(val || '').replace(/"/g, '""')}"`;
@@ -140,6 +140,7 @@ function persistLeadToDisk(leadRecord, targetDir) {
         escapeCsv(leadRecord.name),
         escapeCsv(leadRecord.email),
         escapeCsv(leadRecord.phone),
+        escapeCsv(leadRecord.budget),
         escapeCsv(leadRecord.jurisdiction),
         escapeCsv(leadRecord.activity),
         escapeCsv(leadRecord.timeline),
@@ -199,10 +200,11 @@ function getTursoClient(customOptions = {}) {
  * Persist lead record into Turso database with UAE phone normalization.
  */
 async function persistLeadToTurso(leadRecord, options = {}) {
-  try {
-    const client = getTursoClient(options);
-    if (!client) return false;
+  // Elevate client to function scope so it is accessible in catch block
+  const client = getTursoClient(options);
+  if (!client) return false;
 
+  try {
     const rawPhone = leadRecord.phone || '';
     let phoneToStore = rawPhone.trim();
     const digitsOnly = phoneToStore.replace(/\D/g, '');
@@ -223,12 +225,13 @@ async function persistLeadToTurso(leadRecord, options = {}) {
 
     await client.execute({
       sql: `INSERT INTO leads (
-        id, reference_number, timestamp, name, email, phone,
+        id, reference_number, timestamp, name, email, phone, budget,
         jurisdiction, activity, timeline, visa_count, notes,
         source, platform, status, created_at, updated_at
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
       ON CONFLICT(id) DO UPDATE SET
         status = excluded.status,
+        budget = COALESCE(excluded.budget, leads.budget),
         updated_at = CURRENT_TIMESTAMP`,
       args: [
         leadId,
@@ -237,6 +240,7 @@ async function persistLeadToTurso(leadRecord, options = {}) {
         leadRecord.name || 'Anonymous',
         leadRecord.email || '',
         phoneToStore,
+        leadRecord.budget || null,
         leadRecord.jurisdiction || 'UAE',
         leadRecord.activity || 'General',
         leadRecord.timeline || null,
@@ -256,7 +260,40 @@ async function persistLeadToTurso(leadRecord, options = {}) {
 
     return true;
   } catch (err) {
-    console.warn('[Turso Lead Persistence Error]:', err.message);
+    const errMsg = err && err.message ? String(err.message) : '';
+
+    // Matches any variation across libSQL, SQLite3, SQLite WASM, and Cloud Turso (INSERT, SELECT, Upsert)
+    const isMissingBudgetColumn =
+      /(?:(?:has\s+)?no\s+column\s+named:?|no\s+(?:such\s+)?column:?)\s*(?:[\w$]+\.)?['"`]?budget['"`]?/i.test(
+        errMsg
+      ) ||
+      (errMsg.toLowerCase().includes('budget') &&
+        (errMsg.includes('has no column') ||
+          errMsg.includes('no column named') ||
+          errMsg.includes('no such column')));
+
+    // Guard against infinite retry loops: at most ONE migration attempt and ONE retry
+    if (!options._migrationAttempted && isMissingBudgetColumn) {
+      try {
+        await client.execute('ALTER TABLE leads ADD COLUMN budget TEXT;');
+        return await persistLeadToTurso(leadRecord, {
+          ...options,
+          _migrationAttempted: true,
+        });
+      } catch (retryErr) {
+        const retryMsg = retryErr && retryErr.message ? String(retryErr.message) : '';
+        // If column was concurrently added by a parallel serverless container, safe to retry insert
+        if (/duplicate column|already exists/i.test(retryMsg)) {
+          return await persistLeadToTurso(leadRecord, {
+            ...options,
+            _migrationAttempted: true,
+          });
+        }
+        console.warn('[Turso Auto-Migration Error]:', retryMsg);
+      }
+    }
+
+    console.warn('[Turso Lead Persistence Error]:', errMsg);
     return false;
   }
 }
@@ -301,6 +338,7 @@ function buildTelegramAlertPayload(lead, chatId) {
 
   const safeName = escapeTelegramHtml((lead.name || 'Anonymous').slice(0, 100));
   const safeRef = escapeTelegramHtml(lead.referenceNumber || lead.id || 'N/A');
+  const safeBudget = escapeTelegramHtml(lead.budget || 'Not specified');
   const safeJurisdiction = escapeTelegramHtml(jurisdiction);
   const safeActivity = escapeTelegramHtml(lead.activity || 'General Commercial');
   const safeEmail = escapeTelegramHtml(lead.email || '');
@@ -321,6 +359,7 @@ function buildTelegramAlertPayload(lead, chatId) {
     `🏛️ <b>NEW INCOMING LEAD: ${safeName}</b>`,
     `🆔 Reference: <code>${safeRef}</code>`,
     `━━━━━━━━━━━━━━━━━━━━`,
+    `💰 <b>Budget:</b> ${safeBudget}`,
     `🌐 <b>Jurisdiction:</b> ${safeJurisdiction}`,
     `💼 <b>Activity:</b> ${safeActivity}`,
     `✉️ <b>Email:</b> ${safeEmail}`,
@@ -422,7 +461,8 @@ async function sendPushNotification(leadRecord) {
     const parsed = new URL(ntfyTarget);
     if (parsed.protocol !== 'https:') return;
     const segments = parsed.pathname.split('/').filter(Boolean);
-    if (segments.length !== 1 || parsed.username || parsed.password || parsed.search || parsed.hash) return;
+    if (segments.length !== 1 || parsed.username || parsed.password || parsed.search || parsed.hash)
+      return;
     targetUrl = parsed.origin;
     topic = segments[0];
   } catch {
@@ -467,18 +507,50 @@ async function processIntakeLead(rawBody = {}, context = {}) {
     };
   }
 
-  let { name, email, phone, contact, jurisdiction, activity, timeline, visaCount, notes, source } =
-    rawBody;
+  let {
+    name,
+    email,
+    phone,
+    contact,
+    budget,
+    jurisdiction,
+    activity,
+    timeline,
+    visaCount,
+    notes,
+    source,
+  } = rawBody;
 
-  const limits = { name: 120, email: 254, phone: 32, contact: 254, jurisdiction: 80, activity: 120, timeline: 80, notes: 1000, source: 80 };
+  const limits = {
+    name: 120,
+    email: 254,
+    phone: 32,
+    contact: 254,
+    budget: 80,
+    jurisdiction: 80,
+    activity: 120,
+    timeline: 80,
+    notes: 1000,
+    source: 80,
+  };
   for (const [field, maxLength] of Object.entries(limits)) {
     const value = rawBody[field];
-    if (value !== undefined && value !== null && (typeof value !== 'string' || value.length > maxLength)) {
+    if (
+      value !== undefined &&
+      value !== null &&
+      (typeof value !== 'string' || value.length > maxLength)
+    ) {
       return { statusCode: 400, body: { success: false, error: `Invalid ${field}` } };
     }
   }
-  if (visaCount !== undefined && visaCount !== null &&
-      !((typeof visaCount === 'number' || typeof visaCount === 'string') && String(visaCount).length <= 8)) {
+  if (
+    visaCount !== undefined &&
+    visaCount !== null &&
+    !(
+      (typeof visaCount === 'number' || typeof visaCount === 'string') &&
+      String(visaCount).length <= 8
+    )
+  ) {
     return { statusCode: 400, body: { success: false, error: 'Invalid visaCount' } };
   }
 
@@ -498,6 +570,8 @@ async function processIntakeLead(rawBody = {}, context = {}) {
   const trimmedName = typeof name === 'string' ? name.trim() : '';
   const trimmedEmail = typeof email === 'string' ? email.trim() : '';
   const trimmedPhone = typeof phone === 'string' ? phone.trim() : '';
+  const trimmedBudget =
+    typeof budget === 'string' && budget.trim().length > 0 ? budget.trim().slice(0, 100) : null;
 
   if (!trimmedName || !trimmedEmail || !trimmedPhone) {
     return {
@@ -529,6 +603,7 @@ async function processIntakeLead(rawBody = {}, context = {}) {
     name: trimmedName,
     email: trimmedEmail,
     phone: trimmedPhone,
+    budget: trimmedBudget,
     jurisdiction: jurisdiction || 'UAE',
     activity: activity || 'General',
     timeline: timeline || null,

@@ -24,6 +24,7 @@ export interface BlogArticleDetails {
   metaKeywords?: string;
   tags?: readonly string[];
   audience?: string;
+  faqs?: readonly { question: string; answer: string }[];
 }
 
 export type LongFormSection = {
@@ -57,8 +58,7 @@ export type LongFormArticle = {
 };
 
 export type BlogArticleBody =
-  | ({ kind: 'longform' } & LongFormArticle)
-  | { kind: 'markdown'; markdown: string };
+  ({ kind: 'longform' } & LongFormArticle) | { kind: 'markdown'; markdown: string };
 
 /** Full article module: src/content/blog/articles/<slug>.ts */
 export interface BlogArticle {

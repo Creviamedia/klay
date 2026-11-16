@@ -20,6 +20,7 @@
     "test:all": "npm test && npm run test:admin && npm run test:admin:e2e",
     "images": "node scripts/optimize-images.mjs",
     "seo:generate": "node scripts/seo.cjs --generate",
+    "seo:index": "node scripts/google-indexing.mjs",
     "report:migration": "node scripts/migration-report.cjs",
     "favicons": "node scripts/make-favicons.cjs",
     "prepare": "husky"
