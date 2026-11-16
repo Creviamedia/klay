@@ -454,8 +454,11 @@ async function handleAdminLogin(credentials, clientIp, options = {}) {
         // Non-fatal
       }
     }
-  } else {
-    // Local environment / file fallback
+  }
+
+  if (!authenticated) {
+    // An explicit environment credential can recover an existing Turso admin
+    // whose old password was revoked or rotated.
     const expectedUsername =
       process.env.ADMIN_INITIAL_USERNAME || process.env.ADMIN_USERNAME || 'admin';
     const expectedHash = await getAdminPasswordHash();
@@ -484,7 +487,7 @@ async function handleAdminLogin(credentials, clientIp, options = {}) {
   clearLoginRateLimit(ip);
 
   const token = generateSessionToken(credentials.username);
-  const isProd = process.env.NODE_ENV === 'production';
+  const isProd = Boolean(process.env.NETLIFY) || process.env.NODE_ENV === 'production';
   const secureFlag = isProd ? '; Secure' : '';
   const cookieHeader = `klay_admin_session=${token}; HttpOnly; SameSite=Lax; Path=/; Max-Age=86400${secureFlag}`;
 
@@ -507,7 +510,7 @@ async function handleAdminLogin(credentials, clientIp, options = {}) {
  * Handle POST /api/admin/logout
  */
 function handleAdminLogout() {
-  const isProd = process.env.NODE_ENV === 'production';
+  const isProd = Boolean(process.env.NETLIFY) || process.env.NODE_ENV === 'production';
   const secureFlag = isProd ? '; Secure' : '';
   const cookieHeader = `klay_admin_session=; HttpOnly; SameSite=Lax; Path=/; Max-Age=0${secureFlag}`;
 
