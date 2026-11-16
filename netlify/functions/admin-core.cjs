@@ -496,7 +496,6 @@ async function handleAdminLogin(credentials, clientIp, options = {}) {
     },
     body: {
       ok: true,
-      token,
       user: {
         username: credentials.username,
       },

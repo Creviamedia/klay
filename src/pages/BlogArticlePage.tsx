@@ -105,10 +105,7 @@ export default function BlogArticlePage() {
       let isMounted = true;
       async function fetchRemote() {
         try {
-          const token =
-            localStorage.getItem('klay_admin_token') || sessionStorage.getItem('klay_admin_token');
           const headers: Record<string, string> = { Accept: 'application/json' };
-          if (token) headers['Authorization'] = `Bearer ${token}`;
 
           const res = await fetch('/api/admin/blogs', { headers, credentials: 'include' });
           if (res.ok) {

@@ -27,6 +27,14 @@ exports.handler = async (event, context) => {
     };
   }
 
+  if (Buffer.byteLength(event.body || '', 'utf8') > 32 * 1024) {
+    return {
+      statusCode: 413,
+      headers: CORS_HEADERS,
+      body: JSON.stringify({ success: false, error: 'Payload too large' }),
+    };
+  }
+
   let body = {};
   try {
     body = JSON.parse(event.body || '{}');
