@@ -87,6 +87,49 @@ assert.strictEqual(res400.success, false);
 assert.strictEqual(res400.error, 'Invalid jurisdiction');
 console.log('  ✓ Transmission 400 rejection verified');
 
+// 4c. Multi-endpoint failover: Primary 500 -> Secondary 201
+let fetchCalls = [];
+global.fetch = async (url) => {
+  fetchCalls.push(url);
+  if (url === '/api/leads') {
+    return { ok: false, status: 500, json: async () => ({ error: 'Server error' }) };
+  }
+  return {
+    ok: true,
+    status: 201,
+    json: async () => ({ success: true, leadId: 'KLAY-2026-BACKUP' }),
+  };
+};
+const resFailover = await submitIntakeDossier(
+  {
+    name: 'Resilient Lead',
+    email: 'resilient@example.com',
+    phone: '+971501112233',
+  },
+  { maxRetries: 0 }
+);
+assert.strictEqual(resFailover.success, true);
+assert.strictEqual(resFailover.referenceNumber, 'KLAY-2026-BACKUP');
+assert.ok(fetchCalls.length >= 2, 'Should have attempted secondary endpoint on primary failure');
+console.log('  ✓ Multi-endpoint failover from 500 verified');
+
+// 4d. Complete outage -> Sovereign offline fallback
+global.fetch = async () => {
+  throw new Error('Connection refused');
+};
+const resOutage = await submitIntakeDossier(
+  {
+    name: 'Offline Lead',
+    email: 'offline@example.com',
+    phone: '+971509990000',
+  },
+  { maxRetries: 0 }
+);
+assert.strictEqual(resOutage.success, true);
+assert.strictEqual(resOutage.isFallback, true);
+assert.match(resOutage.referenceNumber, /^KLAY-2026-\d{4}$/);
+console.log('  ✓ Complete network outage sovereign fallback verified');
+
 // Restore fetch
 global.fetch = originalFetch;
 
