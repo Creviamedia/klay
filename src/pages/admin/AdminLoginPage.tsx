@@ -1,6 +1,16 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate, useLocation, Link } from 'react-router-dom';
-import { Shield, Lock, User, Eye, EyeOff, Loader2, AlertCircle, ArrowLeft } from 'lucide-react';
+import {
+  Shield,
+  Lock,
+  User,
+  Eye,
+  EyeOff,
+  Loader2,
+  AlertCircle,
+  ArrowLeft,
+  KeyRound,
+} from 'lucide-react';
 
 export function AdminLoginPage() {
   const navigate = useNavigate();
@@ -8,6 +18,8 @@ export function AdminLoginPage() {
 
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
+  const [totpCode, setTotpCode] = useState('');
+  const [mfaRequired, setMfaRequired] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
@@ -22,6 +34,11 @@ export function AdminLoginPage() {
     e.preventDefault();
     if (!username.trim() || !password) {
       setErrorMessage('Please enter both username and password.');
+      return;
+    }
+
+    if (mfaRequired && !totpCode.trim()) {
+      setErrorMessage('Please enter the 6-digit authenticator code.');
       return;
     }
 
@@ -40,10 +57,17 @@ export function AdminLoginPage() {
         body: JSON.stringify({
           username: username.trim(),
           password,
+          totp_code: mfaRequired ? totpCode.trim() : undefined,
         }),
       });
 
       const data = await response.json().catch(() => ({}));
+
+      if (response.status === 200 && data.mfaRequired) {
+        setMfaRequired(true);
+        setErrorMessage(null);
+        return;
+      }
 
       if (response.status === 200 && data.ok) {
         if (data.user?.username) {
@@ -120,69 +144,130 @@ export function AdminLoginPage() {
 
         {/* Login Form */}
         <form onSubmit={handleSubmit} className="space-y-5">
-          {/* Username Input */}
-          <div className="space-y-1.5">
-            <label
-              htmlFor="admin-username"
-              className="block font-mono text-xs uppercase tracking-wider text-white/70"
-            >
-              Username
-            </label>
-            <div className="relative">
-              <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-white/40">
-                <User className="w-4 h-4" />
+          {!mfaRequired ? (
+            <>
+              {/* Username Input */}
+              <div className="space-y-1.5">
+                <label
+                  htmlFor="admin-username"
+                  className="block font-mono text-xs uppercase tracking-wider text-white/70"
+                >
+                  Username
+                </label>
+                <div className="relative">
+                  <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-white/40">
+                    <User className="w-4 h-4" />
+                  </div>
+                  <input
+                    id="admin-username"
+                    type="text"
+                    autoComplete="username"
+                    value={username}
+                    onChange={(e) => {
+                      setUsername(e.target.value);
+                      if (errorMessage) setErrorMessage(null);
+                    }}
+                    disabled={isLoading}
+                    placeholder="admin"
+                    className="w-full pl-10 pr-4 py-2.5 bg-[#05131F] border border-white/10 rounded-xl text-sm font-mono text-white placeholder-white/30 focus:outline-none focus:border-[#D4AF37] focus:ring-1 focus:ring-[#D4AF37] transition-all disabled:opacity-50"
+                  />
+                </div>
               </div>
-              <input
-                id="admin-username"
-                type="text"
-                autoComplete="username"
-                value={username}
-                onChange={(e) => {
-                  setUsername(e.target.value);
-                  if (errorMessage) setErrorMessage(null);
-                }}
-                disabled={isLoading}
-                placeholder="admin"
-                className="w-full pl-10 pr-4 py-2.5 bg-[#05131F] border border-white/10 rounded-xl text-sm font-mono text-white placeholder-white/30 focus:outline-none focus:border-[#D4AF37] focus:ring-1 focus:ring-[#D4AF37] transition-all disabled:opacity-50"
-              />
-            </div>
-          </div>
 
-          {/* Password Input */}
-          <div className="space-y-1.5">
-            <label
-              htmlFor="admin-password"
-              className="block font-mono text-xs uppercase tracking-wider text-white/70"
-            >
-              Password
-            </label>
-            <div className="relative">
-              <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-white/40">
-                <Lock className="w-4 h-4" />
+              {/* Password Input */}
+              <div className="space-y-1.5">
+                <label
+                  htmlFor="admin-password"
+                  className="block font-mono text-xs uppercase tracking-wider text-white/70"
+                >
+                  Password
+                </label>
+                <div className="relative">
+                  <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-white/40">
+                    <Lock className="w-4 h-4" />
+                  </div>
+                  <input
+                    id="admin-password"
+                    type={showPassword ? 'text' : 'password'}
+                    autoComplete="current-password"
+                    value={password}
+                    onChange={(e) => {
+                      setPassword(e.target.value);
+                      if (errorMessage) setErrorMessage(null);
+                    }}
+                    disabled={isLoading}
+                    placeholder="••••••••••••"
+                    className="w-full pl-10 pr-11 py-2.5 bg-[#05131F] border border-white/10 rounded-xl text-sm font-mono text-white placeholder-white/30 focus:outline-none focus:border-[#D4AF37] focus:ring-1 focus:ring-[#D4AF37] transition-all disabled:opacity-50"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute inset-y-0 right-0 pr-3.5 flex items-center text-white/40 hover:text-white transition-colors"
+                    aria-label={showPassword ? 'Hide password' : 'Show password'}
+                  >
+                    {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                  </button>
+                </div>
               </div>
-              <input
-                id="admin-password"
-                type={showPassword ? 'text' : 'password'}
-                autoComplete="current-password"
-                value={password}
-                onChange={(e) => {
-                  setPassword(e.target.value);
-                  if (errorMessage) setErrorMessage(null);
-                }}
-                disabled={isLoading}
-                placeholder="••••••••••••"
-                className="w-full pl-10 pr-11 py-2.5 bg-[#05131F] border border-white/10 rounded-xl text-sm font-mono text-white placeholder-white/30 focus:outline-none focus:border-[#D4AF37] focus:ring-1 focus:ring-[#D4AF37] transition-all disabled:opacity-50"
-              />
+            </>
+          ) : (
+            /* 2FA TOTP Challenge View */
+            <div className="space-y-4">
+              <div className="p-3.5 rounded-xl bg-[#D4AF37]/10 border border-[#D4AF37]/30 text-[#D4AF37] text-xs font-mono space-y-1">
+                <div className="flex items-center gap-2 font-semibold">
+                  <KeyRound className="w-4 h-4 shrink-0" />
+                  <span>Two-Factor Authentication Enforced</span>
+                </div>
+                <p className="text-white/70 pl-6 leading-relaxed">
+                  Enter the 6-digit verification code from your authenticator application for{' '}
+                  <strong className="text-white">{username}</strong>.
+                </p>
+              </div>
+
+              <div className="space-y-1.5">
+                <label
+                  htmlFor="admin-totp-code"
+                  className="block font-mono text-xs uppercase tracking-wider text-white/70"
+                >
+                  6-Digit Verification Code
+                </label>
+                <div className="relative">
+                  <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-white/40">
+                    <KeyRound className="w-4 h-4" />
+                  </div>
+                  <input
+                    id="admin-totp-code"
+                    type="text"
+                    inputMode="numeric"
+                    pattern="[0-9]*"
+                    maxLength={6}
+                    autoComplete="one-time-code"
+                    autoFocus
+                    value={totpCode}
+                    onChange={(e) => {
+                      setTotpCode(e.target.value.replace(/\D/g, ''));
+                      if (errorMessage) setErrorMessage(null);
+                    }}
+                    disabled={isLoading}
+                    placeholder="123456"
+                    className="w-full pl-10 pr-4 py-2.5 bg-[#05131F] border border-white/10 rounded-xl text-center text-lg tracking-[0.3em] font-mono font-bold text-[#D4AF37] placeholder-white/20 focus:outline-none focus:border-[#D4AF37] focus:ring-1 focus:ring-[#D4AF37] transition-all disabled:opacity-50"
+                  />
+                </div>
+              </div>
+
               <button
                 type="button"
-                onClick={() => setShowPassword(!showPassword)}
-                className="absolute inset-y-0 right-0 pr-3.5 flex items-center text-white/40 hover:text-white transition-colors"
-                aria-label={showPassword ? 'Hide password' : 'Show password'}
+                onClick={() => {
+                  setMfaRequired(false);
+                  setTotpCode('');
+                  setErrorMessage(null);
+                }}
+                className="text-xs font-mono text-white/50 hover:text-[#D4AF37] transition-colors underline cursor-pointer"
               >
-                {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                &larr; Cancel and return to password login
               </button>
             </div>
-          </div>
+          )}
 
           {/* Submit Button */}
           <button
@@ -193,10 +278,12 @@ export function AdminLoginPage() {
             {isLoading ? (
               <>
                 <Loader2 className="w-4 h-4 animate-spin text-[#D4AF37]" />
-                <span>Authenticating Session...</span>
+                <span>Verifying Authentication...</span>
               </>
             ) : (
-              <span>Sign In to Executive Portal</span>
+              <span>
+                {mfaRequired ? 'Verify Authenticator Code' : 'Sign In to Executive Portal'}
+              </span>
             )}
           </button>
         </form>

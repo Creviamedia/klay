@@ -110,7 +110,7 @@ exports.handler = async (event, context) => {
 
   // 2. POST /api/admin/logout
   if (event.httpMethod === 'POST' && pathname === '/api/admin/logout') {
-    const result = handleAdminLogout();
+    const result = handleAdminLogout(event);
     return formatResponse(result, corsHeaders);
   }
 

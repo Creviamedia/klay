@@ -203,7 +203,7 @@ app.post('/api/admin/login', async (request, response) => {
 });
 
 app.post('/api/admin/logout', (request, response) => {
-  const result = handleAdminLogout();
+  const result = handleAdminLogout(request);
   for (const [key, value] of Object.entries(result.headers || {})) {
     response.setHeader(key, value);
   }

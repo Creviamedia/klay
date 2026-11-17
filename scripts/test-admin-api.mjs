@@ -517,7 +517,11 @@ await testAsync(
 
     assert.strictEqual(res.statusCode, 200);
     assert.strictEqual(res.body.ok, true);
-    assert.strictEqual(res.body.token, undefined, 'Session token must not be readable by browser JavaScript');
+    assert.strictEqual(
+      res.body.token,
+      undefined,
+      'Session token must not be readable by browser JavaScript'
+    );
     assert.strictEqual(res.body.user.username, 'admin');
 
     const cookieHeader = res.headers['Set-Cookie'];
@@ -747,35 +751,29 @@ await testAsync(
   }
 );
 
-await testAsync(
-  '9.1b Pre-flight OPTIONS permits the approved staging origin',
-  async () => {
-    const origin = 'https://klay-consulting-staging.netlify.app';
-    const res = await adminFunction.handler({
-      httpMethod: 'OPTIONS',
-      path: '/api/admin/leads',
-      headers: { origin },
-    });
-    assert.strictEqual(res.statusCode, 204);
-    assert.strictEqual(res.headers['Access-Control-Allow-Origin'], origin);
-    assert.strictEqual(res.headers['Access-Control-Allow-Credentials'], 'true');
-  }
-);
+await testAsync('9.1b Pre-flight OPTIONS permits the approved staging origin', async () => {
+  const origin = 'https://klay-consulting-staging.netlify.app';
+  const res = await adminFunction.handler({
+    httpMethod: 'OPTIONS',
+    path: '/api/admin/leads',
+    headers: { origin },
+  });
+  assert.strictEqual(res.statusCode, 204);
+  assert.strictEqual(res.headers['Access-Control-Allow-Origin'], origin);
+  assert.strictEqual(res.headers['Access-Control-Allow-Credentials'], 'true');
+});
 
-await testAsync(
-  '9.1c Pre-flight OPTIONS permits the approved production origin',
-  async () => {
-    const origin = 'https://klayconsultants.com';
-    const res = await adminFunction.handler({
-      httpMethod: 'OPTIONS',
-      path: '/api/admin/leads',
-      headers: { Origin: origin },
-    });
-    assert.strictEqual(res.statusCode, 204);
-    assert.strictEqual(res.headers['Access-Control-Allow-Origin'], origin);
-    assert.strictEqual(res.headers['Access-Control-Allow-Credentials'], 'true');
-  }
-);
+await testAsync('9.1c Pre-flight OPTIONS permits the approved production origin', async () => {
+  const origin = 'https://klayconsultants.com';
+  const res = await adminFunction.handler({
+    httpMethod: 'OPTIONS',
+    path: '/api/admin/leads',
+    headers: { Origin: origin },
+  });
+  assert.strictEqual(res.statusCode, 204);
+  assert.strictEqual(res.headers['Access-Control-Allow-Origin'], origin);
+  assert.strictEqual(res.headers['Access-Control-Allow-Credentials'], 'true');
+});
 
 await testAsync(
   '9.1d Authenticated response with origin reflects origin and sets credentials',
@@ -913,6 +911,117 @@ test('9.8 safeDecode returns null on malformed percent encoding without throwing
   assert.strictEqual(adminFunction.safeDecode('%E0%A4%A'), null);
   assert.strictEqual(adminFunction.safeDecode('valid-slug'), 'valid-slug');
   assert.strictEqual(adminFunction.safeDecode('hello%20world'), 'hello world');
+});
+
+// ============================================================================
+// SUITE 10: RFC 6238 TOTP 2FA & TOKEN REVOCATION
+// ============================================================================
+console.log('\n--- SUITE 10: RFC 6238 TOTP 2FA & Token Revocation Architecture ---');
+
+test('10.1 base32Encode and base32Decode round-trip correctly', () => {
+  const original = Buffer.from('KlayConsultantsDubai2026!');
+  const encoded = adminCore.base32Encode(original);
+  assert.strictEqual(typeof encoded, 'string');
+  assert.ok(/^[A-Z2-7]+$/.test(encoded));
+  const decoded = adminCore.base32Decode(encoded);
+  assert.deepStrictEqual(decoded, original);
+});
+
+test('10.2 generateTotp matches RFC 6238 Appendix B test vectors exactly', () => {
+  // RFC 6238 Key: ASCII "12345678901234567890" -> Base32 GEZDGNBVGY3TQOJQGEZDGNBVGY3TQOJQ
+  const rfcKeyB32 = 'GEZDGNBVGY3TQOJQGEZDGNBVGY3TQOJQ';
+  // Step at T=59s (Math.floor(59/30) = 1) -> 287082
+  assert.strictEqual(adminCore.generateTotp(rfcKeyB32, 1), '287082');
+  // Step at T=1111111109s (Math.floor(1111111109/30) = 37037036) -> 081804
+  assert.strictEqual(adminCore.generateTotp(rfcKeyB32, 37037036), '081804');
+  // Step at T=2000000000s (Math.floor(2000000000/30) = 66666666) -> 279037
+  assert.strictEqual(adminCore.generateTotp(rfcKeyB32, 66666666), '279037');
+});
+
+test('10.3 verifyTotp verifies valid TOTP with clock drift window', () => {
+  const secret = 'GEZDGNBVGY3TQOJQGEZDGNBVGY3TQOJQ';
+  const now = 1700000000;
+  const currentStep = Math.floor(now / 30);
+  const currentCode = adminCore.generateTotp(secret, currentStep);
+  const prevCode = adminCore.generateTotp(secret, currentStep - 1);
+  const nextCode = adminCore.generateTotp(secret, currentStep + 1);
+  const farFutureCode = adminCore.generateTotp(secret, currentStep + 5);
+
+  assert.strictEqual(adminCore.verifyTotp(secret, currentCode, 1, now), true);
+  assert.strictEqual(adminCore.verifyTotp(secret, prevCode, 1, now), true);
+  assert.strictEqual(adminCore.verifyTotp(secret, nextCode, 1, now), true);
+  assert.strictEqual(adminCore.verifyTotp(secret, farFutureCode, 1, now), false);
+  assert.strictEqual(adminCore.verifyTotp(secret, '999999', 1, now), false);
+  assert.strictEqual(adminCore.verifyTotp(secret, 'invalid', 1, now), false);
+});
+
+await testAsync(
+  '10.4 handleAdminLogin enforces MFA when user has totp_secret configured',
+  async () => {
+    const testTotpSecret = 'JBSWY3DPEHPK3PXPJBSWY3DPEHPK3PXP';
+    process.env.ADMIN_TOTP_SECRET = testTotpSecret;
+
+    try {
+      // Attempt 1: Password only -> Returns HTTP 200 with mfaRequired: true, NO cookie
+      const mfaPromptRes = await adminCore.handleAdminLogin(
+        { username: 'admin', password: 'TestOnlyAdmin#297' },
+        '192.168.10.1'
+      );
+      assert.strictEqual(mfaPromptRes.statusCode, 200);
+      assert.strictEqual(mfaPromptRes.body.ok, false);
+      assert.strictEqual(mfaPromptRes.body.mfaRequired, true);
+      assert.strictEqual(mfaPromptRes.headers['Set-Cookie'], undefined);
+
+      // Attempt 2: Incorrect TOTP code -> Returns HTTP 401
+      const badTotpRes = await adminCore.handleAdminLogin(
+        { username: 'admin', password: 'TestOnlyAdmin#297', totp_code: '000000' },
+        '192.168.10.1'
+      );
+      assert.strictEqual(badTotpRes.statusCode, 401);
+      assert.strictEqual(badTotpRes.body.error, 'Invalid two-factor authentication code');
+
+      // Attempt 3: Valid TOTP code -> Returns HTTP 200 with session cookie
+      const currentStep = Math.floor(Date.now() / 30000);
+      const validTotpCode = adminCore.generateTotp(testTotpSecret, currentStep);
+      const successRes = await adminCore.handleAdminLogin(
+        { username: 'admin', password: 'TestOnlyAdmin#297', totp_code: validTotpCode },
+        '192.168.10.1'
+      );
+      assert.strictEqual(successRes.statusCode, 200);
+      assert.strictEqual(successRes.body.ok, true);
+      assert.ok(successRes.headers['Set-Cookie'].includes('klay_admin_session='));
+    } finally {
+      delete process.env.ADMIN_TOTP_SECRET;
+    }
+  }
+);
+
+test('10.5 handleAdminLogout immediately revokes session token jti in memory', () => {
+  const token = adminCore.generateSessionToken('admin_revoke_test');
+  const req = { headers: { authorization: `Bearer ${token}` } };
+
+  // Before logout: session is valid
+  const authBefore = adminCore.requireAdminAuth(req);
+  assert.strictEqual(authBefore.authenticated, true);
+  assert.ok(authBefore.user.jti);
+
+  // Logout executes and kills session
+  const logoutRes = adminCore.handleAdminLogout(req);
+  assert.strictEqual(logoutRes.statusCode, 200);
+  assert.strictEqual(logoutRes.body.ok, true);
+
+  // After logout: session is revoked
+  const authAfter = adminCore.requireAdminAuth(req);
+  assert.strictEqual(authAfter.authenticated, false);
+  assert.strictEqual(authAfter.status, 401);
+  assert.strictEqual(authAfter.error, 'Unauthorized: session has been revoked');
+});
+
+test('10.6 isTokenRevoked and revokeToken track token status', () => {
+  const testJti = 'test-jti-' + Date.now();
+  assert.strictEqual(adminCore.isTokenRevoked(testJti), false);
+  adminCore.revokeToken(testJti, Math.floor(Date.now() / 1000) + 3600);
+  assert.strictEqual(adminCore.isTokenRevoked(testJti), true);
 });
 
 // Cleanup temp test data

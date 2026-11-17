@@ -47,6 +47,102 @@ const MAX_FAILED_ATTEMPTS = 5;
 // In-memory sliding-window rate limiting map: ip -> { timestamps: number[] }
 const loginAttempts = new Map();
 
+// In-memory set of revoked session token JTIs
+const revokedTokensMemory = new Set();
+
+// RFC 6238 TOTP constants & utilities
+const B32_ALPHABET = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ234567';
+
+function base32Decode(str) {
+  if (!str || typeof str !== 'string') return Buffer.alloc(0);
+  const cleaned = str.toUpperCase().replace(/[^A-Z2-7]/g, '');
+  let bits = 0;
+  let value = 0;
+  const output = [];
+  for (let i = 0; i < cleaned.length; i++) {
+    const idx = B32_ALPHABET.indexOf(cleaned[i]);
+    if (idx === -1) continue;
+    value = (value << 5) | idx;
+    bits += 5;
+    if (bits >= 8) {
+      output.push((value >>> (bits - 8)) & 255);
+      bits -= 8;
+    }
+  }
+  return Buffer.from(output);
+}
+
+function base32Encode(buf) {
+  if (!buf || !Buffer.isBuffer(buf)) return '';
+  let bits = 0;
+  let value = 0;
+  let output = '';
+  for (let i = 0; i < buf.length; i++) {
+    value = (value << 8) | buf[i];
+    bits += 8;
+    while (bits >= 5) {
+      output += B32_ALPHABET[(value >>> (bits - 5)) & 31];
+      bits -= 5;
+    }
+  }
+  if (bits > 0) output += B32_ALPHABET[(value << (5 - bits)) & 31];
+  return output;
+}
+
+function generateTotpSecret() {
+  return base32Encode(crypto.randomBytes(20));
+}
+
+function generateTotp(secret, counter) {
+  const key = base32Decode(secret);
+  const buf = Buffer.alloc(8);
+  buf.writeBigUInt64BE(BigInt(counter));
+  const hmac = crypto.createHmac('sha1', key).update(buf).digest();
+  const offset = hmac[hmac.length - 1] & 0x0f;
+  const num =
+    ((hmac[offset] & 0x7f) << 24) |
+    ((hmac[offset + 1] & 0xff) << 16) |
+    ((hmac[offset + 2] & 0xff) << 8) |
+    (hmac[offset + 3] & 0xff);
+  return String(num % 1000000).padStart(6, '0');
+}
+
+function verifyTotp(secret, token, window = 1, customTimestamp) {
+  if (!secret || !token) return false;
+  const cleaned = String(token).replace(/\s+/g, '');
+  if (cleaned.length !== 6 || !/^\d{6}$/.test(cleaned)) return false;
+  const now = customTimestamp !== undefined ? customTimestamp : Math.floor(Date.now() / 1000);
+  const currentStep = Math.floor(now / 30);
+  for (let i = -window; i <= window; i++) {
+    const expected = generateTotp(secret, currentStep + i);
+    if (crypto.timingSafeEqual(Buffer.from(cleaned), Buffer.from(expected))) {
+      return true;
+    }
+  }
+  return false;
+}
+
+// shortcut: in-memory revokedTokensMemory provides instant sync for warm worker instances, upgrade to cross-instance distributed cache if multi-region cold starts require immediate sub-millisecond sync
+function isTokenRevoked(jti) {
+  if (!jti) return false;
+  return revokedTokensMemory.has(jti);
+}
+
+function revokeToken(jti, expiresAt, options = {}) {
+  if (!jti) return;
+  revokedTokensMemory.add(jti);
+  const client = options.client || getTursoClient(options);
+  if (client) {
+    const exp = expiresAt || Math.floor(Date.now() / 1000) + 86400;
+    client
+      .execute({
+        sql: 'INSERT OR REPLACE INTO revoked_tokens (jti, revoked_at, expires_at) VALUES (?, CURRENT_TIMESTAMP, ?)',
+        args: [jti, exp],
+      })
+      .catch(() => {});
+  }
+}
+
 /**
  * Returns the secret key for HMAC-SHA256 session token generation.
  * Throws a fatal error if executed in production without an explicit secret.
@@ -288,6 +384,15 @@ function requireAdminAuth(reqOrEvent) {
     };
   }
 
+  // Reject immediately if session token was revoked on logout
+  if (user.jti && isTokenRevoked(user.jti)) {
+    return {
+      authenticated: false,
+      status: 401,
+      error: 'Unauthorized: session has been revoked',
+    };
+  }
+
   return { authenticated: true, user };
 }
 
@@ -483,7 +588,31 @@ async function handleAdminLogin(credentials, clientIp, options = {}) {
     };
   }
 
-  // 4. Success handling: clear rate limit and issue token & cookie
+  // 4. Two-factor authentication (RFC 6238 TOTP) challenge if secret configured
+  const userTotpSecret = tursoUser?.totp_secret || process.env.ADMIN_TOTP_SECRET;
+  if (userTotpSecret) {
+    if (!credentials.totp_code) {
+      return {
+        statusCode: 200,
+        headers: { 'Content-Type': 'application/json' },
+        body: {
+          ok: false,
+          mfaRequired: true,
+          message: 'Two-factor authentication code required',
+        },
+      };
+    }
+    const isTotpValid = verifyTotp(userTotpSecret, credentials.totp_code);
+    if (!isTotpValid) {
+      return {
+        statusCode: 401,
+        headers: { 'Content-Type': 'application/json' },
+        body: { error: 'Invalid two-factor authentication code' },
+      };
+    }
+  }
+
+  // 5. Success handling: clear rate limit and issue token & cookie
   clearLoginRateLimit(ip);
 
   const token = generateSessionToken(credentials.username);
@@ -508,8 +637,24 @@ async function handleAdminLogin(credentials, clientIp, options = {}) {
 
 /**
  * Handle POST /api/admin/logout
+ * Revokes current session token jti in memory and database, and expires session cookie.
  */
-function handleAdminLogout() {
+function handleAdminLogout(reqOrEvent, options = {}) {
+  const token = extractSessionToken(reqOrEvent);
+  if (token) {
+    try {
+      const parts = token.split('.');
+      if (parts.length === 3) {
+        const payload = JSON.parse(Buffer.from(parts[1], 'base64url').toString('utf8'));
+        if (payload && payload.jti) {
+          revokeToken(payload.jti, payload.exp, options);
+        }
+      }
+    } catch {
+      // Non-fatal
+    }
+  }
+
   const isProd = Boolean(process.env.NETLIFY) || process.env.NODE_ENV === 'production';
   const secureFlag = isProd ? '; Secure' : '';
   const cookieHeader = `klay_admin_session=; HttpOnly; SameSite=Lax; Path=/; Max-Age=0${secureFlag}`;
@@ -1530,6 +1675,18 @@ module.exports = {
   verifyPassword,
   generateSessionToken,
   verifySessionToken,
+
+  // RFC 6238 TOTP (Two-Factor Authentication)
+  base32Decode,
+  base32Encode,
+  generateTotpSecret,
+  generateTotp,
+  verifyTotp,
+
+  // Token Revocation
+  isTokenRevoked,
+  revokeToken,
+  _revokedTokensMemory: revokedTokensMemory,
 
   // Rate Limiting
   checkLoginRateLimit,

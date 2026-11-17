@@ -66,6 +66,7 @@ export interface AdminUserRecord {
   id: string;
   username: string;
   password_hash: string;
+  totp_secret?: string | null;
   created_at: string;
   last_login_at?: string | null;
 }
@@ -237,22 +238,37 @@ export async function initTursoSchema(client?: Client): Promise<void> {
       id TEXT PRIMARY KEY NOT NULL,
       username TEXT NOT NULL,
       password_hash TEXT NOT NULL,
+      totp_secret TEXT,
       created_at TEXT NOT NULL DEFAULT (CURRENT_TIMESTAMP),
       last_login_at TEXT
     );`,
     `CREATE UNIQUE INDEX IF NOT EXISTS idx_admin_users_username ON admin_users(username);`,
+
+    // 4. Revoked Session Tokens Table
+    `CREATE TABLE IF NOT EXISTS revoked_tokens (
+      jti TEXT PRIMARY KEY NOT NULL,
+      revoked_at TEXT NOT NULL DEFAULT (CURRENT_TIMESTAMP),
+      expires_at INTEGER NOT NULL
+    );`,
+    `CREATE INDEX IF NOT EXISTS idx_revoked_tokens_expires_at ON revoked_tokens(expires_at);`,
   ];
 
   for (const sql of ddlStatements) {
     await db.execute(sql);
   }
 
-  // Safe backward-compatible migration for existing leads table
+  // Safe backward-compatible migrations for existing tables
   try {
-    const tableInfo = await db.execute(`PRAGMA table_info(leads)`);
-    const hasBudget = tableInfo.rows.some((row: any) => row.name === 'budget');
+    const leadsInfo = await db.execute(`PRAGMA table_info(leads)`);
+    const hasBudget = leadsInfo.rows.some((row: any) => row.name === 'budget');
     if (!hasBudget) {
       await db.execute(`ALTER TABLE leads ADD COLUMN budget TEXT;`);
+    }
+
+    const adminInfo = await db.execute(`PRAGMA table_info(admin_users)`);
+    const hasTotp = adminInfo.rows.some((row: any) => row.name === 'totp_secret');
+    if (!hasTotp) {
+      await db.execute(`ALTER TABLE admin_users ADD COLUMN totp_secret TEXT;`);
     }
   } catch (err: any) {
     if (!err.message?.includes('duplicate column name')) {
@@ -705,3 +721,46 @@ export async function deleteBlog(slugOrClient: any, maybeSlug?: any): Promise<bo
 
 // Alias for specification naming compliance
 export const deleteBlogBySlug = deleteBlog;
+
+/**
+ * Revokes a session token jti in the database.
+ */
+export async function revokeTokenInDb(
+  jti: string,
+  expiresAt: number,
+  client?: Client
+): Promise<void> {
+  const db = client || getTursoClient();
+  await db.execute({
+    sql: `INSERT OR REPLACE INTO revoked_tokens (jti, revoked_at, expires_at) VALUES (?, CURRENT_TIMESTAMP, ?)`,
+    args: [jti, expiresAt],
+  });
+}
+
+/**
+ * Checks whether a session token jti has been revoked in the database.
+ */
+export async function isTokenRevokedInDb(jti: string, client?: Client): Promise<boolean> {
+  const db = client || getTursoClient();
+  const res = await db.execute({
+    sql: `SELECT 1 FROM revoked_tokens WHERE jti = ? LIMIT 1`,
+    args: [jti],
+  });
+  return res.rows.length > 0;
+}
+
+/**
+ * Sets or clears the RFC 6238 TOTP secret for an administrator user.
+ */
+export async function setAdminTotpSecret(
+  username: string,
+  totpSecret: string | null,
+  client?: Client
+): Promise<boolean> {
+  const db = client || getTursoClient();
+  const res = await db.execute({
+    sql: `UPDATE admin_users SET totp_secret = ? WHERE username = ?`,
+    args: [totpSecret, username],
+  });
+  return res.rowsAffected > 0;
+}
