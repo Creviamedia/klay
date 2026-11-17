@@ -1,4 +1,4 @@
-import * as Sentry from '@sentry/react';
+import type { ErrorEvent, EventHint } from '@sentry/react';
 
 const env =
   typeof import.meta !== 'undefined' && import.meta.env
@@ -99,10 +99,7 @@ function isThirdPartyUrl(url?: string): boolean {
  * Evaluates whether a captured error event is a false positive that should be suppressed.
  * Preserves genuine runtime exceptions, syntax errors, and unhandled business logic promise rejections.
  */
-export function filterSentryEvent(
-  event: Sentry.ErrorEvent,
-  hint?: Sentry.EventHint
-): Sentry.ErrorEvent | null {
+export function filterSentryEvent(event: ErrorEvent, hint?: EventHint): ErrorEvent | null {
   const originalException = hint?.originalException;
 
   // 1. Inspect originalException object if present
@@ -211,9 +208,16 @@ export function filterSentryEvent(
   return event;
 }
 
+type SentryModule = typeof import('@sentry/react');
+let sentryInstance: SentryModule | null = null;
+let isInitializing = false;
+const pendingErrors: Array<{ error: unknown; context?: Record<string, unknown> }> = [];
+
 /**
- * Initializes Sentry application monitoring.
+ * Initializes Sentry application monitoring asynchronously.
  * Safe in SSR / static prerender and development environments.
+ * Defers dynamic import and configuration to idle/post-load so it never blocks
+ * initial hydration, FCP, LCP, or Total Blocking Time.
  */
 export function initSentry(): void {
   if (typeof window === 'undefined') return;
@@ -228,52 +232,96 @@ export function initSentry(): void {
     return;
   }
 
-  Sentry.init({
-    dsn,
-    environment,
-    integrations: [
-      Sentry.browserTracingIntegration(),
-      Sentry.replayIntegration({
-        maskAllText: false,
-        blockAllMedia: false,
-      }),
-    ],
-    // Tracing sample rate: 100% in staging/development, 20% in production
-    tracesSampleRate: environment === 'production' ? 0.2 : 1.0,
-    tracePropagationTargets: ['localhost', /^\//],
-    // Session Replay sample rate
-    replaysSessionSampleRate: 0.1,
-    replaysOnErrorSampleRate: 1.0,
-    beforeSend(event, hint) {
-      return filterSentryEvent(event, hint);
-    },
-    ignoreErrors: [
-      'TypeError: Illegal invocation',
-      /Illegal invocation/i,
-      'ResizeObserver loop completed with undelivered notifications',
-      'ResizeObserver loop limit exceeded',
-      'Non-Error promise rejection captured',
-      'NetworkError when attempting to fetch resource.',
-      /Loading chunk [0-9]+ failed/i,
-    ],
-    denyUrls: [
-      /extensions\//i,
-      /^chrome:\/\//i,
-      /^chrome-extension:\/\//i,
-      /^moz-extension:\/\//i,
-      /^safari-extension:\/\//i,
-    ],
-  });
+  const loadSentry = () => {
+    if (sentryInstance || isInitializing) return;
+    isInitializing = true;
+
+    import('@sentry/react')
+      .then((Sentry) => {
+        sentryInstance = Sentry;
+        Sentry.init({
+          dsn,
+          environment,
+          integrations: [
+            Sentry.browserTracingIntegration(),
+            Sentry.replayIntegration({
+              maskAllText: false,
+              blockAllMedia: false,
+            }),
+          ],
+          tracesSampleRate: environment === 'production' ? 0.2 : 1.0,
+          tracePropagationTargets: ['localhost', /^\//],
+          replaysSessionSampleRate: 0.1,
+          replaysOnErrorSampleRate: 1.0,
+          beforeSend(event, hint) {
+            return filterSentryEvent(event, hint);
+          },
+          ignoreErrors: [
+            'TypeError: Illegal invocation',
+            /Illegal invocation/i,
+            'ResizeObserver loop completed with undelivered notifications',
+            'ResizeObserver loop limit exceeded',
+            'Non-Error promise rejection captured',
+            'NetworkError when attempting to fetch resource.',
+            /Loading chunk [0-9]+ failed/i,
+          ],
+          denyUrls: [
+            /extensions\//i,
+            /^chrome:\/\//i,
+            /^chrome-extension:\/\//i,
+            /^moz-extension:\/\//i,
+            /^safari-extension:\/\//i,
+          ],
+        });
+
+        while (pendingErrors.length > 0) {
+          const item = pendingErrors.shift();
+          if (item) {
+            Sentry.captureException(item.error, { extra: item.context });
+          }
+        }
+      })
+      .catch((err) => {
+        console.error('Failed to load Sentry monitoring dynamically:', err);
+      })
+      .finally(() => {
+        isInitializing = false;
+      });
+  };
+
+  if (document.readyState === 'complete') {
+    if ('requestIdleCallback' in window) {
+      window.requestIdleCallback(loadSentry, { timeout: 3000 });
+    } else {
+      setTimeout(loadSentry, 2000);
+    }
+  } else {
+    window.addEventListener(
+      'load',
+      () => {
+        if ('requestIdleCallback' in window) {
+          window.requestIdleCallback(loadSentry, { timeout: 3000 });
+        } else {
+          setTimeout(loadSentry, 2000);
+        }
+      },
+      { once: true }
+    );
+  }
 }
 
 /**
  * Capture an error with custom diagnostic context.
+ * If Sentry is not yet loaded, errors are buffered and flushed once Sentry initializes.
  */
 export function captureException(error: unknown, context?: Record<string, unknown>): void {
   console.error('[App Error Captured]', error, context);
-  if (typeof window !== 'undefined' && env.VITE_SENTRY_DSN) {
-    Sentry.captureException(error, { extra: context });
+  if (typeof window === 'undefined' || !env.VITE_SENTRY_DSN) return;
+
+  if (sentryInstance) {
+    sentryInstance.captureException(error, { extra: context });
+  } else {
+    pendingErrors.push({ error, context });
+    initSentry();
   }
 }
-
-export { Sentry };

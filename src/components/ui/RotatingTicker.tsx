@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { motion, AnimatePresence, useReducedMotion } from 'framer-motion';
 import { cn } from '@/lib/utils';
+import { useMediaQuery } from '@/hooks/use-media-query';
 
 export interface RotatingTickerProps {
   /**
@@ -32,17 +32,14 @@ export interface RotatingTickerProps {
   className?: string;
 }
 
-const DEFAULT_ITEMS = [
-  'Foreign Ownership',
-  'Tax Exemption',
-  'Asset Protection',
-];
+const DEFAULT_ITEMS = ['Foreign Ownership', 'Tax Exemption', 'Asset Protection'];
 
 /**
  * Precision Rotating Value Ticker matching Equitify Asset Staggered Cycle architecture:
  * - Fluid baseline alignment with static prefix
  * - Smooth vertical slide transition with zero Cumulative Layout Shift
  * - Character/word-level overflow containment preventing awkward flight paths
+ * - Powered by CSS compositor animations: eliminates Framer Motion from critical above-the-fold path.
  */
 export function RotatingTicker({
   phrases,
@@ -54,7 +51,7 @@ export function RotatingTicker({
 }: RotatingTickerProps) {
   const items = words || phrases || DEFAULT_ITEMS;
   const [index, setIndex] = useState(0);
-  const shouldReduceMotion = useReducedMotion();
+  const shouldReduceMotion = useMediaQuery('(prefers-reduced-motion: reduce)', false);
 
   useEffect(() => {
     if (shouldReduceMotion || items.length <= 1) return;
@@ -78,9 +75,7 @@ export function RotatingTicker({
       aria-atomic="true"
     >
       {/* Screen-reader full sentence announcement */}
-      <span className="sr-only">
-        {prefix ? `${prefix} ${currentItem}` : currentItem}
-      </span>
+      <span className="sr-only">{prefix ? `${prefix} ${currentItem}` : currentItem}</span>
 
       {/* Optional static prefix */}
       {prefix && (
@@ -97,26 +92,17 @@ export function RotatingTicker({
         {items.reduce((longest, curr) => (curr.length > longest.length ? curr : longest), items[0])}
       </span>
 
-      {/* Animated smooth vertical slide layer */}
-      <span
-        aria-hidden="true"
-        className="absolute inset-0 flex items-center overflow-hidden"
-      >
-        <AnimatePresence mode="wait" initial={false}>
-          <motion.span
-            key={currentItem}
-            initial={shouldReduceMotion ? { opacity: 0 } : { y: '80%', opacity: 0 }}
-            animate={shouldReduceMotion ? { opacity: 1 } : { y: '0%', opacity: 1 }}
-            exit={shouldReduceMotion ? { opacity: 0 } : { y: '-80%', opacity: 0 }}
-            transition={{
-              duration: 0.65,
-              ease: [0.16, 1, 0.3, 1], // Smooth luxury cubic bezier
-            }}
-            className="inline-block whitespace-nowrap text-[#FBFBFB] font-heading font-normal"
-          >
-            {currentItem}
-          </motion.span>
-        </AnimatePresence>
+      {/* Animated smooth vertical slide layer (Pure CSS GPU-accelerated) */}
+      <span aria-hidden="true" className="absolute inset-0 flex items-center overflow-hidden">
+        <span
+          key={index}
+          className={cn(
+            'inline-block whitespace-nowrap text-[#FBFBFB] font-heading font-normal',
+            shouldReduceMotion ? 'transition-opacity duration-300' : 'animate-ticker-slide'
+          )}
+        >
+          {currentItem}
+        </span>
       </span>
     </Component>
   );

@@ -17,6 +17,8 @@
     <link rel="preload" href="/fonts/plus-jakarta-sans-v12-latin.woff2" as="font" type="font/woff2" crossorigin />
     <!-- prettier-ignore -->
     <link rel="preload" href="/fonts/outfit-v15-latin.woff2" as="font" type="font/woff2" crossorigin />
+    <!-- prettier-ignore -->
+    <link rel="preload" as="image" href="/images/site/hero-skyline-800.webp" imagesrcset="/images/site/hero-skyline-800.webp 800w, /images/site/hero-skyline.webp 1600w" imagesizes="100vw" fetchpriority="high" />
     <link rel="dns-prefetch" href="https://www.googletagmanager.com" />
     <link rel="icon" href="/favicon.ico" sizes="16x16 32x32 48x48" />
     <link rel="icon" href="/favicon-48.png" type="image/png" sizes="48x48" />
@@ -33,11 +35,17 @@
         };
       window.gtag('js', new Date());
       (function () {
-        var loadDelay = 4000;
         var triggerOnce = false;
+        var events = ['pointerdown', 'touchstart', 'keydown', 'scroll'];
+        var cleanup = function () {
+          events.forEach(function (e) {
+            document.removeEventListener(e, onInteraction);
+          });
+        };
         var loadGtm = function () {
           if (triggerOnce) return;
           triggerOnce = true;
+          cleanup();
           (function (w, d, s, l, i) {
             w[l] = w[l] || [];
             w[l].push({ 'gtm.start': new Date().getTime(), event: 'gtm.js' });
@@ -49,17 +57,30 @@
             firstScript.parentNode.insertBefore(script, firstScript);
           })(window, document, 'script', 'dataLayer', 'GTM-MHNJGSWX');
         };
-
-        var onUserInteraction = function () {
+        var onInteraction = function () {
           loadGtm();
         };
-
-        setTimeout(loadGtm, loadDelay);
-        ['pointerdown', 'touchstart', 'keydown', 'scroll', 'mousemove'].forEach(
-          function (eventName) {
-            document.addEventListener(eventName, onUserInteraction, { once: true, passive: true });
+        events.forEach(function (e) {
+          document.addEventListener(e, onInteraction, { once: true, passive: true });
+        });
+        // Defer idle timer until after page load & idle to avoid main-thread TBT contention during hydration
+        var scheduleGtm = function () {
+          if ('requestIdleCallback' in window) {
+            window.requestIdleCallback(
+              function () {
+                setTimeout(loadGtm, 2500);
+              },
+              { timeout: 5000 }
+            );
+          } else {
+            setTimeout(loadGtm, 5000);
           }
-        );
+        };
+        if (document.readyState === 'complete') {
+          scheduleGtm();
+        } else {
+          window.addEventListener('load', scheduleGtm, { once: true });
+        }
       })();
     </script>
     <meta property="og:site_name" content="Klay Consultants" />

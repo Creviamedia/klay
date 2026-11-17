@@ -123,6 +123,17 @@ ul{display:flex;flex-wrap:wrap;gap:.5rem 1.5rem;list-style:none;padding:0;margin
 </html>
 `;
 
+function getRouteImagePreload(routePath) {
+  const normalized = routePath.replace(/\/+$/, '');
+  if (normalized === '' || normalized === '/') {
+    return '    <!-- prettier-ignore -->\n    <link rel="preload" as="image" href="/images/site/hero-skyline-800.webp" imagesrcset="/images/site/hero-skyline-800.webp 800w, /images/site/hero-skyline.webp 1600w" imagesizes="100vw" fetchpriority="high" />';
+  }
+  if (normalized === '/services') {
+    return '    <link rel="preload" as="image" href="/images/site/services-dubai-sunset.webp" fetchpriority="high" />';
+  }
+  return '';
+}
+
 try {
   const { SiteApp } = await vite.ssrLoadModule('/src/App.tsx');
   const { getPageSeo, getPrerenderRoutes, getStructuredData, SITE_ORIGIN } =
@@ -141,10 +152,13 @@ try {
     let markup = await renderMarkup(
       React.createElement(StaticRouter, { location: route.path }, React.createElement(SiteApp))
     );
+    const normalizedPath = route.path.replace(/\/+$/, '');
     const priorityImage =
-      route.path.replace(/\/+$/, '') === '/services'
+      normalizedPath === '/services'
         ? '/images/site/services-dubai-sunset.webp'
-        : seo.image.replace(SITE_ORIGIN, '');
+        : normalizedPath === '' || normalizedPath === '/'
+          ? '/images/site/hero-skyline.webp'
+          : seo.image.replace(SITE_ORIGIN, '');
     markup = prioritizeImage(markup, priorityImage);
 
     const articleSlug =
@@ -170,6 +184,13 @@ try {
       /<link\s+rel="canonical"[^>]*>/i,
       `<link rel="canonical" href="${escapeHtml(seo.canonical)}" />`,
       'link rel="canonical"'
+    );
+    const imagePreloadTag = getRouteImagePreload(route.path);
+    html = replaceOnce(
+      html,
+      /(?:[ \t]*<!-- prettier-ignore -->\n)?[ \t]*<link\s+rel="preload"\s+as="image"[^>]*>\n?/i,
+      imagePreloadTag ? `${imagePreloadTag}\n` : '',
+      'link rel="preload" as="image"'
     );
     html = replaceMeta(
       html,

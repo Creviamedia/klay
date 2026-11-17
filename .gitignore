@@ -33,3 +33,7 @@ lighthouse-*.json
 plugins/
 scrollcraft/
 .netlify
+
+# Local build archives
+*.zip
+backups/
