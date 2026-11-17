@@ -31,8 +31,9 @@ All notable changes to the Klay Consultants platform are documented here followi
 
 ### Infrastructure & Continuous Deployment
 
-- **Sovereign Lead Intake Pipeline (`public/api/leads.php`)**:
-  - Native PHP intake conduit deployed to Hostinger LiteSpeed writing directly to Turso Frankfurt via libSQL pipeline HTTP API.
+- **Sovereign Lead & Admin Conduit Pipelines (`public/api/leads.php`, `public/api/admin.php`)**:
+  - Native Hostinger LiteSpeed conduits writing directly to Turso Frankfurt via libSQL pipeline HTTP API.
+  - `public/api/admin.php` resolves the `Authentication failed (404)` on Hostinger production by routing `/api/admin/*` to native PHP handling for login, session verification, lead status updates, and CMS management.
   - Emergency fallback persists leads to local JSONL (`data/leads.jsonl`) if remote database is unreachable.
   - Instant dispatch to Telegram group with UAE WhatsApp 1-tap dialer (`971...`) and encrypted ntfy.sh push channel.
 - **Automated Zero-Downtime Deployment (`.github/workflows/deploy-production.yml`)**:
