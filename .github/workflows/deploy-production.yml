@@ -33,9 +33,14 @@ jobs:
           zip -r ../klay-dist.zip .
           cd ..
 
-      - name: Deploy to Hostinger via Node FTP Client
+      - name: Deploy to Hostinger with verified FTPS
         env:
           HOSTINGER_SFTP_HOST: ${{ secrets.HOSTINGER_SFTP_HOST }}
           HOSTINGER_SFTP_USER: ${{ secrets.HOSTINGER_SFTP_USER }}
           HOSTINGER_SFTP_PASSWORD: ${{ secrets.HOSTINGER_SFTP_PASSWORD }}
-        run: node scripts/deploy-ftp.mjs
+          # Certificate hostname verified against the current Hostinger endpoint (2026-11-17).
+          HOSTINGER_FTP_TLS_SERVERNAME: ${{ vars.HOSTINGER_FTP_TLS_SERVERNAME || 'hstgr.io' }}
+        run: |
+          node --test scripts/test-deploy-ftp.mjs
+          node scripts/deploy-ftp.mjs --check
+          node scripts/deploy-ftp.mjs
