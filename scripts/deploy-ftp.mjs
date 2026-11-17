@@ -12,12 +12,16 @@ async function deploy() {
   const client = new ftp.Client(60000);
   client.ftp.verbose = true;
 
+  const host = process.env.HOSTINGER_SFTP_HOST || '217.196.55.88';
+  const user = process.env.HOSTINGER_SFTP_USER || 'u505970159.klayconsultants.com';
+  const password = process.env.HOSTINGER_SFTP_PASSWORD || 'Klay@2024';
+
   try {
-    console.log('📡 Connecting to Hostinger FTP (217.196.55.88:21)...');
+    console.log(`📡 Connecting to Hostinger FTP (${host}:21)...`);
     await client.access({
-      host: '217.196.55.88',
-      user: 'u505970159.klayconsultants.com',
-      password: 'Klay@2024',
+      host,
+      user,
+      password,
       port: 21,
       secure: false,
     });
