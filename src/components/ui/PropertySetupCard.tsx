@@ -2,6 +2,7 @@ import React from 'react';
 import { ArrowUpRight, MapPin, Shield, CheckCircle } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { cn } from '@/lib/utils';
+import { Image } from '@/components/ui/image';
 
 export interface PropertySetupCardProps {
   title: string;
@@ -29,9 +30,12 @@ export const PropertySetupCard: React.FC<PropertySetupCardProps> = ({
   const cardContent = (
     <>
       {/* Zoomable Image Layer */}
-      <img
+      <Image
         src={imageSrc}
         alt={imageAlt}
+        fill
+        loading="lazy"
+        sizes="(min-width: 1280px) 286px, (min-width: 1024px) calc((100vw - 136px) / 4), (min-width: 768px) calc((100vw - 72px) / 2), calc(100vw - 48px)"
         className="absolute inset-0 h-full w-full object-cover filter brightness-[1.05] contrast-[1.0] saturate-[0.4] transition-transform duration-600 ease-[cubic-bezier(0.4,0,0.2,1)] group-hover:scale-105 motion-reduce:transform-none"
       />
 

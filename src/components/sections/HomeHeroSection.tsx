@@ -1,4 +1,4 @@
-import React, { useRef, useEffect } from 'react';
+import React, { useRef, useEffect, useState } from 'react';
 import { EquitifyButton } from '@/components/ui/EquitifyButton';
 import { RotatingTicker } from '@/components/ui/RotatingTicker';
 import { Image } from '@/components/ui/image';
@@ -35,6 +35,7 @@ export const HomeHeroSection: React.FC<HomeHeroSectionProps> = ({
   className = '',
 }) => {
   const videoRef = useRef<HTMLVideoElement>(null);
+  const [videoPlaying, setVideoPlaying] = useState(false);
 
   useEffect(() => {
     // Only attempt video playback on desktop / non-mobile devices to conserve mobile bandwidth and battery
@@ -62,7 +63,7 @@ export const HomeHeroSection: React.FC<HomeHeroSectionProps> = ({
           muted
           playsInline
           preload="none"
-          poster={IMAGES.heroSkyline}
+          onPlaying={() => setVideoPlaying(true)}
           className="hidden md:block absolute inset-0 w-full h-full object-cover object-center pointer-events-none opacity-85"
           aria-hidden="true"
         >
@@ -76,7 +77,9 @@ export const HomeHeroSection: React.FC<HomeHeroSectionProps> = ({
           fill
           priority
           sizes="100vw"
-          className="object-cover opacity-85 md:opacity-20 filter saturate-50 pointer-events-none -z-10"
+          // This responsive image is also the desktop video fallback. A video poster
+          // would download its full-size image even when the video is hidden on phones.
+          className={`object-cover opacity-85 ${videoPlaying ? 'md:opacity-20' : ''} filter saturate-50 pointer-events-none -z-10`}
         />
       </div>
 
