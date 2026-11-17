@@ -33,17 +33,9 @@ jobs:
           zip -r ../klay-dist.zip .
           cd ..
 
-      # Hostinger FTP account uses explicit TLS on port 21. This action does not
-      # support SFTP; fail the job if credentials are missing rather than skip.
-      - name: Deploy to Hostinger via FTPS
-        uses: SamKirkland/FTP-Deploy-Action@v4.3.5
-        with:
-          server: ${{ secrets.HOSTINGER_SFTP_HOST }}
-          username: ${{ secrets.HOSTINGER_SFTP_USER }}
-          password: ${{ secrets.HOSTINGER_SFTP_PASSWORD }}
-          protocol: ftps
-          port: 21
-          security: strict
-          server-dir: 'public_html/'
-          local-dir: './dist/'
-          dangerous-clean-slate: false
+      - name: Deploy to Hostinger via Node FTP Client
+        env:
+          HOSTINGER_SFTP_HOST: ${{ secrets.HOSTINGER_SFTP_HOST }}
+          HOSTINGER_SFTP_USER: ${{ secrets.HOSTINGER_SFTP_USER }}
+          HOSTINGER_SFTP_PASSWORD: ${{ secrets.HOSTINGER_SFTP_PASSWORD }}
+        run: node scripts/deploy-ftp.mjs
