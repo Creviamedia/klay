@@ -172,6 +172,7 @@ export function SiteRoutes() {
   const { pathname } = useLocation();
   const normalizedPathname = pathname.replace(/\/+$/, '');
   const isAdminRoute = pathname.startsWith('/admin');
+  const isHomePage = normalizedPathname === '' || normalizedPathname === ROUTES.home;
   const isBusinessSetupPage =
     normalizedPathname === ROUTES.businessSetup.replace(/\/+$/, '') ||
     normalizedPathname === '/business-setup';
@@ -183,7 +184,9 @@ export function SiteRoutes() {
     <>
       <PageMetadata />
       <ScrollToTop />
-      {!isAdminRoute && !isBusinessSetupPage && !isCostCalculatorPage && <SiteBackground />}
+      {!isAdminRoute && !isHomePage && !isBusinessSetupPage && !isCostCalculatorPage && (
+        <SiteBackground />
+      )}
       {/* Keyboard users can jump past the header links; hidden until it receives focus. */}
       {!isAdminRoute && (
         <a

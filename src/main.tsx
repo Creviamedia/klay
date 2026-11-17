@@ -10,9 +10,6 @@ import './styles/globals.css';
 import './pages/ContactPage.css';
 import './pages/CostCalculatorPage.css';
 
-// Initialize Sentry monitoring
-initSentry();
-
 const rootElement = document.getElementById('root');
 
 if (!rootElement) {
@@ -32,3 +29,6 @@ if (rootElement.dataset.prerendered === 'true') {
 } else {
   createRoot(rootElement).render(app);
 }
+
+// Initialize Sentry monitoring (deferred asynchronously to idle/post-load)
+initSentry();

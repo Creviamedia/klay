@@ -28,8 +28,22 @@ export default defineConfig({
         // deploy changes it. React, React DOM and React Router only change on dependency upgrades: in a
         // chunk of their own they stay cached in returning visitors' browsers across content deploys.
         manualChunks(id) {
-          if (/[\\/]node_modules[\\/](?:react|react-dom|scheduler|react-router|react-router-dom|@remix-run[\\/]router)[\\/]/.test(id)) {
+          if (
+            /[\\/]node_modules[\\/](?:react|react-dom|scheduler|react-router|react-router-dom|@remix-run[\\/]router)[\\/]/.test(
+              id
+            )
+          ) {
             return 'react-vendor';
+          }
+          if (id.includes('node_modules/@sentry')) {
+            return 'sentry-vendor';
+          }
+          if (
+            id.includes('node_modules/framer-motion') ||
+            id.includes('node_modules/motion-dom') ||
+            id.includes('node_modules/motion-utils')
+          ) {
+            return 'motion-vendor';
           }
           return undefined;
         },
