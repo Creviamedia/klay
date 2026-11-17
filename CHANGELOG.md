@@ -4,6 +4,44 @@ All notable changes to the Klay Consultants platform are documented here followi
 
 ---
 
+## [2.4.0-production] - 2026-11-17 (Production Launch, 2FA Hardening, Mobile Performance & Sovereign Lead Engine)
+
+### Added & Security Hardening
+
+- **RFC 6238 TOTP Two-Factor Authentication (`netlify/functions/admin-core.cjs`, `AdminLoginPage.tsx`)**:
+  - Zero-dependency TOTP engine implemented in pure Node.js standard library `crypto` with Base32 encode/decode, HMAC-SHA1 dynamic truncation, and constant-time `crypto.timingSafeEqual` comparison.
+  - Verified against exact RFC 6238 Appendix B test vectors with $\pm 1$ step (30s) clock drift tolerance.
+  - Backward-compatible challenge: prompts for 6-digit authenticator code when `totp_secret` is configured, while allowing password-only login when unconfigured to prevent lockouts.
+- **Database Token Revocation Ledger (`src/lib/turso.ts`, `netlify/functions/admin-core.cjs`)**:
+  - Added `revoked_tokens (jti PRIMARY KEY, revoked_at, expires_at)` table with index on `expires_at` in Turso SQLite Cloud (Frankfurt).
+  - Synchronous in-memory cache check in `requireAdminAuth` + database persistence in `handleAdminLogout` immediately kills revoked sessions (HTTP 401).
+- **Hardened Admin Credentials**:
+  - Revoked public dev password (`KlayAdmin2026!Dev`); upgraded admin password hash with bcrypt work factor 10.
+  - Enforced sliding-window rate limiting (max 5 failed attempts / 15 min per IP) with concurrency race mitigation and memory leak cleanup.
+  - Strict CORS origin validation: untrusted origins rejected prior to authentication; credentials and origin reflection restricted to approved production and staging domains.
+
+### Performance & Mobile Optimizations (`crevia/perf/mobile-image-loading-20261117`)
+
+- **Hero Video Poster Elimination (`HomeHeroSection.tsx`)**: Removed hidden desktop video poster download on mobile devices, saving ~160 KiB initial bandwidth on mobile viewports while preserving desktop playback on `onPlaying`.
+- **Below-Fold Lazy Image Loading (`PropertySetupCard.tsx`)**: Converted static cards to use canonical `<Image loading="lazy" .../>` with responsive `sizes` attribute, eliminating 533 KiB of offscreen image transfer.
+- **Measured Metrics**: Mobile Lighthouse performance increased from 74/75 to 87; Largest Contentful Paint (LCP) dropped from 6.2s to 3.5s.
+- **Verified FTPS Transport (`scripts/deploy-ftp.mjs`, `scripts/test-deploy-ftp.mjs`)**:
+  - Enforced TLS 1.2+ encryption (`secure: true`, `rejectUnauthorized: true`) for Hostinger deployments.
+  - Added TLS SNI servername validation (`HOSTINGER_FTP_TLS_SERVERNAME` = `hstgr.io`) preventing IP certificate mismatch errors.
+
+### Infrastructure & Continuous Deployment
+
+- **Sovereign Lead Intake Pipeline (`public/api/leads.php`)**:
+  - Native PHP intake conduit deployed to Hostinger LiteSpeed writing directly to Turso Frankfurt via libSQL pipeline HTTP API.
+  - Emergency fallback persists leads to local JSONL (`data/leads.jsonl`) if remote database is unreachable.
+  - Instant dispatch to Telegram group with UAE WhatsApp 1-tap dialer (`971...`) and encrypted ntfy.sh push channel.
+- **Automated Zero-Downtime Deployment (`.github/workflows/deploy-production.yml`)**:
+  - GitHub Actions workflow deploys production static bundle directly to Hostinger upon merging into `main`.
+  - Prerendered 130 public routes, 4 sitemaps, robots.txt, and llms.txt.
+  - Branch parity verified: `main`, `staging`, and `uat` synchronized at commit `76b522b`.
+
+---
+
 ## [2.3.0-staging] / [2.3.0-uat] - 2026-11-15 (Audit Defect Resolutions, Pre-Commit Hooks & Lead Verification)
 
 ### Fixed & Hardened (Audit Remediation)
