@@ -532,6 +532,7 @@ export function KlayLeadForm({
                 </div>
                 <input
                   id={nameId}
+                  name="name"
                   type="text"
                   required
                   autoComplete="name"
@@ -569,6 +570,7 @@ export function KlayLeadForm({
                 </div>
                 <input
                   id={emailId}
+                  name="email"
                   type="email"
                   required
                   autoComplete="email"
@@ -633,6 +635,7 @@ export function KlayLeadForm({
                 </div>
                 <input
                   id={phoneId}
+                  name="phone"
                   type="tel"
                   required
                   autoComplete="tel"
