@@ -68,12 +68,12 @@
           if ('requestIdleCallback' in window) {
             window.requestIdleCallback(
               function () {
-                setTimeout(loadGtm, 2500);
+                setTimeout(loadGtm, 5000);
               },
-              { timeout: 5000 }
+              { timeout: 8000 }
             );
           } else {
-            setTimeout(loadGtm, 5000);
+            setTimeout(loadGtm, 6000);
           }
         };
         if (document.readyState === 'complete') {

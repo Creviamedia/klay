@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { ArrowUpRight } from 'lucide-react';
 import { Image } from '@/components/ui/image';
 import { Link } from '@/components/ui/link';
@@ -94,32 +94,41 @@ const benefits = [
   {
     number: '01',
     title: 'Direct Government Accredited',
-    description: 'We liaise directly with DED, ICP, and Freezone Registrars with zero intermediary markups.',
+    description:
+      'We liaise directly with DED, ICP, and Freezone Registrars with zero intermediary markups.',
   },
   {
     number: '02',
     title: '100% Sovereign Foreign Ownership',
-    description: 'Direct foreign ownership structures eliminating nominee risks and local sponsor dependencies.',
+    description:
+      'Direct foreign ownership structures eliminating nominee risks and local sponsor dependencies.',
   },
   {
     number: '03',
     title: 'Pre-Underwritten Banking Dossiers',
-    description: 'Guaranteed corporate banker introductions in tier-1 UAE banks with verified compliance packs.',
+    description:
+      'Guaranteed corporate banker introductions in tier-1 UAE banks with verified compliance packs.',
   },
   {
     number: '04',
     title: 'Fixed Transparent Fees',
-    description: 'Complete cost certainty from day one with zero hidden renewal markups or typing surprises.',
+    description:
+      'Complete cost certainty from day one with zero hidden renewal markups or typing surprises.',
   },
 ];
 
 export default function BusinessSetupPage() {
   const [filter, setFilter] = useState<'ALL' | 'FREE ZONE' | 'MAINLAND' | 'OFFSHORE'>('ALL');
+  const [isDesktop, setIsDesktop] = useState(false);
+
+  useEffect(() => {
+    if (typeof window !== 'undefined' && window.innerWidth >= 768) {
+      setIsDesktop(true);
+    }
+  }, []);
 
   const filteredServices =
-    filter === 'ALL'
-      ? formationServices
-      : formationServices.filter((s) => s.category === filter);
+    filter === 'ALL' ? formationServices : formationServices.filter((s) => s.category === filter);
 
   return (
     <div className="flex flex-col w-full bg-canvas-light text-text-primary-dark pb-24 md:pb-28">
@@ -128,17 +137,26 @@ export default function BusinessSetupPage() {
           ========================================================================= */}
       <section className="relative isolate min-h-[560px] lg:min-h-[660px] flex items-center overflow-hidden bg-canvas-dark text-canvas-light py-24 md:py-32 border-b border-hairline-dark/40">
         <div className="absolute inset-0 -z-20 overflow-hidden">
-          <video
-            autoPlay
-            loop
-            muted
-            playsInline
-            poster={IMAGES.heroSkyline}
-            className="w-full h-full object-cover opacity-40 scale-105"
-            style={{ filter: 'brightness(0.9) contrast(1.1)' }}
-          >
-            <source src="/videos/equitify-hero-bg.mp4" type="video/mp4" />
-          </video>
+          {isDesktop ? (
+            <video
+              autoPlay
+              loop
+              muted
+              playsInline
+              poster={IMAGES.heroSkyline}
+              className="w-full h-full object-cover opacity-40 scale-105"
+              style={{ filter: 'brightness(0.9) contrast(1.1)' }}
+            >
+              <source src="/videos/equitify-hero-bg.mp4" type="video/mp4" />
+            </video>
+          ) : (
+            <img
+              src={IMAGES.heroSkyline}
+              alt="Dubai skyline"
+              className="w-full h-full object-cover opacity-40 scale-105"
+              style={{ filter: 'brightness(0.9) contrast(1.1)' }}
+            />
+          )}
           <div className="absolute inset-0 bg-gradient-to-b from-[#05131F]/90 via-[#05131F]/70 to-[#05131F]" />
         </div>
 
@@ -160,7 +178,9 @@ export default function BusinessSetupPage() {
               With <span className="text-brand-green">Clarity &amp; Confidence.</span>
             </h1>
             <p className="text-base sm:text-lg text-canvas-light/80 font-normal leading-relaxed mb-8 max-w-2xl">
-              Turning an enterprise vision into an operational UAE entity starts with the right decisions. From choosing your business activity and jurisdiction to complete trade licensing, visa stamping, and corporate banking.
+              Turning an enterprise vision into an operational UAE entity starts with the right
+              decisions. From choosing your business activity and jurisdiction to complete trade
+              licensing, visa stamping, and corporate banking.
             </p>
             <div className="flex flex-wrap items-center gap-4">
               <EquitifyButton to={ROUTES.contact} variant="green" size="lg">
@@ -250,8 +270,12 @@ export default function BusinessSetupPage() {
                     {service.description}
                   </p>
                   <div className="border-t border-hairline-light/30 pt-3">
-                    <span className="block text-[10px] font-mono text-brand-navy/60 uppercase">Ideal for:</span>
-                    <span className="text-xs text-brand-navy/90 font-medium">{service.idealFor}</span>
+                    <span className="block text-[10px] font-mono text-brand-navy/60 uppercase">
+                      Ideal for:
+                    </span>
+                    <span className="text-xs text-brand-navy/90 font-medium">
+                      {service.idealFor}
+                    </span>
                   </div>
                 </div>
               </Link>
@@ -273,7 +297,8 @@ export default function BusinessSetupPage() {
               How to Set Up a Business in the UAE.
             </h2>
             <p className="text-sm md:text-base text-canvas-light/75 leading-relaxed">
-              A structured overview of the typical company formation journey. Sourcing, legal drafting, licensing, and corporate bank accounts under one roof.
+              A structured overview of the typical company formation journey. Sourcing, legal
+              drafting, licensing, and corporate bank accounts under one roof.
             </p>
           </div>
 
@@ -319,7 +344,9 @@ export default function BusinessSetupPage() {
                 Your Business Goals. Our Guidance. One Accountable Path.
               </h2>
               <p className="text-base text-text-secondary-dark leading-relaxed mb-8">
-                Setting up in the UAE should feel confident, not overwhelming. At Klay Consultants, we underwrite your business activity, jurisdiction, and banking requirements before filing a single document.
+                Setting up in the UAE should feel confident, not overwhelming. At Klay Consultants,
+                we underwrite your business activity, jurisdiction, and banking requirements before
+                filing a single document.
               </p>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">

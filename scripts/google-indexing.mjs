@@ -145,7 +145,8 @@ function loadCredentials() {
       return JSON.parse(trimmed);
     } catch (err) {
       throw new Error(
-        `Failed to parse Google credentials JSON from environment variable: ${err.message}`
+        `Failed to parse Google credentials JSON from environment variable: ${err.message}`,
+        { cause: err }
       );
     }
   }
@@ -155,7 +156,9 @@ function loadCredentials() {
     try {
       return JSON.parse(fs.readFileSync(resolved, 'utf8'));
     } catch (err) {
-      throw new Error(`Failed to parse credentials file at ${resolved}: ${err.message}`);
+      throw new Error(`Failed to parse credentials file at ${resolved}: ${err.message}`, {
+        cause: err,
+      });
     }
   }
 

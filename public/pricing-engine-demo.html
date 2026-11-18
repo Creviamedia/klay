@@ -1,930 +1,1069 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>KLAY UAE Statutory Pricing Engine & Logic Model Demo</title>
-  <style>
-    :root {
-      --bg-dark: #05131F;
-      --bg-card: #0C2D48;
-      --navy: #0C2D48;
-      --emerald: #16A34A;
-      --emerald-bright: #22C55E;
-      --gold: #D4AF37;
-      --gold-light: #F6DF98;
-      --text-white: #FFFFFF;
-      --text-dim: rgba(255, 255, 255, 0.7);
-      --border-subtle: rgba(255, 255, 255, 0.12);
-      --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
-      --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-    }
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>KLAY UAE Statutory Pricing Engine & Logic Model Demo</title>
+    <style>
+      :root {
+        --bg-dark: #05131f;
+        --bg-card: #0c2d48;
+        --navy: #0c2d48;
+        --emerald: #16a34a;
+        --emerald-bright: #22c55e;
+        --gold: #d4af37;
+        --gold-light: #f6df98;
+        --text-white: #ffffff;
+        --text-dim: rgba(255, 255, 255, 0.7);
+        --border-subtle: rgba(255, 255, 255, 0.12);
+        --font-mono:
+          ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New',
+          monospace;
+        --font-sans:
+          -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+      }
 
-    * { box-sizing: border-box; margin: 0; padding: 0; }
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
 
-    body {
-      background-color: var(--bg-dark);
-      color: var(--text-white);
-      font-family: var(--font-sans);
-      line-height: 1.5;
-      padding: 32px 20px 80px 20px;
-    }
+      body {
+        background-color: var(--bg-dark);
+        color: var(--text-white);
+        font-family: var(--font-sans);
+        line-height: 1.5;
+        padding: 32px 20px 80px 20px;
+      }
 
-    .container {
-      max-width: 1200px;
-      margin: 0 auto;
-    }
+      .container {
+        max-width: 1200px;
+        margin: 0 auto;
+      }
 
-    /* Header Bar */
-    .header {
-      background: rgba(12, 45, 72, 0.6);
-      border: 1px border var(--border-subtle);
-      border-radius: 20px;
-      padding: 24px 32px;
-      margin-bottom: 24px;
-      display: flex;
-      flex-wrap: wrap;
-      justify-content: space-between;
-      align-items: center;
-      gap: 16px;
-      backdrop-filter: blur(12px);
-      box-shadow: 0 12px 30px rgba(0, 0, 0, 0.35);
-    }
+      /* Header Bar */
+      .header {
+        background: rgba(12, 45, 72, 0.6);
+        border: 1px border var(--border-subtle);
+        border-radius: 20px;
+        padding: 24px 32px;
+        margin-bottom: 24px;
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: space-between;
+        align-items: center;
+        gap: 16px;
+        backdrop-filter: blur(12px);
+        box-shadow: 0 12px 30px rgba(0, 0, 0, 0.35);
+      }
 
-    .badge-pill {
-      font-family: var(--font-mono);
-      font-size: 11px;
-      font-weight: 700;
-      letter-spacing: 0.1em;
-      text-transform: uppercase;
-      color: var(--emerald-bright);
-      background: rgba(34, 197, 94, 0.12);
-      border: 1px solid rgba(34, 197, 94, 0.3);
-      padding: 4px 10px;
-      border-radius: 100px;
-      display: inline-block;
-      margin-bottom: 8px;
-    }
+      .badge-pill {
+        font-family: var(--font-mono);
+        font-size: 11px;
+        font-weight: 700;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+        color: var(--emerald-bright);
+        background: rgba(34, 197, 94, 0.12);
+        border: 1px solid rgba(34, 197, 94, 0.3);
+        padding: 4px 10px;
+        border-radius: 100px;
+        display: inline-block;
+        margin-bottom: 8px;
+      }
 
-    h1 {
-      font-size: 26px;
-      font-weight: 600;
-      letter-spacing: -0.02em;
-    }
+      h1 {
+        font-size: 26px;
+        font-weight: 600;
+        letter-spacing: -0.02em;
+      }
 
-    .subtitle {
-      font-size: 13px;
-      color: var(--text-dim);
-      margin-top: 4px;
-    }
+      .subtitle {
+        font-size: 13px;
+        color: var(--text-dim);
+        margin-top: 4px;
+      }
 
-    .currency-toggle {
-      display: flex;
-      background: rgba(0, 0, 0, 0.3);
-      padding: 4px;
-      border-radius: 12px;
-      border: 1px solid var(--border-subtle);
-    }
+      .currency-toggle {
+        display: flex;
+        background: rgba(0, 0, 0, 0.3);
+        padding: 4px;
+        border-radius: 12px;
+        border: 1px solid var(--border-subtle);
+      }
 
-    .currency-btn {
-      background: transparent;
-      color: var(--text-dim);
-      border: none;
-      padding: 6px 14px;
-      font-family: var(--font-mono);
-      font-size: 12px;
-      font-weight: 600;
-      cursor: pointer;
-      border-radius: 8px;
-      transition: all 0.2s;
-    }
+      .currency-btn {
+        background: transparent;
+        color: var(--text-dim);
+        border: none;
+        padding: 6px 14px;
+        font-family: var(--font-mono);
+        font-size: 12px;
+        font-weight: 600;
+        cursor: pointer;
+        border-radius: 8px;
+        transition: all 0.2s;
+      }
 
-    .currency-btn.active {
-      background: var(--emerald);
-      color: white;
-      box-shadow: 0 2px 8px rgba(22, 163, 74, 0.4);
-    }
+      .currency-btn.active {
+        background: var(--emerald);
+        color: white;
+        box-shadow: 0 2px 8px rgba(22, 163, 74, 0.4);
+      }
 
-    /* Presets Bar */
-    .presets-container {
-      background: rgba(12, 45, 72, 0.35);
-      border: 1px solid var(--border-subtle);
-      border-radius: 16px;
-      padding: 16px 20px;
-      margin-bottom: 24px;
-      display: flex;
-      flex-wrap: wrap;
-      align-items: center;
-      gap: 10px;
-    }
+      /* Presets Bar */
+      .presets-container {
+        background: rgba(12, 45, 72, 0.35);
+        border: 1px solid var(--border-subtle);
+        border-radius: 16px;
+        padding: 16px 20px;
+        margin-bottom: 24px;
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 10px;
+      }
 
-    .presets-label {
-      font-family: var(--font-mono);
-      font-size: 11px;
-      text-transform: uppercase;
-      letter-spacing: 0.08em;
-      color: var(--gold-light);
-      font-weight: 600;
-      margin-right: 8px;
-    }
+      .presets-label {
+        font-family: var(--font-mono);
+        font-size: 11px;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        color: var(--gold-light);
+        font-weight: 600;
+        margin-right: 8px;
+      }
 
-    .preset-pill {
-      background: rgba(255, 255, 255, 0.06);
-      border: 1px solid rgba(255, 255, 255, 0.12);
-      color: white;
-      padding: 6px 12px;
-      border-radius: 10px;
-      font-size: 12px;
-      font-family: var(--font-mono);
-      cursor: pointer;
-      transition: all 0.2s;
-    }
+      .preset-pill {
+        background: rgba(255, 255, 255, 0.06);
+        border: 1px solid rgba(255, 255, 255, 0.12);
+        color: white;
+        padding: 6px 12px;
+        border-radius: 10px;
+        font-size: 12px;
+        font-family: var(--font-mono);
+        cursor: pointer;
+        transition: all 0.2s;
+      }
 
-    .preset-pill:hover {
-      background: rgba(212, 175, 55, 0.15);
-      border-color: var(--gold);
-      color: var(--gold-light);
-    }
+      .preset-pill:hover {
+        background: rgba(212, 175, 55, 0.15);
+        border-color: var(--gold);
+        color: var(--gold-light);
+      }
 
-    /* Main Grid */
-    .workbench-grid {
-      display: grid;
-      grid-template-columns: 1.1fr 0.9fr;
-      gap: 24px;
-      margin-bottom: 32px;
-    }
-
-    @media (max-width: 900px) {
+      /* Main Grid */
       .workbench-grid {
-        grid-template-columns: 1fr;
-      }
-    }
-
-    .panel {
-      background: rgba(12, 45, 72, 0.5);
-      border: 1px solid var(--border-subtle);
-      border-radius: 20px;
-      padding: 24px;
-      backdrop-filter: blur(12px);
-    }
-
-    .panel-title {
-      font-family: var(--font-mono);
-      font-size: 12px;
-      text-transform: uppercase;
-      letter-spacing: 0.1em;
-      color: var(--text-dim);
-      margin-bottom: 16px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-
-    .form-group {
-      margin-bottom: 18px;
-    }
-
-    .form-group label {
-      display: flex;
-      justify-content: space-between;
-      font-size: 12px;
-      font-weight: 600;
-      margin-bottom: 6px;
-      color: rgba(255, 255, 255, 0.85);
-    }
-
-    .form-group label .value-badge {
-      font-family: var(--font-mono);
-      color: var(--emerald-bright);
-    }
-
-    select, input[type="range"] {
-      width: 100%;
-    }
-
-    select {
-      background: rgba(5, 19, 31, 0.8);
-      color: white;
-      border: 1px solid var(--border-subtle);
-      border-radius: 10px;
-      padding: 10px 12px;
-      font-size: 13px;
-      font-family: var(--font-sans);
-      outline: none;
-      cursor: pointer;
-      transition: border-color 0.2s;
-    }
-
-    select:focus {
-      border-color: var(--emerald-bright);
-    }
-
-    input[type="range"] {
-      accent-color: var(--emerald-bright);
-      cursor: pointer;
-    }
-
-    .checkbox-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 10px;
-      margin-top: 8px;
-    }
-
-    .checkbox-pill {
-      background: rgba(5, 19, 31, 0.6);
-      border: 1px solid var(--border-subtle);
-      border-radius: 10px;
-      padding: 8px 12px;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      font-size: 12px;
-      cursor: pointer;
-      user-select: none;
-    }
-
-    .checkbox-pill input {
-      accent-color: var(--emerald);
-    }
-
-    /* Result Panel */
-    .total-box {
-      background: rgba(5, 19, 31, 0.8);
-      border: 1px solid var(--border-subtle);
-      border-radius: 16px;
-      padding: 20px;
-      text-align: center;
-      margin-bottom: 20px;
-    }
-
-    .total-amount {
-      font-family: var(--font-mono);
-      font-size: 38px;
-      font-weight: 700;
-      color: var(--text-white);
-      letter-spacing: -0.02em;
-      margin: 4px 0;
-    }
-
-    .total-meta {
-      font-size: 12px;
-      color: var(--text-dim);
-      font-family: var(--font-mono);
-      display: flex;
-      justify-content: center;
-      gap: 16px;
-    }
-
-    .golden-visa-tag {
-      display: inline-block;
-      margin-top: 8px;
-      background: rgba(212, 175, 55, 0.15);
-      border: 1px solid rgba(212, 175, 55, 0.4);
-      color: var(--gold-light);
-      font-family: var(--font-mono);
-      font-size: 11px;
-      font-weight: 600;
-      padding: 3px 10px;
-      border-radius: 100px;
-    }
-
-    /* Line Item Breakdown Tape */
-    .tape-container {
-      background: rgba(5, 19, 31, 0.6);
-      border: 1px solid var(--border-subtle);
-      border-radius: 14px;
-      padding: 14px;
-      max-height: 280px;
-      overflow-y: auto;
-      font-family: var(--font-mono);
-      font-size: 12px;
-    }
-
-    .tape-row {
-      display: flex;
-      justify-content: space-between;
-      padding: 6px 0;
-      border-bottom: 1px solid rgba(255, 255, 255, 0.06);
-    }
-
-    .tape-row:last-child {
-      border-bottom: none;
-    }
-
-    .tape-row .cat {
-      color: var(--text-dim);
-      font-size: 10px;
-      display: block;
-    }
-
-    .tape-row .val {
-      font-weight: 600;
-    }
-
-    /* Tests & Guardrails */
-    .tests-panel {
-      background: rgba(12, 45, 72, 0.5);
-      border: 1px solid var(--border-subtle);
-      border-radius: 20px;
-      padding: 24px;
-      margin-bottom: 24px;
-    }
-
-    .test-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-      gap: 12px;
-      margin-top: 14px;
-    }
-
-    .test-card {
-      background: rgba(5, 19, 31, 0.7);
-      border: 1px solid rgba(34, 197, 94, 0.25);
-      border-radius: 12px;
-      padding: 12px 16px;
-      font-family: var(--font-mono);
-      font-size: 12px;
-    }
-
-    .test-card.passed {
-      border-left: 4px solid var(--emerald-bright);
-    }
-
-    .test-status {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      margin-bottom: 4px;
-      font-size: 10px;
-      text-transform: uppercase;
-      font-weight: 700;
-      color: var(--emerald-bright);
-    }
-
-    /* JSON Inspector */
-    .json-box {
-      background: #030c14;
-      border: 1px solid var(--border-subtle);
-      border-radius: 12px;
-      padding: 16px;
-      font-family: var(--font-mono);
-      font-size: 11px;
-      color: #94A3B8;
-      max-height: 220px;
-      overflow-y: auto;
-      white-space: pre-wrap;
-    }
-
-    .btn-action {
-      background: var(--navy);
-      border: 1px solid var(--border-subtle);
-      color: white;
-      padding: 8px 16px;
-      border-radius: 10px;
-      font-size: 12px;
-      font-family: var(--font-mono);
-      cursor: pointer;
-      transition: all 0.2s;
-    }
-
-    .btn-action:hover {
-      background: rgba(255, 255, 255, 0.15);
-    }
-  </style>
-</head>
-<body>
-  <div class="container">
-    
-    <!-- Header -->
-    <header class="header">
-      <div>
-        <span class="badge-pill">OPTION 3 · STATUTORY LOGIC VERIFICATION ENGINE</span>
-        <h1>UAE Company Formation 2026 Tariff Simulator</h1>
-        <p class="subtitle">Direct mathematical execution of the sovereign pricing algorithm across Free Zones, Mainland, and Offshore.</p>
-      </div>
-
-      <div class="currency-toggle">
-        <button id="btn-aed" class="currency-btn active" onclick="setCurrency('AED')">AED (Dirhams)</button>
-        <button id="btn-usd" class="currency-btn" onclick="setCurrency('USD')">USD ($3.6725 Peg)</button>
-      </div>
-    </header>
-
-    <!-- 1-Click Scenario Presets -->
-    <div class="presets-container">
-      <span class="presets-label">⚡ Scenario Presets:</span>
-      <button class="preset-pill" onclick="loadPreset('meydan-solo')">Meydan Solo Tech (1-Visa)</button>
-      <button class="preset-pill" onclick="loadPreset('ifza-trading')">IFZA Commercial Multi-Visa</button>
-      <button class="preset-pill" onclick="loadPreset('mainland-ejari')">Dubai Mainland + Physical Ejari</button>
-      <button class="preset-pill" onclick="loadPreset('offshore-rak')">RAK ICC Offshore (0-Visa Guardrail)</button>
-      <button class="preset-pill" onclick="loadPreset('industrial-corp')">Industrial Scaling (10+ Staff)</button>
-    </div>
-
-    <!-- Interactive Grid -->
-    <div class="workbench-grid">
-      
-      <!-- Left: Engine Inputs -->
-      <div class="panel">
-        <div class="panel-title">
-          <span>01 // PARAMETER CONTROLS</span>
-          <span style="color: var(--emerald-bright); font-size: 11px;">LIVE REACTIVE ENGINE</span>
-        </div>
-
-        <div class="form-group">
-          <label>Corporate Jurisdiction</label>
-          <select id="sel-jurisdiction" onchange="runEngine()">
-            <option value="freezone-meydan">Meydan Free Zone (Dubai) — From AED 12,500</option>
-            <option value="freezone-ifza">IFZA Dubai — From AED 11,900</option>
-            <option value="freezone-dmcc">DMCC (JLT Dubai) — From AED 28,500</option>
-            <option value="mainland-dubai">Dubai Mainland (DET / DED) — From AED 18,500</option>
-            <option value="offshore-rak">RAK ICC Offshore — From AED 9,500</option>
-          </select>
-        </div>
-
-        <div class="form-group">
-          <label>Permitted Business Activity</label>
-          <select id="sel-activity" onchange="runEngine()">
-            <option value="consulting">Consulting & Professional Services (Standard Tariff)</option>
-            <option value="commercial">Commercial & General Trading (+AED 2,000)</option>
-            <option value="ecommerce">E-Commerce & Digital Marketplace (+AED 1,000)</option>
-            <option value="industrial">Industrial & Light Manufacturing (+AED 5,000)</option>
-          </select>
-        </div>
-
-        <div class="form-group">
-          <label>
-            <span>Investor / Shareholder Visas</span>
-            <span class="value-badge" id="val-investor">1 Visa</span>
-          </label>
-          <input type="range" id="rng-investor" min="0" max="5" value="1" oninput="updateRangeText(); runEngine()">
-        </div>
-
-        <div class="form-group">
-          <label>
-            <span>Employee & Staff Visas</span>
-            <span class="value-badge" id="val-employee">0 Visas</span>
-          </label>
-          <input type="range" id="rng-employee" min="0" max="20" value="0" oninput="updateRangeText(); runEngine()">
-        </div>
-
-        <div class="form-group">
-          <label>Registered Office Facility</label>
-          <select id="sel-office" onchange="runEngine()">
-            <option value="flexi-desk">Virtual Flexi-Desk / Smart Address (Included in Base)</option>
-            <option value="dedicated-desk">Dedicated Co-Working Desk (+AED 7,500/yr)</option>
-            <option value="physical-office">Private Physical Office Lease / Ejari (+AED 24,000/yr)</option>
-          </select>
-        </div>
-
-        <div class="form-group">
-          <label>Advisory & Statutory Desk Add-ons</label>
-          <div class="checkbox-grid">
-            <label class="checkbox-pill">
-              <input type="checkbox" id="chk-tax" checked onchange="runEngine()">
-              <span>Corporate Tax TRN (+1.5k)</span>
-            </label>
-            <label class="checkbox-pill">
-              <input type="checkbox" id="chk-bank" checked onchange="runEngine()">
-              <span>Corporate Bank Advisory (+2.5k)</span>
-            </label>
-            <label class="checkbox-pill">
-              <input type="checkbox" id="chk-aml" onchange="runEngine()">
-              <span>AML / CFT Compliance (+2k)</span>
-            </label>
-            <label class="checkbox-pill">
-              <input type="checkbox" id="chk-will" onchange="runEngine()">
-              <span>UAE Succession Will (+3.5k)</span>
-            </label>
-          </div>
-        </div>
-      </div>
-
-      <!-- Right: Engine Output & Live Fee Tape -->
-      <div class="panel">
-        <div class="panel-title">
-          <span>02 // COMPUTED LEDGER & BREAKDOWN</span>
-          <span id="turnaround-tag" style="color: var(--gold-light); font-size: 11px;">SLA: 3–5 Days</span>
-        </div>
-
-        <div class="total-box">
-          <span style="font-family: var(--font-mono); font-size: 11px; text-transform: uppercase; color: var(--text-dim);">
-            Total Statutory Investment
-          </span>
-          <div class="total-amount" id="display-total">AED 20,250</div>
-          <div class="total-meta">
-            <span id="meta-usd">$5,514 USD</span>
-            <span>•</span>
-            <span id="meta-jur">Meydan Free Zone</span>
-          </div>
-          <div id="golden-visa-alert" style="display: none;">
-            <span class="golden-visa-tag">★ Golden Visa Pathway Qualified</span>
-          </div>
-        </div>
-
-        <div class="panel-title" style="margin-top: 20px;">
-          <span>ITEMIZED STATUTORY TAPE</span>
-          <span style="font-size: 11px;" id="item-count">5 Line Items</span>
-        </div>
-
-        <div class="tape-container" id="tape-list">
-          <!-- Dynamic line items -->
-        </div>
-      </div>
-    </div>
-
-    <!-- Automated Unit Tests & Guardrail Panel -->
-    <div class="tests-panel">
-      <div class="panel-title">
-        <span>03 // AUTOMATED MODEL ASSERTIONS & GUARDRAIL CHECKS</span>
-        <button class="btn-action" onclick="runAutomatedTests()">▶ Re-Run Test Assertions</button>
-      </div>
-      <p style="font-size: 12px; color: var(--text-dim); margin-top: 4px;">
-        Evaluates deterministic financial invariants, zero-visa offshore rules, and USD currency peg rounding.
-      </p>
-
-      <div class="test-grid" id="test-results-grid">
-        <!-- Tests populated dynamically -->
-      </div>
-    </div>
-
-    <!-- JSON Payload Inspector -->
-    <div class="panel">
-      <div class="panel-title">
-        <span>04 // CRM & DISPATCH DATA CONTRACT (RAW JSON)</span>
-        <button class="btn-action" onclick="copyJson()">📋 Copy JSON</button>
-      </div>
-      <pre class="json-box" id="json-preview">// JSON Output</pre>
-    </div>
-
-  </div>
-
-  <script>
-    // Canonical Tariff Tables from calculator-engine.ts
-    const USD_PEG = 3.6725;
-
-    const JURISDICTIONS = {
-      'freezone-meydan': { name: 'Meydan Free Zone (Dubai)', baseAed: 12500, visaCost: 3750, turnaround: '3–5 business days', isOffshore: false },
-      'freezone-ifza': { name: 'IFZA Dubai', baseAed: 11900, visaCost: 3500, turnaround: '4–6 business days', isOffshore: false },
-      'freezone-dmcc': { name: 'DMCC (JLT Dubai)', baseAed: 28500, visaCost: 4500, turnaround: '7–10 business days', isOffshore: false },
-      'mainland-dubai': { name: 'Dubai Mainland (DET / DED)', baseAed: 18500, visaCost: 4200, turnaround: '5–8 business days', isOffshore: false },
-      'offshore-rak': { name: 'RAK ICC Offshore', baseAed: 9500, visaCost: 0, turnaround: '3–4 business days', isOffshore: true }
-    };
-
-    const ACTIVITIES = {
-      'consulting': { name: 'Consulting & Professional Services', extraAed: 0 },
-      'commercial': { name: 'Commercial & General Trading', extraAed: 2000 },
-      'ecommerce': { name: 'E-Commerce & Digital Marketplace', extraAed: 1000 },
-      'industrial': { name: 'Industrial & Light Manufacturing', extraAed: 5000 }
-    };
-
-    const OFFICES = {
-      'flexi-desk': { name: 'Virtual Flexi-Desk / Smart Address', costAed: 0 },
-      'dedicated-desk': { name: 'Dedicated Co-Working Desk', costAed: 7500 },
-      'physical-office': { name: 'Private Physical Office (Annual Est.)', costAed: 24000 }
-    };
-
-    const ADDONS = {
-      corporateTax: { name: 'Corporate Tax Registration & TRN', costAed: 1500 },
-      bankAccount: { name: 'Corporate Bank Account Advisory', costAed: 2500 },
-      amlCompliance: { name: 'AML / CFT Compliance Setup', costAed: 2000 },
-      uaeWill: { name: 'UAE Succession Will Advisory', costAed: 3500 }
-    };
-
-    let activeCurrency = 'AED';
-
-    function setCurrency(curr) {
-      activeCurrency = curr;
-      document.getElementById('btn-aed').classList.toggle('active', curr === 'AED');
-      document.getElementById('btn-usd').classList.toggle('active', curr === 'USD');
-      runEngine();
-    }
-
-    function updateRangeText() {
-      const inv = document.getElementById('rng-investor').value;
-      const emp = document.getElementById('rng-employee').value;
-      document.getElementById('val-investor').textContent = inv + (inv === '1' ? ' Visa' : ' Visas');
-      document.getElementById('val-employee').textContent = emp + (emp === '1' ? ' Visa' : ' Visas');
-    }
-
-    function calculate(opts) {
-      const jur = JURISDICTIONS[opts.jurisdiction];
-      const act = ACTIVITIES[opts.activityType];
-      const off = OFFICES[opts.officeType];
-
-      const breakdown = [];
-
-      // 1. Base Licence
-      breakdown.push({
-        id: 'base-licence',
-        label: jur.name + ' — Trade Licence & Formation',
-        category: 'Licence & Authority',
-        amountAed: jur.baseAed,
-        note: 'Statutory registration and economic charter issuance'
-      });
-
-      // 2. Commercial Activity surcharge
-      if (act.extraAed > 0) {
-        breakdown.push({
-          id: 'activity-fee',
-          label: act.name + ' Activity Endorsement',
-          category: 'Licence & Authority',
-          amountAed: act.extraAed,
-          note: 'Authority activity fee'
-        });
+        display: grid;
+        grid-template-columns: 1.1fr 0.9fr;
+        gap: 24px;
+        margin-bottom: 32px;
       }
 
-      // 3. Premises
-      breakdown.push({
-        id: 'premises',
-        label: off.name,
-        category: 'Premises',
-        amountAed: off.costAed,
-        note: off.costAed === 0 ? 'Compliant registered address included in base' : 'Annual lease commitment'
-      });
-
-      // 4. Visas (If not offshore)
-      let effectiveInv = opts.investorVisas;
-      let effectiveEmp = opts.employeeVisas;
-      if (jur.isOffshore) {
-        effectiveInv = 0;
-        effectiveEmp = 0;
-      }
-
-      if (effectiveInv > 0) {
-        breakdown.push({
-          id: 'investor-visas',
-          label: 'Investor / Partner Visa (' + effectiveInv + 'x)',
-          category: 'Visas & Immigration',
-          amountAed: effectiveInv * jur.visaCost,
-          note: 'Includes entry permit, VIP medical & Emirates ID'
-        });
-      }
-
-      if (effectiveEmp > 0) {
-        const empCost = jur.visaCost + 500; // Labour card allocation
-        breakdown.push({
-          id: 'employee-visas',
-          label: 'Employee Work Visa (' + effectiveEmp + 'x)',
-          category: 'Visas & Immigration',
-          amountAed: effectiveEmp * empCost,
-          note: 'Includes MoHRE quota and residency stamping'
-        });
-      }
-
-      // 5. Add-ons
-      for (const [key, addon] of Object.entries(ADDONS)) {
-        if (opts.addOns[key]) {
-          breakdown.push({
-            id: 'addon-' + key,
-            label: addon.name,
-            category: 'Advisory & Compliance',
-            amountAed: addon.costAed,
-            note: 'Professional legal desk execution'
-          });
+      @media (max-width: 900px) {
+        .workbench-grid {
+          grid-template-columns: 1fr;
         }
       }
 
-      const totalAed = breakdown.reduce((sum, item) => sum + item.amountAed, 0);
-      const totalUsd = Math.round((totalAed / USD_PEG) * 100) / 100;
-      const goldenVisaEligible = !jur.isOffshore && (effectiveInv >= 2 || totalAed >= 35000);
+      .panel {
+        background: rgba(12, 45, 72, 0.5);
+        border: 1px solid var(--border-subtle);
+        border-radius: 20px;
+        padding: 24px;
+        backdrop-filter: blur(12px);
+      }
 
-      return {
-        totalAed,
-        totalUsd,
-        jurisdictionName: jur.name,
-        turnaround: jur.turnaround,
-        goldenVisaEligible,
-        breakdown
-      };
-    }
+      .panel-title {
+        font-family: var(--font-mono);
+        font-size: 12px;
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        color: var(--text-dim);
+        margin-bottom: 16px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
 
-    function runEngine() {
-      const jurisdiction = document.getElementById('sel-jurisdiction').value;
-      const activityType = document.getElementById('sel-activity').value;
-      const investorVisas = parseInt(document.getElementById('rng-investor').value, 10);
-      const employeeVisas = parseInt(document.getElementById('rng-employee').value, 10);
-      const officeType = document.getElementById('sel-office').value;
-      const addOns = {
-        corporateTax: document.getElementById('chk-tax').checked,
-        bankAccount: document.getElementById('chk-bank').checked,
-        amlCompliance: document.getElementById('chk-aml').checked,
-        uaeWill: document.getElementById('chk-will').checked
-      };
+      .form-group {
+        margin-bottom: 18px;
+      }
 
-      const result = calculate({
-        jurisdiction,
-        activityType,
-        investorVisas,
-        employeeVisas,
-        officeType,
-        addOns
-      });
+      .form-group label {
+        display: flex;
+        justify-content: space-between;
+        font-size: 12px;
+        font-weight: 600;
+        margin-bottom: 6px;
+        color: rgba(255, 255, 255, 0.85);
+      }
 
-      // Update UI Total
-      const dispTotal = activeCurrency === 'AED'
-        ? 'AED ' + result.totalAed.toLocaleString()
-        : '$' + Math.round(result.totalUsd).toLocaleString() + ' USD';
+      .form-group label .value-badge {
+        font-family: var(--font-mono);
+        color: var(--emerald-bright);
+      }
 
-      document.getElementById('display-total').textContent = dispTotal;
-      document.getElementById('meta-usd').textContent = '$' + Math.round(result.totalUsd).toLocaleString() + ' USD (Peg 3.6725)';
-      document.getElementById('meta-jur').textContent = result.jurisdictionName;
-      document.getElementById('turnaround-tag').textContent = 'SLA: ' + result.turnaround;
-      document.getElementById('golden-visa-alert').style.display = result.goldenVisaEligible ? 'block' : 'none';
-      document.getElementById('item-count').textContent = result.breakdown.length + ' Line Items';
+      select,
+      input[type='range'] {
+        width: 100%;
+      }
 
-      // Render Tape
-      const tapeEl = document.getElementById('tape-list');
-      tapeEl.innerHTML = '';
-      result.breakdown.forEach(item => {
-        const row = document.createElement('div');
-        row.className = 'tape-row';
-        const valText = activeCurrency === 'AED'
-          ? 'AED ' + item.amountAed.toLocaleString()
-          : '$' + Math.round(item.amountAed / USD_PEG).toLocaleString();
-        row.innerHTML = '<div><span>' + item.label + '</span><span class="cat">' + item.category + ' — ' + item.note + '</span></div><div class="val">' + valText + '</div>';
-        tapeEl.appendChild(row);
-      });
+      select {
+        background: rgba(5, 19, 31, 0.8);
+        color: white;
+        border: 1px solid var(--border-subtle);
+        border-radius: 10px;
+        padding: 10px 12px;
+        font-size: 13px;
+        font-family: var(--font-sans);
+        outline: none;
+        cursor: pointer;
+        transition: border-color 0.2s;
+      }
 
-      // Render JSON preview
-      const payload = {
-        meta: {
-          engineVersion: '2026.1',
-          tariffSchedule: 'Official UAE Regulatory Gazette',
-          evaluatedAt: new Date().toISOString()
+      select:focus {
+        border-color: var(--emerald-bright);
+      }
+
+      input[type='range'] {
+        accent-color: var(--emerald-bright);
+        cursor: pointer;
+      }
+
+      .checkbox-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 10px;
+        margin-top: 8px;
+      }
+
+      .checkbox-pill {
+        background: rgba(5, 19, 31, 0.6);
+        border: 1px solid var(--border-subtle);
+        border-radius: 10px;
+        padding: 8px 12px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 12px;
+        cursor: pointer;
+        user-select: none;
+      }
+
+      .checkbox-pill input {
+        accent-color: var(--emerald);
+      }
+
+      /* Result Panel */
+      .total-box {
+        background: rgba(5, 19, 31, 0.8);
+        border: 1px solid var(--border-subtle);
+        border-radius: 16px;
+        padding: 20px;
+        text-align: center;
+        margin-bottom: 20px;
+      }
+
+      .total-amount {
+        font-family: var(--font-mono);
+        font-size: 38px;
+        font-weight: 700;
+        color: var(--text-white);
+        letter-spacing: -0.02em;
+        margin: 4px 0;
+      }
+
+      .total-meta {
+        font-size: 12px;
+        color: var(--text-dim);
+        font-family: var(--font-mono);
+        display: flex;
+        justify-content: center;
+        gap: 16px;
+      }
+
+      .golden-visa-tag {
+        display: inline-block;
+        margin-top: 8px;
+        background: rgba(212, 175, 55, 0.15);
+        border: 1px solid rgba(212, 175, 55, 0.4);
+        color: var(--gold-light);
+        font-family: var(--font-mono);
+        font-size: 11px;
+        font-weight: 600;
+        padding: 3px 10px;
+        border-radius: 100px;
+      }
+
+      /* Line Item Breakdown Tape */
+      .tape-container {
+        background: rgba(5, 19, 31, 0.6);
+        border: 1px solid var(--border-subtle);
+        border-radius: 14px;
+        padding: 14px;
+        max-height: 280px;
+        overflow-y: auto;
+        font-family: var(--font-mono);
+        font-size: 12px;
+      }
+
+      .tape-row {
+        display: flex;
+        justify-content: space-between;
+        padding: 6px 0;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+      }
+
+      .tape-row:last-child {
+        border-bottom: none;
+      }
+
+      .tape-row .cat {
+        color: var(--text-dim);
+        font-size: 10px;
+        display: block;
+      }
+
+      .tape-row .val {
+        font-weight: 600;
+      }
+
+      /* Tests & Guardrails */
+      .tests-panel {
+        background: rgba(12, 45, 72, 0.5);
+        border: 1px solid var(--border-subtle);
+        border-radius: 20px;
+        padding: 24px;
+        margin-bottom: 24px;
+      }
+
+      .test-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+        gap: 12px;
+        margin-top: 14px;
+      }
+
+      .test-card {
+        background: rgba(5, 19, 31, 0.7);
+        border: 1px solid rgba(34, 197, 94, 0.25);
+        border-radius: 12px;
+        padding: 12px 16px;
+        font-family: var(--font-mono);
+        font-size: 12px;
+      }
+
+      .test-card.passed {
+        border-left: 4px solid var(--emerald-bright);
+      }
+
+      .test-status {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 4px;
+        font-size: 10px;
+        text-transform: uppercase;
+        font-weight: 700;
+        color: var(--emerald-bright);
+      }
+
+      /* JSON Inspector */
+      .json-box {
+        background: #030c14;
+        border: 1px solid var(--border-subtle);
+        border-radius: 12px;
+        padding: 16px;
+        font-family: var(--font-mono);
+        font-size: 11px;
+        color: #94a3b8;
+        max-height: 220px;
+        overflow-y: auto;
+        white-space: pre-wrap;
+      }
+
+      .btn-action {
+        background: var(--navy);
+        border: 1px solid var(--border-subtle);
+        color: white;
+        padding: 8px 16px;
+        border-radius: 10px;
+        font-size: 12px;
+        font-family: var(--font-mono);
+        cursor: pointer;
+        transition: all 0.2s;
+      }
+
+      .btn-action:hover {
+        background: rgba(255, 255, 255, 0.15);
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <!-- Header -->
+      <header class="header">
+        <div>
+          <span class="badge-pill">OPTION 3 · STATUTORY LOGIC VERIFICATION ENGINE</span>
+          <h1>UAE Company Formation 2026 Tariff Simulator</h1>
+          <p class="subtitle">
+            Direct mathematical execution of the sovereign pricing algorithm across Free Zones,
+            Mainland, and Offshore.
+          </p>
+        </div>
+
+        <div class="currency-toggle">
+          <button id="btn-aed" class="currency-btn active" onclick="setCurrency('AED')">
+            AED (Dirhams)
+          </button>
+          <button id="btn-usd" class="currency-btn" onclick="setCurrency('USD')">
+            USD ($3.6725 Peg)
+          </button>
+        </div>
+      </header>
+
+      <!-- 1-Click Scenario Presets -->
+      <div class="presets-container">
+        <span class="presets-label">⚡ Scenario Presets:</span>
+        <button class="preset-pill" onclick="loadPreset('meydan-solo')">
+          Meydan Solo Tech (1-Visa)
+        </button>
+        <button class="preset-pill" onclick="loadPreset('ifza-trading')">
+          IFZA Commercial Multi-Visa
+        </button>
+        <button class="preset-pill" onclick="loadPreset('mainland-ejari')">
+          Dubai Mainland + Physical Ejari
+        </button>
+        <button class="preset-pill" onclick="loadPreset('offshore-rak')">
+          RAK ICC Offshore (0-Visa Guardrail)
+        </button>
+        <button class="preset-pill" onclick="loadPreset('industrial-corp')">
+          Industrial Scaling (10+ Staff)
+        </button>
+      </div>
+
+      <!-- Interactive Grid -->
+      <div class="workbench-grid">
+        <!-- Left: Engine Inputs -->
+        <div class="panel">
+          <div class="panel-title">
+            <span>01 // PARAMETER CONTROLS</span>
+            <span style="color: var(--emerald-bright); font-size: 11px">LIVE REACTIVE ENGINE</span>
+          </div>
+
+          <div class="form-group">
+            <label>Corporate Jurisdiction</label>
+            <select id="sel-jurisdiction" onchange="runEngine()">
+              <option value="freezone-meydan">Meydan Free Zone (Dubai) — From AED 12,500</option>
+              <option value="freezone-ifza">IFZA Dubai — From AED 11,900</option>
+              <option value="freezone-dmcc">DMCC (JLT Dubai) — From AED 28,500</option>
+              <option value="mainland-dubai">Dubai Mainland (DET / DED) — From AED 18,500</option>
+              <option value="offshore-rak">RAK ICC Offshore — From AED 9,500</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label>Permitted Business Activity</label>
+            <select id="sel-activity" onchange="runEngine()">
+              <option value="consulting">
+                Consulting & Professional Services (Standard Tariff)
+              </option>
+              <option value="commercial">Commercial & General Trading (+AED 2,000)</option>
+              <option value="ecommerce">E-Commerce & Digital Marketplace (+AED 1,000)</option>
+              <option value="industrial">Industrial & Light Manufacturing (+AED 5,000)</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label>
+              <span>Investor / Shareholder Visas</span>
+              <span class="value-badge" id="val-investor">1 Visa</span>
+            </label>
+            <input
+              type="range"
+              id="rng-investor"
+              min="0"
+              max="5"
+              value="1"
+              oninput="
+                updateRangeText();
+                runEngine();
+              "
+            />
+          </div>
+
+          <div class="form-group">
+            <label>
+              <span>Employee & Staff Visas</span>
+              <span class="value-badge" id="val-employee">0 Visas</span>
+            </label>
+            <input
+              type="range"
+              id="rng-employee"
+              min="0"
+              max="20"
+              value="0"
+              oninput="
+                updateRangeText();
+                runEngine();
+              "
+            />
+          </div>
+
+          <div class="form-group">
+            <label>Registered Office Facility</label>
+            <select id="sel-office" onchange="runEngine()">
+              <option value="flexi-desk">
+                Virtual Flexi-Desk / Smart Address (Included in Base)
+              </option>
+              <option value="dedicated-desk">Dedicated Co-Working Desk (+AED 7,500/yr)</option>
+              <option value="physical-office">
+                Private Physical Office Lease / Ejari (+AED 24,000/yr)
+              </option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label>Advisory & Statutory Desk Add-ons</label>
+            <div class="checkbox-grid">
+              <label class="checkbox-pill">
+                <input type="checkbox" id="chk-tax" checked onchange="runEngine()" />
+                <span>Corporate Tax TRN (+1.5k)</span>
+              </label>
+              <label class="checkbox-pill">
+                <input type="checkbox" id="chk-bank" checked onchange="runEngine()" />
+                <span>Corporate Bank Advisory (+2.5k)</span>
+              </label>
+              <label class="checkbox-pill">
+                <input type="checkbox" id="chk-aml" onchange="runEngine()" />
+                <span>AML / CFT Compliance (+2k)</span>
+              </label>
+              <label class="checkbox-pill">
+                <input type="checkbox" id="chk-will" onchange="runEngine()" />
+                <span>UAE Succession Will (+3.5k)</span>
+              </label>
+            </div>
+          </div>
+        </div>
+
+        <!-- Right: Engine Output & Live Fee Tape -->
+        <div class="panel">
+          <div class="panel-title">
+            <span>02 // COMPUTED LEDGER & BREAKDOWN</span>
+            <span id="turnaround-tag" style="color: var(--gold-light); font-size: 11px"
+              >SLA: 3–5 Days</span
+            >
+          </div>
+
+          <div class="total-box">
+            <span
+              style="
+                font-family: var(--font-mono);
+                font-size: 11px;
+                text-transform: uppercase;
+                color: var(--text-dim);
+              "
+            >
+              Total Statutory Investment
+            </span>
+            <div class="total-amount" id="display-total">AED 20,250</div>
+            <div class="total-meta">
+              <span id="meta-usd">$5,514 USD</span>
+              <span>•</span>
+              <span id="meta-jur">Meydan Free Zone</span>
+            </div>
+            <div id="golden-visa-alert" style="display: none">
+              <span class="golden-visa-tag">★ Golden Visa Pathway Qualified</span>
+            </div>
+          </div>
+
+          <div class="panel-title" style="margin-top: 20px">
+            <span>ITEMIZED STATUTORY TAPE</span>
+            <span style="font-size: 11px" id="item-count">5 Line Items</span>
+          </div>
+
+          <div class="tape-container" id="tape-list">
+            <!-- Dynamic line items -->
+          </div>
+        </div>
+      </div>
+
+      <!-- Automated Unit Tests & Guardrail Panel -->
+      <div class="tests-panel">
+        <div class="panel-title">
+          <span>03 // AUTOMATED MODEL ASSERTIONS & GUARDRAIL CHECKS</span>
+          <button class="btn-action" onclick="runAutomatedTests()">▶ Re-Run Test Assertions</button>
+        </div>
+        <p style="font-size: 12px; color: var(--text-dim); margin-top: 4px">
+          Evaluates deterministic financial invariants, zero-visa offshore rules, and USD currency
+          peg rounding.
+        </p>
+
+        <div class="test-grid" id="test-results-grid">
+          <!-- Tests populated dynamically -->
+        </div>
+      </div>
+
+      <!-- JSON Payload Inspector -->
+      <div class="panel">
+        <div class="panel-title">
+          <span>04 // CRM & DISPATCH DATA CONTRACT (RAW JSON)</span>
+          <button class="btn-action" onclick="copyJson()">📋 Copy JSON</button>
+        </div>
+        <pre class="json-box" id="json-preview">// JSON Output</pre>
+      </div>
+    </div>
+
+    <script>
+      // Canonical Tariff Tables from calculator-engine.ts
+      const USD_PEG = 3.6725;
+
+      const JURISDICTIONS = {
+        'freezone-meydan': {
+          name: 'Meydan Free Zone (Dubai)',
+          baseAed: 12500,
+          visaCost: 3750,
+          turnaround: '3–5 business days',
+          isOffshore: false,
         },
-        inputs: {
+        'freezone-ifza': {
+          name: 'IFZA Dubai',
+          baseAed: 11900,
+          visaCost: 3500,
+          turnaround: '4–6 business days',
+          isOffshore: false,
+        },
+        'freezone-dmcc': {
+          name: 'DMCC (JLT Dubai)',
+          baseAed: 28500,
+          visaCost: 4500,
+          turnaround: '7–10 business days',
+          isOffshore: false,
+        },
+        'mainland-dubai': {
+          name: 'Dubai Mainland (DET / DED)',
+          baseAed: 18500,
+          visaCost: 4200,
+          turnaround: '5–8 business days',
+          isOffshore: false,
+        },
+        'offshore-rak': {
+          name: 'RAK ICC Offshore',
+          baseAed: 9500,
+          visaCost: 0,
+          turnaround: '3–4 business days',
+          isOffshore: true,
+        },
+      };
+
+      const ACTIVITIES = {
+        consulting: { name: 'Consulting & Professional Services', extraAed: 0 },
+        commercial: { name: 'Commercial & General Trading', extraAed: 2000 },
+        ecommerce: { name: 'E-Commerce & Digital Marketplace', extraAed: 1000 },
+        industrial: { name: 'Industrial & Light Manufacturing', extraAed: 5000 },
+      };
+
+      const OFFICES = {
+        'flexi-desk': { name: 'Virtual Flexi-Desk / Smart Address', costAed: 0 },
+        'dedicated-desk': { name: 'Dedicated Co-Working Desk', costAed: 7500 },
+        'physical-office': { name: 'Private Physical Office (Annual Est.)', costAed: 24000 },
+      };
+
+      const ADDONS = {
+        corporateTax: { name: 'Corporate Tax Registration & TRN', costAed: 1500 },
+        bankAccount: { name: 'Corporate Bank Account Advisory', costAed: 2500 },
+        amlCompliance: { name: 'AML / CFT Compliance Setup', costAed: 2000 },
+        uaeWill: { name: 'UAE Succession Will Advisory', costAed: 3500 },
+      };
+
+      let activeCurrency = 'AED';
+
+      function setCurrency(curr) {
+        activeCurrency = curr;
+        document.getElementById('btn-aed').classList.toggle('active', curr === 'AED');
+        document.getElementById('btn-usd').classList.toggle('active', curr === 'USD');
+        runEngine();
+      }
+
+      function updateRangeText() {
+        const inv = document.getElementById('rng-investor').value;
+        const emp = document.getElementById('rng-employee').value;
+        document.getElementById('val-investor').textContent =
+          inv + (inv === '1' ? ' Visa' : ' Visas');
+        document.getElementById('val-employee').textContent =
+          emp + (emp === '1' ? ' Visa' : ' Visas');
+      }
+
+      function calculate(opts) {
+        const jur = JURISDICTIONS[opts.jurisdiction];
+        const act = ACTIVITIES[opts.activityType];
+        const off = OFFICES[opts.officeType];
+
+        const breakdown = [];
+
+        // 1. Base Licence
+        breakdown.push({
+          id: 'base-licence',
+          label: jur.name + ' — Trade Licence & Formation',
+          category: 'Licence & Authority',
+          amountAed: jur.baseAed,
+          note: 'Statutory registration and economic charter issuance',
+        });
+
+        // 2. Commercial Activity surcharge
+        if (act.extraAed > 0) {
+          breakdown.push({
+            id: 'activity-fee',
+            label: act.name + ' Activity Endorsement',
+            category: 'Licence & Authority',
+            amountAed: act.extraAed,
+            note: 'Authority activity fee',
+          });
+        }
+
+        // 3. Premises
+        breakdown.push({
+          id: 'premises',
+          label: off.name,
+          category: 'Premises',
+          amountAed: off.costAed,
+          note:
+            off.costAed === 0
+              ? 'Compliant registered address included in base'
+              : 'Annual lease commitment',
+        });
+
+        // 4. Visas (If not offshore)
+        let effectiveInv = opts.investorVisas;
+        let effectiveEmp = opts.employeeVisas;
+        if (jur.isOffshore) {
+          effectiveInv = 0;
+          effectiveEmp = 0;
+        }
+
+        if (effectiveInv > 0) {
+          breakdown.push({
+            id: 'investor-visas',
+            label: 'Investor / Partner Visa (' + effectiveInv + 'x)',
+            category: 'Visas & Immigration',
+            amountAed: effectiveInv * jur.visaCost,
+            note: 'Includes entry permit, VIP medical & Emirates ID',
+          });
+        }
+
+        if (effectiveEmp > 0) {
+          const empCost = jur.visaCost + 500; // Labour card allocation
+          breakdown.push({
+            id: 'employee-visas',
+            label: 'Employee Work Visa (' + effectiveEmp + 'x)',
+            category: 'Visas & Immigration',
+            amountAed: effectiveEmp * empCost,
+            note: 'Includes MoHRE quota and residency stamping',
+          });
+        }
+
+        // 5. Add-ons
+        for (const [key, addon] of Object.entries(ADDONS)) {
+          if (opts.addOns[key]) {
+            breakdown.push({
+              id: 'addon-' + key,
+              label: addon.name,
+              category: 'Advisory & Compliance',
+              amountAed: addon.costAed,
+              note: 'Professional legal desk execution',
+            });
+          }
+        }
+
+        const totalAed = breakdown.reduce((sum, item) => sum + item.amountAed, 0);
+        const totalUsd = Math.round((totalAed / USD_PEG) * 100) / 100;
+        const goldenVisaEligible = !jur.isOffshore && (effectiveInv >= 2 || totalAed >= 35000);
+
+        return {
+          totalAed,
+          totalUsd,
+          jurisdictionName: jur.name,
+          turnaround: jur.turnaround,
+          goldenVisaEligible,
+          breakdown,
+        };
+      }
+
+      function runEngine() {
+        const jurisdiction = document.getElementById('sel-jurisdiction').value;
+        const activityType = document.getElementById('sel-activity').value;
+        const investorVisas = parseInt(document.getElementById('rng-investor').value, 10);
+        const employeeVisas = parseInt(document.getElementById('rng-employee').value, 10);
+        const officeType = document.getElementById('sel-office').value;
+        const addOns = {
+          corporateTax: document.getElementById('chk-tax').checked,
+          bankAccount: document.getElementById('chk-bank').checked,
+          amlCompliance: document.getElementById('chk-aml').checked,
+          uaeWill: document.getElementById('chk-will').checked,
+        };
+
+        const result = calculate({
           jurisdiction,
           activityType,
           investorVisas,
           employeeVisas,
           officeType,
-          addOns
-        },
-        financials: {
-          totalAed: result.totalAed,
-          totalUsd: result.totalUsd,
-          goldenVisaEligible: result.goldenVisaEligible,
-          breakdownCount: result.breakdown.length
-        }
-      };
-      document.getElementById('json-preview').textContent = JSON.stringify(payload, null, 2);
-    }
+          addOns,
+        });
 
-    function loadPreset(name) {
-      if (name === 'meydan-solo') {
-        document.getElementById('sel-jurisdiction').value = 'freezone-meydan';
-        document.getElementById('sel-activity').value = 'consulting';
-        document.getElementById('rng-investor').value = 1;
-        document.getElementById('rng-employee').value = 0;
-        document.getElementById('sel-office').value = 'flexi-desk';
-        document.getElementById('chk-tax').checked = true;
-        document.getElementById('chk-bank').checked = true;
-        document.getElementById('chk-aml').checked = false;
-        document.getElementById('chk-will').checked = false;
-      } else if (name === 'ifza-trading') {
-        document.getElementById('sel-jurisdiction').value = 'freezone-ifza';
-        document.getElementById('sel-activity').value = 'commercial';
-        document.getElementById('rng-investor').value = 2;
-        document.getElementById('rng-employee').value = 3;
-        document.getElementById('sel-office').value = 'dedicated-desk';
-        document.getElementById('chk-tax').checked = true;
-        document.getElementById('chk-bank').checked = true;
-        document.getElementById('chk-aml').checked = false;
-        document.getElementById('chk-will').checked = false;
-      } else if (name === 'mainland-ejari') {
-        document.getElementById('sel-jurisdiction').value = 'mainland-dubai';
-        document.getElementById('sel-activity').value = 'commercial';
-        document.getElementById('rng-investor').value = 1;
-        document.getElementById('rng-employee').value = 2;
-        document.getElementById('sel-office').value = 'physical-office';
-        document.getElementById('chk-tax').checked = true;
-        document.getElementById('chk-bank').checked = true;
-        document.getElementById('chk-aml').checked = true;
-        document.getElementById('chk-will').checked = false;
-      } else if (name === 'offshore-rak') {
-        document.getElementById('sel-jurisdiction').value = 'offshore-rak';
-        document.getElementById('sel-activity').value = 'consulting';
-        document.getElementById('rng-investor').value = 2; // Should be auto-excluded!
-        document.getElementById('rng-employee').value = 2;
-        document.getElementById('sel-office').value = 'flexi-desk';
-        document.getElementById('chk-tax').checked = false;
-        document.getElementById('chk-bank').checked = false;
-        document.getElementById('chk-aml').checked = false;
-        document.getElementById('chk-will').checked = true;
-      } else if (name === 'industrial-corp') {
-        document.getElementById('sel-jurisdiction').value = 'mainland-dubai';
-        document.getElementById('sel-activity').value = 'industrial';
-        document.getElementById('rng-investor').value = 2;
-        document.getElementById('rng-employee').value = 10;
-        document.getElementById('sel-office').value = 'physical-office';
-        document.getElementById('chk-tax').checked = true;
-        document.getElementById('chk-bank').checked = true;
-        document.getElementById('chk-aml').checked = true;
-        document.getElementById('chk-will').checked = true;
+        // Update UI Total
+        const dispTotal =
+          activeCurrency === 'AED'
+            ? 'AED ' + result.totalAed.toLocaleString()
+            : '$' + Math.round(result.totalUsd).toLocaleString() + ' USD';
+
+        document.getElementById('display-total').textContent = dispTotal;
+        document.getElementById('meta-usd').textContent =
+          '$' + Math.round(result.totalUsd).toLocaleString() + ' USD (Peg 3.6725)';
+        document.getElementById('meta-jur').textContent = result.jurisdictionName;
+        document.getElementById('turnaround-tag').textContent = 'SLA: ' + result.turnaround;
+        document.getElementById('golden-visa-alert').style.display = result.goldenVisaEligible
+          ? 'block'
+          : 'none';
+        document.getElementById('item-count').textContent = result.breakdown.length + ' Line Items';
+
+        // Render Tape
+        const tapeEl = document.getElementById('tape-list');
+        tapeEl.replaceChildren();
+        result.breakdown.forEach((item) => {
+          const row = document.createElement('div');
+          row.className = 'tape-row';
+          const valText =
+            activeCurrency === 'AED'
+              ? 'AED ' + item.amountAed.toLocaleString()
+              : '$' + Math.round(item.amountAed / USD_PEG).toLocaleString();
+          row.innerHTML =
+            '<div><span>' +
+            item.label +
+            '</span><span class="cat">' +
+            item.category +
+            ' — ' +
+            item.note +
+            '</span></div><div class="val">' +
+            valText +
+            '</div>';
+          tapeEl.appendChild(row);
+        });
+
+        // Render JSON preview
+        const payload = {
+          meta: {
+            engineVersion: '2026.1',
+            tariffSchedule: 'Official UAE Regulatory Gazette',
+            evaluatedAt: new Date().toISOString(),
+          },
+          inputs: {
+            jurisdiction,
+            activityType,
+            investorVisas,
+            employeeVisas,
+            officeType,
+            addOns,
+          },
+          financials: {
+            totalAed: result.totalAed,
+            totalUsd: result.totalUsd,
+            goldenVisaEligible: result.goldenVisaEligible,
+            breakdownCount: result.breakdown.length,
+          },
+        };
+        document.getElementById('json-preview').textContent = JSON.stringify(payload, null, 2);
       }
+
+      function loadPreset(name) {
+        if (name === 'meydan-solo') {
+          document.getElementById('sel-jurisdiction').value = 'freezone-meydan';
+          document.getElementById('sel-activity').value = 'consulting';
+          document.getElementById('rng-investor').value = 1;
+          document.getElementById('rng-employee').value = 0;
+          document.getElementById('sel-office').value = 'flexi-desk';
+          document.getElementById('chk-tax').checked = true;
+          document.getElementById('chk-bank').checked = true;
+          document.getElementById('chk-aml').checked = false;
+          document.getElementById('chk-will').checked = false;
+        } else if (name === 'ifza-trading') {
+          document.getElementById('sel-jurisdiction').value = 'freezone-ifza';
+          document.getElementById('sel-activity').value = 'commercial';
+          document.getElementById('rng-investor').value = 2;
+          document.getElementById('rng-employee').value = 3;
+          document.getElementById('sel-office').value = 'dedicated-desk';
+          document.getElementById('chk-tax').checked = true;
+          document.getElementById('chk-bank').checked = true;
+          document.getElementById('chk-aml').checked = false;
+          document.getElementById('chk-will').checked = false;
+        } else if (name === 'mainland-ejari') {
+          document.getElementById('sel-jurisdiction').value = 'mainland-dubai';
+          document.getElementById('sel-activity').value = 'commercial';
+          document.getElementById('rng-investor').value = 1;
+          document.getElementById('rng-employee').value = 2;
+          document.getElementById('sel-office').value = 'physical-office';
+          document.getElementById('chk-tax').checked = true;
+          document.getElementById('chk-bank').checked = true;
+          document.getElementById('chk-aml').checked = true;
+          document.getElementById('chk-will').checked = false;
+        } else if (name === 'offshore-rak') {
+          document.getElementById('sel-jurisdiction').value = 'offshore-rak';
+          document.getElementById('sel-activity').value = 'consulting';
+          document.getElementById('rng-investor').value = 2; // Should be auto-excluded!
+          document.getElementById('rng-employee').value = 2;
+          document.getElementById('sel-office').value = 'flexi-desk';
+          document.getElementById('chk-tax').checked = false;
+          document.getElementById('chk-bank').checked = false;
+          document.getElementById('chk-aml').checked = false;
+          document.getElementById('chk-will').checked = true;
+        } else if (name === 'industrial-corp') {
+          document.getElementById('sel-jurisdiction').value = 'mainland-dubai';
+          document.getElementById('sel-activity').value = 'industrial';
+          document.getElementById('rng-investor').value = 2;
+          document.getElementById('rng-employee').value = 10;
+          document.getElementById('sel-office').value = 'physical-office';
+          document.getElementById('chk-tax').checked = true;
+          document.getElementById('chk-bank').checked = true;
+          document.getElementById('chk-aml').checked = true;
+          document.getElementById('chk-will').checked = true;
+        }
+        updateRangeText();
+        runEngine();
+      }
+
+      function runAutomatedTests() {
+        const tests = [
+          {
+            name: 'Meydan Baseline (0 Visas, Flexi Desk)',
+            run: () => {
+              const r = calculate({
+                jurisdiction: 'freezone-meydan',
+                activityType: 'consulting',
+                investorVisas: 0,
+                employeeVisas: 0,
+                officeType: 'flexi-desk',
+                addOns: {
+                  corporateTax: false,
+                  bankAccount: false,
+                  amlCompliance: false,
+                  uaeWill: false,
+                },
+              });
+              return r.totalAed === 12500 && Math.abs(r.totalUsd - 3403.68) < 0.1;
+            },
+          },
+          {
+            name: 'IFZA Multi-Visa & Commercial Activity (+2k)',
+            run: () => {
+              const r = calculate({
+                jurisdiction: 'freezone-ifza',
+                activityType: 'commercial',
+                investorVisas: 1,
+                employeeVisas: 1,
+                officeType: 'dedicated-desk',
+                addOns: {
+                  corporateTax: true,
+                  bankAccount: true,
+                  amlCompliance: false,
+                  uaeWill: false,
+                },
+              });
+              // 11900 + 2000 + 7500 + 3500 + 4000 + 1500 + 2500 = 32900
+              return r.totalAed === 32900;
+            },
+          },
+          {
+            name: 'RAK ICC Offshore Visa Invalidation Guardrail',
+            run: () => {
+              const r = calculate({
+                jurisdiction: 'offshore-rak',
+                activityType: 'consulting',
+                investorVisas: 5,
+                employeeVisas: 10,
+                officeType: 'flexi-desk',
+                addOns: {
+                  corporateTax: false,
+                  bankAccount: false,
+                  amlCompliance: false,
+                  uaeWill: true,
+                },
+              });
+              // 9500 + 3500 = 13000 (Visas must be 0)
+              return r.totalAed === 13000;
+            },
+          },
+          {
+            name: 'Dubai Mainland Physical Ejari & Industrial (+5k)',
+            run: () => {
+              const r = calculate({
+                jurisdiction: 'mainland-dubai',
+                activityType: 'industrial',
+                investorVisas: 1,
+                employeeVisas: 0,
+                officeType: 'physical-office',
+                addOns: {
+                  corporateTax: true,
+                  bankAccount: true,
+                  amlCompliance: true,
+                  uaeWill: false,
+                },
+              });
+              // 18500 + 5000 + 24000 + 4200 + 6000 = 57700
+              return r.totalAed === 57700;
+            },
+          },
+          {
+            name: 'USD Fixed Peg (3.6725) Invariant Accuracy',
+            run: () => {
+              const r = calculate({
+                jurisdiction: 'freezone-dmcc',
+                activityType: 'ecommerce',
+                investorVisas: 2,
+                employeeVisas: 2,
+                officeType: 'flexi-desk',
+                addOns: {
+                  corporateTax: true,
+                  bankAccount: false,
+                  amlCompliance: false,
+                  uaeWill: false,
+                },
+              });
+              return r.totalUsd === Math.round((r.totalAed / USD_PEG) * 100) / 100;
+            },
+          },
+        ];
+
+        const grid = document.getElementById('test-results-grid');
+        grid.replaceChildren();
+        tests.forEach((t, i) => {
+          const passed = t.run();
+          const card = document.createElement('div');
+          card.className = 'test-card ' + (passed ? 'passed' : 'failed');
+          card.innerHTML =
+            '<div class="test-status"><span>ASSERTION 0' +
+            (i + 1) +
+            '</span><span>' +
+            (passed ? '✓ PASSED' : '✗ FAILED') +
+            '</span></div><div style="font-size:11px; color:rgba(255,255,255,0.9);">' +
+            t.name +
+            '</div>';
+          grid.appendChild(card);
+        });
+      }
+
+      function copyJson() {
+        const text = document.getElementById('json-preview').textContent;
+        navigator.clipboard.writeText(text).then(() => {
+          alert('Engine JSON payload copied to clipboard!');
+        });
+      }
+
+      // Initialize
       updateRangeText();
       runEngine();
-    }
-
-    function runAutomatedTests() {
-      const tests = [
-        {
-          name: 'Meydan Baseline (0 Visas, Flexi Desk)',
-          run: () => {
-            const r = calculate({
-              jurisdiction: 'freezone-meydan',
-              activityType: 'consulting',
-              investorVisas: 0,
-              employeeVisas: 0,
-              officeType: 'flexi-desk',
-              addOns: { corporateTax: false, bankAccount: false, amlCompliance: false, uaeWill: false }
-            });
-            return r.totalAed === 12500 && Math.abs(r.totalUsd - 3403.68) < 0.1;
-          }
-        },
-        {
-          name: 'IFZA Multi-Visa & Commercial Activity (+2k)',
-          run: () => {
-            const r = calculate({
-              jurisdiction: 'freezone-ifza',
-              activityType: 'commercial',
-              investorVisas: 1,
-              employeeVisas: 1,
-              officeType: 'dedicated-desk',
-              addOns: { corporateTax: true, bankAccount: true, amlCompliance: false, uaeWill: false }
-            });
-            // 11900 + 2000 + 7500 + 3500 + 4000 + 1500 + 2500 = 32900
-            return r.totalAed === 32900;
-          }
-        },
-        {
-          name: 'RAK ICC Offshore Visa Invalidation Guardrail',
-          run: () => {
-            const r = calculate({
-              jurisdiction: 'offshore-rak',
-              activityType: 'consulting',
-              investorVisas: 5,
-              employeeVisas: 10,
-              officeType: 'flexi-desk',
-              addOns: { corporateTax: false, bankAccount: false, amlCompliance: false, uaeWill: true }
-            });
-            // 9500 + 3500 = 13000 (Visas must be 0)
-            return r.totalAed === 13000;
-          }
-        },
-        {
-          name: 'Dubai Mainland Physical Ejari & Industrial (+5k)',
-          run: () => {
-            const r = calculate({
-              jurisdiction: 'mainland-dubai',
-              activityType: 'industrial',
-              investorVisas: 1,
-              employeeVisas: 0,
-              officeType: 'physical-office',
-              addOns: { corporateTax: true, bankAccount: true, amlCompliance: true, uaeWill: false }
-            });
-            // 18500 + 5000 + 24000 + 4200 + 6000 = 57700
-            return r.totalAed === 57700;
-          }
-        },
-        {
-          name: 'USD Fixed Peg (3.6725) Invariant Accuracy',
-          run: () => {
-            const r = calculate({
-              jurisdiction: 'freezone-dmcc',
-              activityType: 'ecommerce',
-              investorVisas: 2,
-              employeeVisas: 2,
-              officeType: 'flexi-desk',
-              addOns: { corporateTax: true, bankAccount: false, amlCompliance: false, uaeWill: false }
-            });
-            return r.totalUsd === Math.round((r.totalAed / USD_PEG) * 100) / 100;
-          }
-        }
-      ];
-
-      const grid = document.getElementById('test-results-grid');
-      grid.innerHTML = '';
-      tests.forEach((t, i) => {
-        const passed = t.run();
-        const card = document.createElement('div');
-        card.className = 'test-card ' + (passed ? 'passed' : 'failed');
-        card.innerHTML = '<div class="test-status"><span>ASSERTION 0' + (i+1) + '</span><span>' + (passed ? '✓ PASSED' : '✗ FAILED') + '</span></div><div style="font-size:11px; color:rgba(255,255,255,0.9);">' + t.name + '</div>';
-        grid.appendChild(card);
-      });
-    }
-
-    function copyJson() {
-      const text = document.getElementById('json-preview').textContent;
-      navigator.clipboard.writeText(text).then(() => {
-        alert('Engine JSON payload copied to clipboard!');
-      });
-    }
-
-    // Initialize
-    updateRangeText();
-    runEngine();
-    runAutomatedTests();
-  </script>
-</body>
+      runAutomatedTests();
+    </script>
+  </body>
 </html>

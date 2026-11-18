@@ -36,18 +36,24 @@ export const HomeHeroSection: React.FC<HomeHeroSectionProps> = ({
 }) => {
   const videoRef = useRef<HTMLVideoElement>(null);
   const [videoPlaying, setVideoPlaying] = useState(false);
+  const [isDesktop, setIsDesktop] = useState(false);
 
   useEffect(() => {
-    // Only attempt video playback on desktop / non-mobile devices to conserve mobile bandwidth and battery
-    const isMobile = typeof window !== 'undefined' && window.innerWidth < 768;
-    if (videoRef.current && !isMobile) {
+    // Only mount and stream video on confirmed desktop viewports (>=768px)
+    if (typeof window !== 'undefined' && window.innerWidth >= 768) {
+      setIsDesktop(true);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (isDesktop && videoRef.current) {
       videoRef.current.defaultMuted = true;
       videoRef.current.muted = true;
       videoRef.current.play().catch(() => {
         // Autoplay policy prevented playback; video falls back to poster image gracefully
       });
     }
-  }, []);
+  }, [isDesktop]);
 
   return (
     <section
@@ -56,20 +62,26 @@ export const HomeHeroSection: React.FC<HomeHeroSectionProps> = ({
     >
       {/* 1. Cinematic Background Layer: Loop Video on Desktop, High-Res WebP on Mobile */}
       <div className="absolute inset-0 pointer-events-none select-none z-0 overflow-hidden">
-        <video
-          ref={videoRef}
-          autoPlay
-          loop
-          muted
-          playsInline
-          preload="none"
-          onPlaying={() => setVideoPlaying(true)}
-          className="hidden md:block absolute inset-0 w-full h-full object-cover object-center pointer-events-none opacity-85"
-          aria-hidden="true"
-        >
-          <source src="/videos/equitify-hero-bg.mp4" type="video/mp4" media="(min-width: 768px)" />
-          <source src="/videos/klay-dubai-loop.mp4" type="video/mp4" media="(min-width: 768px)" />
-        </video>
+        {isDesktop && (
+          <video
+            ref={videoRef}
+            autoPlay
+            loop
+            muted
+            playsInline
+            preload="none"
+            onPlaying={() => setVideoPlaying(true)}
+            className="hidden md:block absolute inset-0 w-full h-full object-cover object-center pointer-events-none opacity-85"
+            aria-hidden="true"
+          >
+            <source
+              src="/videos/equitify-hero-bg.mp4"
+              type="video/mp4"
+              media="(min-width: 768px)"
+            />
+            <source src="/videos/klay-dubai-loop.mp4" type="video/mp4" media="(min-width: 768px)" />
+          </video>
+        )}
         {/* Preloaded static image fallback for SSR, mobile devices, and instant initial paint */}
         <Image
           src={IMAGES.heroSkyline}
