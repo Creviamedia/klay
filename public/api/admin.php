@@ -463,7 +463,7 @@ if ($method === 'PATCH' && preg_match('#^leads/(.+)$#', $subpath, $matches)) {
 
 // 5. GET /api/admin/blogs
 if ($method === 'GET' && ($subpath === 'blogs' || $subpath === 'blogs/')) {
-    $res = tursoQuery('SELECT * FROM blogs ORDER BY published_at DESC');
+    $res = tursoQuery('SELECT * FROM blogs ORDER BY date DESC, created_at DESC');
     $blogs = $res['rows'] ?? [];
     http_response_code(200);
     echo json_encode(['ok' => true, 'blogs' => $blogs]);
@@ -477,16 +477,15 @@ if ($method === 'POST' && ($subpath === 'blogs' || $subpath === 'blogs/')) {
 
     $slug = trim((string)($body['slug'] ?? ''));
     $title = trim((string)($body['title'] ?? ''));
+    $pillar = trim((string)($body['pillar'] ?? 'Company Setup & Strategy'));
+    $readingTime = (int)($body['reading_time'] ?? $body['readingTime'] ?? 3);
     $excerpt = (string)($body['excerpt'] ?? '');
     $content = (string)($body['content'] ?? '');
-    $author = (string)($body['author'] ?? 'Klay Advisory');
-    $category = (string)($body['category'] ?? 'Corporate Advisory');
-    $publishedAt = (string)($body['published_at'] ?? gmdate('Y-m-d\TH:i:s.v\Z'));
-    $readTime = (string)($body['read_time'] ?? '5 min');
-    $featured = !empty($body['featured']) ? 1 : 0;
-    $coverImage = (string)($body['cover_image'] ?? '');
-    $tags = is_array($body['tags'] ?? null) ? json_encode($body['tags']) : (string)($body['tags'] ?? '[]');
-    $updatedAt = gmdate('Y-m-d\TH:i:s.v\Z');
+    $coverImage = (string)($body['cover_image'] ?? $body['coverImage'] ?? '');
+    $status = in_array($body['status'] ?? '', ['draft', 'published'], true) ? $body['status'] : 'draft';
+    $date = (string)($body['date'] ?? gmdate('Y-m-d'));
+    $id = (string)($body['id'] ?? ('post-' . $slug));
+    $sanityId = (string)($body['sanity_id'] ?? $id);
 
     if (empty($slug) || empty($title)) {
         http_response_code(400);
@@ -495,8 +494,13 @@ if ($method === 'POST' && ($subpath === 'blogs' || $subpath === 'blogs/')) {
     }
 
     tursoQuery(
-        'INSERT OR REPLACE INTO blogs (slug, title, excerpt, content, author, category, published_at, read_time, featured, cover_image, tags, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
-        [$slug, $title, $excerpt, $content, $author, $category, $publishedAt, $readTime, $featured, $coverImage, $tags, $updatedAt]
+        'INSERT INTO blogs (id, slug, title, pillar, reading_time, excerpt, cover_image, content, status, date, sanity_id, updated_at) ' .
+        'VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP) ' .
+        'ON CONFLICT(slug) DO UPDATE SET ' .
+        'title = excluded.title, pillar = excluded.pillar, reading_time = excluded.reading_time, ' .
+        'excerpt = excluded.excerpt, cover_image = excluded.cover_image, content = excluded.content, ' .
+        'status = excluded.status, date = excluded.date, sanity_id = excluded.sanity_id, updated_at = CURRENT_TIMESTAMP',
+        [$id, $slug, $title, $pillar, $readingTime, $excerpt, $coverImage, $content, $status, $date, $sanityId]
     );
 
     http_response_code(200);

@@ -49,6 +49,7 @@ const STATUS_OPTIONS: Array<LeadRecord['status']> = [
 
 const JURISDICTION_OPTIONS = [
   'All Jurisdictions',
+  'Free Zone',
   'Meydan Free Zone',
   'IFZA',
   'DIFC',
