@@ -213,10 +213,66 @@ let sentryInstance: SentryModule | null = null;
 let isInitializing = false;
 const pendingErrors: Array<{ error: unknown; context?: Record<string, unknown> }> = [];
 
+let loadSentryFn: (() => void) | null = null;
+
+function executeLoadSentry(): void {
+  if (typeof window === 'undefined') return;
+  const dsn = env.VITE_SENTRY_DSN;
+  const environment = env.MODE || env.NODE_ENV || 'development';
+  if (!dsn || sentryInstance || isInitializing) return;
+
+  isInitializing = true;
+  import('@sentry/react')
+    .then((Sentry) => {
+      sentryInstance = Sentry;
+      Sentry.init({
+        dsn,
+        environment,
+        integrations: [Sentry.browserTracingIntegration()],
+        tracesSampleRate: environment === 'production' ? 0.1 : 1.0,
+        tracePropagationTargets: ['localhost', /^\//],
+        beforeSend(event, hint) {
+          return filterSentryEvent(event, hint);
+        },
+        ignoreErrors: [
+          'TypeError: Illegal invocation',
+          /Illegal invocation/i,
+          'ResizeObserver loop completed with undelivered notifications',
+          'ResizeObserver loop limit exceeded',
+          'Non-Error promise rejection captured',
+          'NetworkError when attempting to fetch resource.',
+          /Loading chunk [0-9]+ failed/i,
+        ],
+        denyUrls: [
+          /extensions\//i,
+          /^chrome:\/\//i,
+          /^chrome-extension:\/\//i,
+          /^moz-extension:\/\//i,
+          /^safari-extension:\/\//i,
+        ],
+      });
+
+      while (pendingErrors.length > 0) {
+        const item = pendingErrors.shift();
+        if (item) {
+          Sentry.captureException(item.error, { extra: item.context });
+        }
+      }
+    })
+    .catch((err) => {
+      console.error('Failed to load Sentry monitoring dynamically:', err);
+    })
+    .finally(() => {
+      isInitializing = false;
+    });
+}
+
+loadSentryFn = executeLoadSentry;
+
 /**
  * Initializes Sentry application monitoring asynchronously.
  * Safe in SSR / static prerender and development environments.
- * Defers dynamic import and configuration to idle/post-load so it never blocks
+ * Defers dynamic import and configuration to user interaction or late idle so it never blocks
  * initial hydration, FCP, LCP, or Total Blocking Time.
  */
 export function initSentry(): void {
@@ -232,81 +288,37 @@ export function initSentry(): void {
     return;
   }
 
-  const loadSentry = () => {
-    if (sentryInstance || isInitializing) return;
-    isInitializing = true;
+  const triggerSentry = () => {
+    events.forEach((e) => document.removeEventListener(e, onInteraction));
+    executeLoadSentry();
+  };
 
-    import('@sentry/react')
-      .then((Sentry) => {
-        sentryInstance = Sentry;
-        Sentry.init({
-          dsn,
-          environment,
-          integrations: [
-            Sentry.browserTracingIntegration(),
-            Sentry.replayIntegration({
-              maskAllText: false,
-              blockAllMedia: false,
-            }),
-          ],
-          tracesSampleRate: environment === 'production' ? 0.2 : 1.0,
-          tracePropagationTargets: ['localhost', /^\//],
-          replaysSessionSampleRate: 0.1,
-          replaysOnErrorSampleRate: 1.0,
-          beforeSend(event, hint) {
-            return filterSentryEvent(event, hint);
-          },
-          ignoreErrors: [
-            'TypeError: Illegal invocation',
-            /Illegal invocation/i,
-            'ResizeObserver loop completed with undelivered notifications',
-            'ResizeObserver loop limit exceeded',
-            'Non-Error promise rejection captured',
-            'NetworkError when attempting to fetch resource.',
-            /Loading chunk [0-9]+ failed/i,
-          ],
-          denyUrls: [
-            /extensions\//i,
-            /^chrome:\/\//i,
-            /^chrome-extension:\/\//i,
-            /^moz-extension:\/\//i,
-            /^safari-extension:\/\//i,
-          ],
-        });
+  const onInteraction = () => {
+    triggerSentry();
+  };
 
-        while (pendingErrors.length > 0) {
-          const item = pendingErrors.shift();
-          if (item) {
-            Sentry.captureException(item.error, { extra: item.context });
-          }
-        }
-      })
-      .catch((err) => {
-        console.error('Failed to load Sentry monitoring dynamically:', err);
-      })
-      .finally(() => {
-        isInitializing = false;
-      });
+  const events = ['pointerdown', 'touchstart', 'keydown', 'scroll'];
+  events.forEach((e) => {
+    document.addEventListener(e, onInteraction, { once: true, passive: true });
+  });
+
+  const scheduleSentry = () => {
+    if ('requestIdleCallback' in window) {
+      window.requestIdleCallback(
+        () => {
+          setTimeout(triggerSentry, 4000);
+        },
+        { timeout: 8000 }
+      );
+    } else {
+      setTimeout(triggerSentry, 6000);
+    }
   };
 
   if (document.readyState === 'complete') {
-    if ('requestIdleCallback' in window) {
-      window.requestIdleCallback(loadSentry, { timeout: 3000 });
-    } else {
-      setTimeout(loadSentry, 2000);
-    }
+    scheduleSentry();
   } else {
-    window.addEventListener(
-      'load',
-      () => {
-        if ('requestIdleCallback' in window) {
-          window.requestIdleCallback(loadSentry, { timeout: 3000 });
-        } else {
-          setTimeout(loadSentry, 2000);
-        }
-      },
-      { once: true }
-    );
+    window.addEventListener('load', scheduleSentry, { once: true });
   }
 }
 
@@ -322,6 +334,10 @@ export function captureException(error: unknown, context?: Record<string, unknow
     sentryInstance.captureException(error, { extra: context });
   } else {
     pendingErrors.push({ error, context });
-    initSentry();
+    if (loadSentryFn) {
+      loadSentryFn();
+    } else {
+      initSentry();
+    }
   }
 }

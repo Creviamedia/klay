@@ -550,6 +550,10 @@
   h6 {
     font-family: var(--font-display);
     font-weight: 400;
+    text-wrap: balance;
+  }
+  p {
+    text-wrap: pretty;
   }
   h1 {
     font-size: var(--font-size-section);
@@ -585,6 +589,11 @@
   textarea {
     font-family: var(--font-body);
     font-size: 1rem;
+  }
+  input:user-invalid,
+  select:user-invalid,
+  textarea:user-invalid {
+    border-color: #ef4444;
   }
 }
 

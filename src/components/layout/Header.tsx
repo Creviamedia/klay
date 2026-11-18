@@ -206,7 +206,11 @@ export function Header() {
                   value={searchTerm}
                   onChange={(event) => setSearchTerm(event.target.value)}
                   onKeyDown={(event) => {
-                    if (event.key === 'Enter' && searchResults[0]) {
+                    if (
+                      event.key === 'Enter' &&
+                      !event.nativeEvent.isComposing &&
+                      searchResults[0]
+                    ) {
                       event.preventDefault();
                       setIsSearchOpen(false);
                       navigate(searchResults[0].href);

@@ -11,6 +11,12 @@
  * - DELETE /api/admin/blogs/:slug
  */
 
+// Ensure sovereign fallback secret for Netlify showcase & staging previews
+process.env.KLAY_ADMIN_SECRET =
+  process.env.KLAY_ADMIN_SECRET ||
+  process.env.ADMIN_JWT_SECRET ||
+  'klay_executive_portal_sovereign_secret_2026_jwt';
+
 const {
   resolveClientIp,
   requireAdminAuth,
